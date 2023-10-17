@@ -184,7 +184,7 @@ class BaseDetector(BaseModule, metaclass=ABCMeta):
                 raise TypeError(
                     f'{loss_name} is not a tensor or list of tensors')
 
-        loss = sum(_value for _key, _value in log_vars.items()
+        loss = sum(_value for _key, _value in log_vars.items()   # here name loss should be in the world contrastive_loss
                    if 'loss' in _key)
 
         # If the loss_vars has different length, GPUs will wait infinitely
