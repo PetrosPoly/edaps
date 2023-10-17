@@ -67,7 +67,7 @@ class CustomDataset(Dataset):
                  include_diffusion_data=False,
                  diffusion_set=None,
                  ):
-        self.pipeline = Compose(pipeline)
+        self.pipeline = Compose(pipeline)  # Petros :: calls the Compose class for several transformation
         self.img_dir = img_dir
         self.depth_dir = depth_dir
         self.img_suffix = img_suffix
@@ -75,6 +75,7 @@ class CustomDataset(Dataset):
         self.seg_map_suffix = seg_map_suffix
         self.split = split
         self.data_root = data_root
+        print_log(f'DEBUG - PETROS 20-08-2023 - data root is : {data_root}') # added by Petros
         self.test_mode = test_mode
         self.ignore_index = ignore_index
         self.reduce_zero_label = reduce_zero_label
@@ -96,7 +97,7 @@ class CustomDataset(Dataset):
         # load annotations
         self.img_infos = self.load_annotations_panoptic(self.ann_dir)
         self.gen_panop_labels = GenPanopLabels(8, 'val')
-        self.gen_panop_labels_for_maskformer = GenPanopLabelsForMaskFormer(8, 'val', gen_instance_classids_from_zero=True)
+        self.gen_panop_labels_for_maskformer = GenPanopLabelsForMaskFormer(8, 'val', gen_instance_classids_from_zero=True) # While creating the source/target only the dataset from 
         self.best_miou = -1.0
 
     def __len__(self):
@@ -111,13 +112,22 @@ class CustomDataset(Dataset):
             json_filename = ann_dir + f'_{self.diffusion_set}.json'
         print_log(f'Loaded annotations from : {json_filename}', logger=get_root_logger())
         dataset = json.load(open(json_filename))
+        print_log(f'DEBUG - PETROS 19-08-2023 - the type of the dataset variable:{type(dataset)}') # added by Petros'
         self.files = {}
+        first_iteration = True # variable added by Petros for debugging
+        s = 0 # count the number of iterations for synthia dataset loading
+        c = 0 # count the number of iterations for cityscape dataset loading
         for ano in dataset['annotations']:
             img_info = {}
             if 'synthia' in self.data_root:
-                ano_fname = ano['file_name']
+                s = s + 1 # added by Petros for debugging
+                ano_fname = ano['file_name']   # comment by Petros - check the filename the file data/synthia/panoptic-labels-crowdth-0-for-daformer and you will understand
+                if first_iteration:
+                    print_log((f'DEBUG - PETROS 19-08-2023 - Annotation filename is the following :{ano_fname}'))
+                    first_iteration = False
                 seg_fname = ano['image_id'] + self.seg_map_suffix
             elif 'cityscapes' in self.data_root:
+                c = c + 1 # added by Petros for debugging
                 ano_fname = ano['image_id']
                 str1 = ano_fname.split('_')[0] + '/' + ano_fname
                 ano_fname = str1 + '_leftImg8bit.png'
@@ -326,6 +336,7 @@ class CustomDataset(Dataset):
             panop_lbl_dict['seg_fields'] = []
             panop_lbl_dict['seg_fields'].append('gt_panoptic_seg')
             if labels_for_maskformer:
+                print_log('DEBUG - PETROS 18-09-2023 - GEN GT PANOPTIC LABEL CALL')
                 data = self.gen_panop_labels_for_maskformer(panop_lbl_dict)
                 gt_panoptic_labels.append([data['gt_semantic_seg'], data['gt_masks'], data['gt_labels'], data['gt_bboxes']])
             else:
@@ -339,6 +350,7 @@ class CustomDataset(Dataset):
     def get_gt_seg_maps(self, efficient_test=False):
         """Get ground truth segmentation maps for evaluation."""
         gt_seg_maps = []
+        print_log('DEBUG - PETROS 18-09-2023 - GEN GT SEG MAP CALL')
         for img_info in self.img_infos:
             seg_map = osp.join(self.ann_dir, img_info['ann']['seg_map'])
             if efficient_test:

@@ -71,23 +71,23 @@ class UDADataset(object):
             self.samples_with_class = {}
             for c in self.rcs_classes:
                 self.samples_with_class[c] = []
-                for file, pixels in samples_with_class_and_n[c]:
+                for file, pixels in samples_with_class_and_n[c]: # Petros :: Is a dictionary of 16 keys (for each class) and each key has the photos that has this class (belongs to rcs) and the pixels 
                     if pixels > self.rcs_min_pixels:
-                        self.samples_with_class[c].append(file.split('/')[-1])
+                        self.samples_with_class[c].append(file.split('/')[-1]) # Petros :: Is a dictionary of 16 Keys where each one, is a list of the photos contain this class and pixels more than 3000
                 assert len(self.samples_with_class[c]) > 0
-            self.file_to_idx = {}
+            self.file_to_idx = {}   # Petros :: is a dictionary where we have filename and index
             for i, dic in enumerate(self.source.img_infos):
                 file = dic['ann']['seg_map']
                 if isinstance(self.source, CityscapesDataset):
-                    file = file.split('/')[-1]
+                    file = file.split('/')[-1] # Petros :: in order to work with the actual name of the filename
                 self.file_to_idx[file] = i
 
     def get_rare_class_sample(self):
-        c = np.random.choice(self.rcs_classes, p=self.rcs_classprob)
-        f1 = np.random.choice(self.samples_with_class[c])
-        f1 = f1.replace('_labelTrainIds.png', '_panoptic.png')
-        i1 = self.file_to_idx[f1]
-        s1 = self.source[i1]
+        c = np.random.choice(self.rcs_classes, p=self.rcs_classprob) # Petros :: is a random choice of class, but the sampling outcome will be influenced by the probabilities. Elements with higher probs are more likely
+        f1 = np.random.choice(self.samples_with_class[c]) # Petros :: is a random choice of an image which contains this class and number of pixels of this class >= 3000. 
+        f1 = f1.replace('_labelTrainIds.png', '_panoptic.png') # Petros :: replace the end of the name of the filename
+        i1 = self.file_to_idx[f1] # find the index
+        s1 = self.source[i1] # Petros :: Source is the synthiaDataset (class) based on CustomDataset and index calls the getitem method of the class. Check customDataset for the rest 
         if self.rcs_min_crop_ratio > 0:
             for j in range(10):
                 n_class = torch.sum(s1['gt_semantic_seg'].data == c)
@@ -122,7 +122,7 @@ class UDADataset(object):
             'target_img': s2['img']
         }
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx): # dataloader loads idx equals to batch_size and calls the get_rare_class_sample as rcs_enabled = True
         if self.rcs_enabled:
             return self.get_rare_class_sample()
         else:

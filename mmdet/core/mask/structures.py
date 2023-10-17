@@ -1082,21 +1082,26 @@ def bitmap_to_polygon(bitmap):
         list[ndarray]: the converted mask in polygon representation.
         bool: whether the mask has holes.
     """
-    bitmap = np.ascontiguousarray(bitmap).astype(np.uint8)
+    bitmap = np.ascontiguousarray(bitmap).astype(np.uint8) # https://stackoverflow.com/questions/26998223/what-is-the-difference-between-contiguous-and-non-contiguous-arrays#:~:text=A%20contiguous%20array%20is%20just,to%20the%20next%20memory%20address.&text=This%20means%20arr%20is%20a,row%20value%20on%20that%20row.
     # cv2.RETR_CCOMP: retrieves all of the contours and organizes them
     #   into a two-level hierarchy. At the top level, there are external
     #   boundaries of the components. At the second level, there are
     #   boundaries of the holes. If there is another contour inside a hole
     #   of a connected component, it is still put at the top level.
     # cv2.CHAIN_APPROX_NONE: stores absolutely all the contour points.
-    outs = cv2.findContours(bitmap, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)
-    contours = outs[-2]
-    hierarchy = outs[-1]
-    if hierarchy is None:
+    outs = cv2.findContours(bitmap, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_NONE)  # Petros :: outs is a python list of all contours. Each one is numpy array of (x,y) coordinates of the boundaries of the object
+    contours = outs[-2] # Petros :: returns a list of contours as the second-to-last element of the outs tuple.
+    hierarchy = outs[-1] # Petros :: hierarchy information of the contours is returned as the last element of the outs tuple.
+    if hierarchy is None: # Petros :: it means that no contours were found, and the function returns an empty list and False to indicate no holes.
         return [], False
     # hierarchy[i]: 4 elements, for the indexes of next, previous,
     # parent, or nested contours. If there is no corresponding contour,
     # it will be -1.
     with_hole = (hierarchy.reshape(-1, 4)[:, 3] >= 0).any()
-    contours = [c.reshape(-1, 2) for c in contours]
+    contours = [c.reshape(-1, 2) for c in contours] # Petros :: The contours are reshaped into a 2D array where each row contains the (x, y) coordinates of a point in the contour.
     return contours, with_hole
+
+## Petros :: comments regarding the reshape function.
+## In the expression reshape(-1, 2), the -1 in the first argument indicates that the length of 
+## that dimension should be inferred automatically based on the other specified dimension(s),
+## while the second argument 2 indicates that the new array should have 2 columns.

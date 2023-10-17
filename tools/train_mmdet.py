@@ -112,9 +112,11 @@ def main(args):
     cfg.seed = args.seed
     meta['seed'] = args.seed
     meta['exp_name'] = osp.splitext(osp.basename(args.config))[0]
+    logger.info('DEBUG - PETROS 14-08-2023 - BEFORE MODEL BUILD') # added by Petros
     model = build_train_model(cfg, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
     model.init_weights()
-    datasets = [build_dataset(cfg.data.train)]
+    logger.info('DEBUG - PETROS 14-08-2023 - MODEL IS READY') # added by Petros
+    datasets = [build_dataset(cfg.data.train)]   # Petros :: this is an UDAdataset that is being returned but inside are being built the synthiaDataset and Cityscape dataset. 
     if len(cfg.workflow) == 2:
         val_dataset = copy.deepcopy(cfg.data.val)
         val_dataset.pipeline = cfg.data.train.pipeline

@@ -69,7 +69,7 @@ def build_dataset(cfg, default_args=None):
     from mmseg.datasets import UDADataset
     if cfg['type'] == 'UDADataset':
         dataset = UDADataset(
-            source=build_dataset(cfg['source'], default_args),
+            source=build_dataset(cfg['source'], default_args), # Petros :: calls the build_dataset with the cfg['source'] as argument. Inside the function becomes cfg and cfg['type'] = SynthiaDataset and build_from_cfg function is called. 
             target=build_dataset(cfg['target'], default_args),
             cfg=cfg)
     elif isinstance(cfg, (list, tuple)):
@@ -81,7 +81,7 @@ def build_dataset(cfg, default_args=None):
             cfg.get('split', None), (list, tuple)):
         dataset = _concat_dataset(cfg, default_args)
     else:
-        dataset = build_from_cfg(cfg, DATASETS, default_args)
+        dataset = build_from_cfg(cfg, DATASETS, default_args) # Petros :: is called to build the source and target dataset. 
     return dataset
 
 

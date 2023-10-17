@@ -11,6 +11,14 @@ from mmseg.core import add_prefix
 import torch
 import torch.nn.functional as F
 
+# # added by Petros for the contrastive loss 
+from pytorch_metric_learning.losses import NTXentLoss
+import numpy as np
+from mmseg.datasets.pipelines.gen_panoptic_labels_for_maskformer import isValidBox, get_bbox_coord, divide_box
+from mmcv.runner import force_fp32
+from w_Petros.feature_extraction_avg_pooling.extact_features_avg_pooling import scatter_mean
+# # added by Petros for the contrastive loss
+
 @DETECTORS.register_module()
 class MaskRCNNPanoptic(TwoStageDetector):
 
@@ -41,6 +49,7 @@ class MaskRCNNPanoptic(TwoStageDetector):
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
         self.use_neck_feat_for_decode_head = use_neck_feat_for_decode_head
+        self.loss_constrastive_ntx = NTXentLoss() # added by Petros 
 
     # init daformer decode head
     def _init_decode_head(self, decode_head):
@@ -87,7 +96,63 @@ class MaskRCNNPanoptic(TwoStageDetector):
     def _decode_head_forward_test(self, x, img_metas):
         seg_logits = self.decode_head.forward_test(x, img_metas, self.test_cfg)
         return seg_logits
-
+    
+    # # added by Petros for contrastive loss on 12 October 2023
+    
+    def constrastive_features(self, tensor, img):
+      x = resize(input=tensor, size=img.shape[2:], mode='bilinear', align_corners=self.align_corners)
+      x_flat = x.view(2, 256, -1).permute(0,2,1).contiguous()
+      return x_flat
+    
+    def pool_features(self, extracted_features, gt_panoptic_thing_classes):
+        panoptic = gt_panoptic_thing_classes.numpy()   
+        selected_labels = [] 
+        selected_features = []
+        for pan_label in np.unique(panoptic):
+            if pan_label == 0:
+                continue  # Skip label 0
+            mask = (panoptic == pan_label)
+            box = get_bbox_coord(mask)
+            
+            # for contrastive average pooling features start # 
+            subregion_labels = np.full_like(panoptic, fill_value=-100, dtype=np.uint8)
+            contrast_label = np.zeros_like(panoptic, dtype=np.uint8)
+            subboxes = [None, None, None, None]
+            if isValidBox(box):
+                
+                # build the subregion label
+                subboxes[0], subboxes[1], subboxes[2], subboxes[3] = divide_box(box)
+                for i, subbox in enumerate(subboxes):
+                    x1, y1, x2, y2 = subbox
+                    subregion_labels[y1:y2+1, x1:x2+1] = i
+                    
+                # build the contrastive labels and extract the uniques and index
+                contrast_label = panoptic * 10 + subregion_labels
+                contrast_label_flatten_tensor = torch.from_numpy(contrast_label.flatten())
+                unique_values, indicies = torch.unique(contrast_label_flatten_tensor,sorted = True, return_inverse=True)
+                
+                # extract the mean values based on the indicies 
+                mean_features = scatter_mean(extracted_features, indicies, dim=0)
+                
+                # Loop through each unique label and feature
+                for label, feature in zip(unique_values, mean_features):
+                    if str(label.item()).startswith(str(pan_label)): # Check if string representation of label starts with '24000'
+                        selected_labels.append(label.item() // 10)
+                        selected_features.append(feature)  
+            # for contrastive average pooling features finish #
+        
+        # Convert list to torch.tensors to be used as input for the loss 
+        selected_labels  = torch.tensor(selected_labels)
+        selected_features = torch.stack(selected_features)
+                   
+        return  selected_labels, selected_features
+    
+    #@force_fp32(apply_to=('features', 'labels'))
+    def loss_constrastive(self, features, labels):
+        loss = self.loss_constrastive_ntx(features, labels)
+        return loss
+        
+    # # added by Petros for contrastive loss on 12 October 2023
 
     def forward_dummy(self, img):
         """Dummy forward function."""
@@ -111,7 +176,6 @@ class MaskRCNNPanoptic(TwoStageDetector):
         out_roi_head = out_roi_head + (roi_outs,)
         return out_decode_head, out_roi_head
 
-
     def forward_train(self,
                       img,
                       img_metas,
@@ -122,6 +186,7 @@ class MaskRCNNPanoptic(TwoStageDetector):
                       gt_labels=None,
                       gt_bboxes_ignore=None,
                       gt_masks=None,
+                      gt_panoptic_only_thing_classes = None, # added by Petros for contrastive
                       proposals=None,
                       box_domain_indicator=None,
                       pseudo_wght_val=None,
@@ -141,6 +206,21 @@ class MaskRCNNPanoptic(TwoStageDetector):
             loss_decode = self._decode_head_forward_train(x, img_metas, gt_semantic_seg, seg_weight)
             losses.update(loss_decode)
         if gt_bboxes:
+            
+            # # added by Petros for contrastive loss on 12 October 2023  # # 
+            
+            contrastive_loss = 0
+            # img_infos = load_annotations_
+            for tensor in x_n:
+                x_flat = self.constrastive_features(tensor, img)
+                for x_, panoptic in zip(x_flat, gt_panoptic_only_thing_classes.squeeze(axis=1)):         # # gt_panoptic_thing_classes.shape = (2, 1, 512, 512) & squeeze to remove the dimension (2,512,512)
+                    labels, features = self.pool_features(x_, panoptic)                                 
+                    contrastive_loss += self.loss_constrastive(features, labels) / tensor.shape[0]
+            contrastive_loss = contrastive_loss / len(x_n)
+            losses.update({'contrastive loss': contrastive_loss})
+            
+            # # added by Petros for contrastive loss on 12 October 2023 # # 
+            
             batch_size = len(gt_labels)
             set_loss_to_zero = False
             for i in range(batch_size):

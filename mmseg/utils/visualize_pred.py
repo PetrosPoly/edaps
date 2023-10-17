@@ -9,6 +9,7 @@
 import numpy as np
 import torch
 from matplotlib import pyplot as plt
+import cv2 # Petros added
 from PIL import Image
 from tools.panoptic_deeplab.save_annotations import flow_compute_color
 from tools.panoptic_deeplab.save_annotations import label_to_color_image, random_color
@@ -70,9 +71,9 @@ Cityscapes_palette = [
 ]
 
 
-def colorize_mask(mask, palette):
-    zero_pad = 256 * 3 - len(palette)
-    for i in range(zero_pad):
+def colorize_mask(mask, palette):  #Petros :: is used to convert a segmentation mask into a color image using a specified palette
+    zero_pad = 256 * 3 - len(palette) # Petros :: a mask a 2D np array representing class label for each pixel 
+    for i in range(zero_pad):  # The line zero_pad = 256 * 3 - len(palette) calculates the number of zeros that need to be appended to the palette list to make its length equal to 256 * 3, which is a common length used for color palettes when working with images
         palette.append(0)
     new_mask = Image.fromarray(mask.astype(np.uint8)).convert('P')
     new_mask.putpalette(palette)
@@ -248,8 +249,8 @@ def prep_ins_for_vis(inst_map, mode='GT', dataset_name='cityscapes', debug=False
 
 
 def _random_color(base, max_dist=30):
-    new_color = base + np.random.randint(low=-max_dist, high=max_dist + 1, size=3)
-    return tuple(np.maximum(0, np.minimum(255, new_color)))
+    new_color = base + np.random.randint(low=-max_dist, high=max_dist + 1, size=3) # Petros :: unction call specifies that you want to generate an array of random values with a size of 3
+    return tuple(np.maximum(0, np.minimum(255, new_color)))                        # Petros :: prevent the values from going below 0 and 255 working with tuples a
 
 
 def mapId2Domain(id):
@@ -260,20 +261,28 @@ def prep_gt_pan_for_vis(pan_map, dataset_name='cityscapes', debug=False, blend_r
     thing_classes = [11,12,13,14,15,16,17,18]
     colormap = create_label_colormap()
     colored_label = np.zeros((pan_map.shape[0], pan_map.shape[1], 3), dtype=np.uint8)
-    taken_colors = set([0, 0, 0])
-    polygons = []
-    for lab in np.unique(pan_map):
-        if lab == 0 or lab == 255:
+    taken_colors = set([0, 0, 0])   # Petros :: a set is initialized with a color '[0, 0, 0]' 
+    polygons = []                   # Petros :: for the contours 
+    for lab in np.unique(pan_map):  # Petros :: look for each unique instance id 
+        if lab == 0 or lab == 255:  # Petros :: 0 and 255 are the uncountable
             continue
         if lab < 1000:
             classId = lab
         else:
-            classId = lab // label_divisor
-
-        labelInfo = id2label[classId]
-        classTrainId = labelInfo.trainId
-        mask = pan_map == lab
-        base_color = colormap[classTrainId]
+            classId = lab // label_divisor   # Petros :: for instance 
+        labelInfo = id2label[classId]        # Petros :: takes the id and corresponds it to the label / lab info (retrieve label information from a dictionary called id2label)
+        classTrainId = labelInfo.trainId     # Petros :: takes label info and provide the id that is responsible for training. For instance uncountable objects take the value 255 or 0
+        mask = pan_map == lab                # Petros :: this line creates a boolean mask for the label / lab correspond to pixels in the panoptic map that have the value 'lab'. 
+        """
+        bounding_boxes = find_bboxes(mask)
+        if len(bounding_boxes) == 0:
+            print("No bounding boxes found.")
+        else:
+            print(f"Found {len(bounding_boxes)} bounding box(es):")
+        for i, bbox in enumerate(bounding_boxes):
+            print(f"Bounding Box {i + 1}: {bbox}")
+        """
+        base_color = colormap[classTrainId]  # Petros :: if you see in Label meta info colors are sychronized with the colormap array above. Check for instance id 6
         if tuple(base_color) not in taken_colors:
             taken_colors.add(tuple(base_color))
             color = base_color
@@ -283,17 +292,45 @@ def prep_gt_pan_for_vis(pan_map, dataset_name='cityscapes', debug=False, blend_r
                 if color not in taken_colors:
                     taken_colors.add(color)
                     break
-        colored_label[mask] = color
+        colored_label[mask] = color                    # Petros :: colored_label is a numpy array with shape (height, width, 3), where each pixel represents a color in RGB format. This array will be used to store the colored version of the label mask. k is a boolean array of the same shape as colored_label, where each element corresponds to whether a specific pixel in the original label mask should be assigned a color or not. color is the color that will be assigned to the pixels where mask is True.
         if img is not None:
             colored_label = blend_ratio * colored_label + (1 - blend_ratio) * img
         if classTrainId in thing_classes:
-            contours, _ = bitmap_to_polygon(mask)
-            polygons += [Polygon(c) for c in contours]
-
+            contours, _ = bitmap_to_polygon(mask)      # Petros :: Suman commnent = its for the white boundaries - returns the contours (array) and the hierarchy / contours is a list[ndarray]: the converted mask in polygon representation.
+            max_x, min_x, max_y, min_y = find_max_min_from_contours(contours) # Petros :: Check the maximum / minimum x and y for the contours
+            polygons += [Polygon(c) for c in contours] # Petros  polygons is a list of the contours that are being presented in the contours line / Polygon(c): This creates a Polygon object using the coordinates in c. The Polygon class is typically used to represent a closed polygonal shape defined by a sequence of (x, y) coordinates.
     p = PatchCollection(polygons, facecolor='none', edgecolors='w', linewidths=2, alpha=1.0)
-    ax.add_collection(p)
+    ax.add_collection(p)                               # Petros :: adds the p PatchCollection to the specified Axes object, which will display the polygons with the specified visual properties.
     return colored_label.astype(int)
 
+def find_bboxes(mask):
+    # Find contours of connected components in the mask
+    contours, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    bounding_boxes = []
+    # Iterate through each contour
+    for contour in contours:
+        # Calculate the bounding box for the contour
+        x, y, w, h = cv2.boundingRect(contour)
+        bounding_boxes.append((x, y, x + w, y + h))  # Store the bounding box coordinates
+    return bounding_boxes
+
+
+def find_max_min_from_contours(contours, max_x = float('-inf'), min_x= float('inf'), max_y = float('-inf'), min_y = float('inf')): # Petros this function has been added by Petros to find the maximum and the minimum. 
+    for arr in contours:
+        max_in_arr_x = arr[:,0].max()
+        min_in_arr_x = arr[:,0].min()
+        max_in_arr_y = arr[:,1].max()
+        min_in_arr_y = arr[:,1].min()
+        if max_in_arr_x > max_x:  
+            max_x = max_in_arr_x
+        if min_in_arr_x < min_x:
+            min_x = min_in_arr_x
+        if max_in_arr_y > max_y:
+            max_y = max_in_arr_y
+        if min_in_arr_y < min_y:
+            min_y = min_in_arr_y
+    return max_x, min_x, max_y, min_y
+    
 def prep_pan_for_vis(pan_map, dataset_name='cityscapes', debug=False,
                      blend_ratio=0.7, img=None, runner_mode='train',
                      ax=None, label_divisor=None, gen_cvrn_panop_visuals=False):
@@ -330,8 +367,8 @@ def prep_pan_for_vis(pan_map, dataset_name='cityscapes', debug=False,
         if img is not None:
             colored_label = blend_ratio * colored_label + (1 - blend_ratio) * img
         if classTrainId in thing_classes:
-            contours, _ = bitmap_to_polygon(mask)
-            polygons += [Polygon(c) for c in contours]
+            contours, _ = bitmap_to_polygon(mask)  
+            polygons += [Polygon(c) for c in contours] 
     p = PatchCollection(polygons, facecolor='none', edgecolors='w', linewidths=2, alpha=1.0)
     ax.add_collection(p)
     return colored_label.astype(int)
@@ -449,37 +486,37 @@ def save_predictions(dataset_name, image_filename, TrgSemGT, TrgSemPd, TrgPanPd,
         vis_W = 1024
         vis_H = 512
         fext = '.png'
-        cityname = image_filename.split('_')[0].strip()
-        filename1 = image_filename.replace('_gtFine_panoptic', '_leftImg8bit')
-        filename2 = cityname + '/' + filename1 + '.png'
-        filename3 = cityname + '/' + image_filename + '.png'
-        output_filename = os.path.join(outdir, f'{filename1}.png')
-        input_filename = os.path.join(img_dir, filename2)
+        cityname = image_filename.split('_')[0].strip()  # Petros :: example aachen_0000000_0000019_gtFine_panoptic.png will take the word aachen
+        filename1 = image_filename.replace('_gtFine_panoptic', '_leftImg8bit') # Petros :: example aachen_0000000_0000019_gtFine_panoptic.png will be aachen_0000000_0000019_leftImg8bit.png
+        filename2 = cityname + '/' + filename1 + '.png' # Petros :: aachen/aachen_0000000_0000019_leftImg8bit.png
+        filename3 = cityname + '/' + image_filename + '.png' # Petros :: aachen/aachen_0000000_0000019_gtFine_panoptic.png
+        output_filename = os.path.join(outdir, f'{filename1}.png') # Petros :: 'outdir' join 'aachen_0000000_0000019_gtFine_panoptic.png'
+        input_filename = os.path.join(img_dir, filename2) # Petros :: img_dir='leftImg8bit/train' join 'aachen/aachen_0000000_0000019_leftImg8bit.png'
     elif dataset_name == 'mapillary':
         vis_W = 1024
         vis_H = 768
         fext = '.jpg'
-        input_filename = os.path.join(img_dir, image_filename + '.jpg')
+        input_filename = os.path.join(img_dir, image_filename + '.jpg') # Petros :: img_dir='train_imgs' join 'aachen_0000000_0000019_gtFine_panoptic.png'
         filename3 = image_filename + '.png'
-        output_filename = os.path.join(outdir, image_filename + '.png')
+        output_filename = os.path.join(outdir, image_filename + '.png') # Petros :: 
     # open image
     vis_trg_img = Image.open(input_filename)
     vis_trg_img = vis_trg_img.convert('RGB')
-    # open GT panoptic label
-    TrgPanGT = Image.open(os.path.join(ann_dir, filename3))
+    # open GT panoptic label                                # Petros :: ann_dir='gtFine_panoptic/cityscapes_panoptic_train_trainId'
+    TrgPanGT = Image.open(os.path.join(ann_dir, filename3)) # Petros :: ann_dir='panoptic-labels-crowdth-0-for-daformer/synthia_panoptic'
     # resize
     if dataset_name == 'cityscapes':
-        vis_trg_img = vis_trg_img.resize((vis_W, vis_H), Image.BICUBIC)
-        TrgPanGT = TrgPanGT.resize((vis_W, vis_H), Image.NEAREST)
+        vis_trg_img = vis_trg_img.resize((vis_W, vis_H), Image.BICUBIC) # Petros :: Bicubic interpolation is a commonly used method for resizing images because it provides smoother results compared to simpler methods like nearest-neighbor interpolation
+        TrgPanGT = TrgPanGT.resize((vis_W, vis_H), Image.NEAREST) # Petros :: the image is resized using nearest-neighbor interpolation, which can be suitable for certain scenarios where speed is more important than maintaining smooth image quality.
         vis_trg_img = np.asarray(vis_trg_img, np.int)
         TrgPanGT = np.array(TrgPanGT).astype(np.uint32)
     elif dataset_name == 'mapillary':
         vis_trg_img, _ = resize_with_pad(vis_trg_img, [1024, 768], Image.BICUBIC, pad_value=0, is_label=False)
         vis_trg_img = np.asarray(vis_trg_img, np.int)
         TrgPanGT, _ = resize_with_pad(TrgPanGT, [1024, 768], Image.NEAREST, pad_value=0, is_label=True)
-    TrgPanGT = rgb2id(TrgPanGT)
+    TrgPanGT = rgb2id(TrgPanGT) # Petros :: Converts the color to panoptic label.
     rows, cols = 3, 2
-    fig, axs = plt.subplots(rows, cols, figsize=(24, 24), constrained_layout=True)
+    fig, axs = plt.subplots(rows, cols, figsize=(24, 24), constrained_layout=True) # Petros :: the plt.subplots() function creates a grid of subplots and returns two things: a Figure object (fig) representing the entire figure, and a NumPy array of Axes objects (axs) representing the individual subplots in the grid.
     subplotimgV2(axs[0][0], vis_trg_img, 'TrgImg')
     subplotimgV2(axs[1][0], prep_sem_for_vis(TrgSemGT, mode='GT', dataset_name=dataset_name,
                                              debug=debug, blend_ratio=1.0, img=None), 'TrgSemGT')

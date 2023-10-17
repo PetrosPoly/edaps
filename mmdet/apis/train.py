@@ -121,7 +121,7 @@ def train_detector(model, dataset, cfg, distributed=False, validate=False, times
     train_dataloader_default_args = dict(samples_per_gpu=2, workers_per_gpu=2, num_gpus=len(cfg.gpu_ids), dist=distributed, seed=cfg.seed, persistent_workers=False)
     # this overrides the configs in train_dataloader_default_args, e.g., if samples_per_gpu=1 in train_dataloader config. It overrides the samples_per_gpu=2 in train_dataloader_default_args
     train_loader_cfg = {**train_dataloader_default_args, **cfg.data.get('train_dataloader', {}) }
-    data_loaders = [build_dataloader(ds, **train_loader_cfg) for ds in dataset]
+    data_loaders = [build_dataloader(ds, **train_loader_cfg) for ds in dataset] # Petros :: train_loader_cfg  - dictionary with samples_per_gpu = 2, workers_per_gpu = 4, num_gpus = 1
     # put model on gpus
     if distributed:
         find_unused_parameters = cfg.get('find_unused_parameters', False)
@@ -190,9 +190,9 @@ def train_detector(model, dataset, cfg, distributed=False, validate=False, times
             cfg.data.val.pipeline = replace_ImageToTensor(cfg.data.val.pipeline)
         val_dataset = build_dataset(cfg.data.val, dict(test_mode=True))
         val_dataloader = build_dataloader(val_dataset, **val_dataloader_args)
-        eval_cfg = cfg.get('evaluation', {})
-        eval_cfg['by_epoch'] = cfg.runner['type'] != 'IterBasedRunner'
-        eval_hook = EvalHook
+        eval_cfg = cfg.get('evaluation', {})  # Petros :: check the folder /configs/_base_/edaps/syn2cs_uda_warm_dfthings_rcs_croppl_a999_edaps_s0_debug.py
+        eval_cfg['by_epoch'] = cfg.runner['type'] != 'IterBasedRunner' # Petros :: check same folder as above
+        eval_hook = EvalHook # Petros :: initialize a model here
         # In this PR (https://github.com/open-mmlab/mmcv/pull/1193), the priority of IterTimerHook has been modified from 'NORMAL' to 'LOW'.
         runner.register_hook(eval_hook(val_dataloader, **eval_cfg), priority='LOW')
 

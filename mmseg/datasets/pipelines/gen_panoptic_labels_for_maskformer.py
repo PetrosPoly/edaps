@@ -10,6 +10,10 @@ from cityscapesscripts.helpers.labels import id2label, labels
 from tools.panoptic_deeplab.utils import rgb2id
 from mmdet.core import BitmapMasks
 
+from mmcv.utils import print_log # added by Petros for debugging
+
+import torch
+
 
 def isValidBox(box):
     isValid = False
@@ -34,6 +38,19 @@ def get_bbox_coord(mask):
     y2 = y1 + int(height) - 1
     bbox = [x1, y1, x2, y2]
     return bbox
+
+# added by Petros
+def divide_box(box):
+    x1, y1, x2, y2 = box
+    width = x2 - x1 + 1
+    height = y2 - y1 + 1
+    # No overlapping of sub - boxes
+    roi1 = (x1, y1, x1 + width // 2 - 1, y1 + height // 2 - 1)
+    roi2 = (x1 + width // 2, y1, x2, y1 + height // 2 - 1)
+    roi3 = (x1, y1 + height // 2 , x1 + width // 2 - 1, y2)
+    roi4 = (x1 + width // 2, y1 + height // 2, x2, y2)
+    return roi1, roi2, roi3, roi4
+# added by Petros for contrastive
 
 @PIPELINES.register_module()
 class GenPanopLabelsForMaskFormer(object):
@@ -64,17 +81,19 @@ class GenPanopLabelsForMaskFormer(object):
         else:
             return catid
 
-    def __call__(self, results):
+    def __call__(self, results):  # this function is called inside the customDataset class which is called during the creation of source / target dataset when the UDAdataset is being built self.gen_panop_labels_for_maskformer = GenPanopLabelsForMaskFormer(8, 'val', gen_instance_classids_from_zero=True)
         panoptic = results['gt_panoptic_seg']
         segments = results['ann_info']['segments_info']
-        panoptic = rgb2id(panoptic)
+        panoptic = rgb2id(panoptic) # Petros :: rgb to panoptic id 
         height, width = panoptic.shape[0], panoptic.shape[1]
         semantic = np.zeros_like(panoptic, dtype=np.uint8) + self.ignore_label
         panoptic_only_thing_classes = np.zeros(panoptic.shape)
         max_inst_per_class = np.zeros(len(self.thing_list))
         class_id_tracker = {}
+        nonclass_id_tracker = {} # Petros :: added to check the number of the labels that do not form a class
         for cid in self.thing_list:
             class_id_tracker[cid] = 1
+            nonclass_id_tracker[cid] = 1
         gt_masks = []
         gt_labels = []
         gt_bboxes = []
@@ -86,10 +105,12 @@ class GenPanopLabelsForMaskFormer(object):
                 cat_id = labelInfo.trainId
             if self.ignore_crowd_in_semantic:
                 if not seg['iscrowd']:
-                    semantic[panoptic == seg["id"]] = cat_id
+                    semantic[panoptic == seg["id"]] = cat_id # Petros :: produce the semantic image
             else:
-                semantic[panoptic == seg["id"]] = cat_id
+                semantic[panoptic == seg["id"]] = cat_id     # Petros :: produce the semantic image
             mask = (panoptic == seg["id"])
+            if mask.sum() == 0 and cat_id in self.thing_list:
+                nonclass_id_tracker[cat_id] += 1
             if not mask.sum() == 0:
                 if self.ignore_crowd_in_instance:
                     if not seg['iscrowd']:

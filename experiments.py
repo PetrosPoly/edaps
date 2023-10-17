@@ -409,7 +409,7 @@ def generate_experiment_cfgs(id, machine_name):
     # EDAPS (M-Dec-TD) : SYNTHIA → Cityscapes (Table 1)
     # -------------------------------------------------------------------------
     if id == 1:
-        seeds = [0,1,2]
+        seeds = [0] # seeds = [0,1,2] / modified by Petros
         for seed in seeds:
             cfg = config_from_vars()
             cfgs.append(cfg)

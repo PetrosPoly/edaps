@@ -11,7 +11,7 @@ from collections import namedtuple
 # Definitions
 #--------------------------------------------------------------------------------
 
-# a label and all meta information
+# a label and all meta information   # Petros :: A namedtuple is a subclass of a standard Python tuple that has named fields, allowing you to access the elements using named attributes as well as indices
 Label = namedtuple( 'Label' , [
 
     'name'        , # The identifier of this label, e.g. 'car', 'person', ... .

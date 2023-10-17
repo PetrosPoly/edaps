@@ -105,7 +105,7 @@ evaluation = dict(
 
 runner = dict(
     type="IterBasedRunner",
-    max_iters= 40000
+    max_iters= 10 # 40000 # modified by Petros
 )
 
 checkpoint_config = dict(
