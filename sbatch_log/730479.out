@@ -1,0 +1,1002 @@
+Running on node: biwirender12
+In directory:    /scratch_net/biwidl202/ppolydorou/project_edaps/edaps
+Starting on:     Wed Aug 16 07:25:03 CEST 2023
+SLURM_JOB_ID:    730479
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:38: UserWarning: Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
+  warnings.warn(
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:48: UserWarning: Setting MKL_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
+  warnings.warn(
+2023-08-16 07:25:31,457 - mmdet - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.5 (default, Sep  4 2020, 07:30:14) [GCC 7.3.0]
+CUDA available: True
+GPU 0: NVIDIA GeForce RTX 2080 Ti
+CUDA_HOME: /usr
+NVCC: Cuda compilation tools, release 11.2, V11.2.152
+GCC: gcc (Debian 8.3.0-6) 8.3.0
+PyTorch: 1.7.1
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2021.4-Product Build 20210904 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v1.6.0 (Git Hash 5ef631a030a6f73131c77892041042805a06064f)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.0
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS=MKL, BUILD_TYPE=Release, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DUSE_VULKAN_WRAPPER -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, USE_CUDA=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.8.2
+OpenCV: 4.8.0
+MMCV: 1.6.1
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.0
+MMDetection: 2.25.1+2a2044c
+------------------------------------------------------------
+
+2023-08-16 07:25:33,003 - mmdet - INFO - Distributed training: False
+2023-08-16 07:25:34,502 - mmdet - INFO - Config:
+checkpoint_config = dict(interval=40000, by_epoch=False, max_keep_ckpts=1)
+log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
+custom_hooks = [dict(type='NumClassCheckHook')]
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+opencv_num_threads = 0
+mp_start_method = 'fork'
+num_instance_classes = 8
+norm_cfg = dict(type='BN', requires_grad=True)
+find_unused_parameters = True
+maskrcnn_losses_weights = 1.0
+model = dict(
+    type='MaskRCNNPanoptic',
+    pretrained='pretrained/mit_b5.pth',
+    backbone=dict(type='mit_b5', style='pytorch'),
+    use_neck_feat_for_decode_head=False,
+    decode_head=dict(
+        type='DAFormerHead',
+        in_channels=[64, 128, 320, 512],
+        in_index=[0, 1, 2, 3],
+        channels=256,
+        dropout_ratio=0.1,
+        num_classes=19,
+        norm_cfg=dict(type='BN', requires_grad=True),
+        align_corners=False,
+        decoder_params=dict(
+            embed_dims=256,
+            embed_cfg=dict(type='mlp', act_cfg=None, norm_cfg=None),
+            embed_neck_cfg=dict(type='mlp', act_cfg=None, norm_cfg=None),
+            fusion_cfg=dict(
+                type='aspp',
+                sep=True,
+                dilations=(1, 6, 12, 18),
+                pool=False,
+                act_cfg=dict(type='ReLU'),
+                norm_cfg=dict(type='BN', requires_grad=True))),
+        loss_decode=dict(
+            type='CrossEntropyLossMmseg', use_sigmoid=False, loss_weight=1.0)),
+    neck=dict(
+        type='FPN',
+        in_channels=[64, 128, 320, 512],
+        out_channels=256,
+        num_outs=5),
+    rpn_head=dict(
+        type='RPNHead',
+        in_channels=256,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
+    roi_head=dict(
+        type='StandardRoIHead',
+        bbox_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        bbox_head=dict(
+            type='Shared2FCBBoxHead',
+            in_channels=256,
+            fc_out_channels=1024,
+            roi_feat_size=7,
+            num_classes=8,
+            bbox_coder=dict(
+                type='DeltaXYWHBBoxCoder',
+                target_means=[0.0, 0.0, 0.0, 0.0],
+                target_stds=[0.1, 0.1, 0.2, 0.2]),
+            reg_class_agnostic=False,
+            loss_cls=dict(
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+            loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
+        mask_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=14, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        mask_head=dict(
+            type='FCNMaskHead',
+            num_convs=4,
+            in_channels=256,
+            conv_out_channels=256,
+            num_classes=8,
+            loss_mask=dict(
+                type='CrossEntropyLoss', use_mask=True, loss_weight=1.0))),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=-1,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.5,
+                neg_iou_thr=0.5,
+                min_pos_iou=0.5,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=512,
+                pos_fraction=0.25,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=True),
+            mask_size=28,
+            pos_weight=-1,
+            debug=False),
+        work_dir=
+        'edaps_experiments/exp-00001/work_dirs/local-exp00001/230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449'
+    ),
+    test_cfg=dict(
+        mode='whole',
+        rpn=dict(
+            nms_pre=1000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            score_thr=0.05,
+            nms=dict(type='nms', iou_threshold=0.5),
+            max_per_img=100,
+            mask_thr_binary=0.5)))
+dataset_type = 'CityscapesDataset'
+data_root = 'data/cityscapes/'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+crop_size = (512, 512)
+num_classes = 19
+synthia_train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadPanopticAnnotations'),
+    dict(type='Resize', img_scale=(1280, 760)),
+    dict(type='RandomCrop', crop_size=(512, 512), cat_max_ratio=0.75),
+    dict(type='RandomFlip', prob=0.5),
+    dict(
+        type='GenPanopLabelsForMaskFormer',
+        sigma=8,
+        mode='train',
+        num_classes=19,
+        gen_instance_classids_from_zero=True),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='DefaultFormatBundleMmdet'),
+    dict(
+        type='Collect',
+        keys=[
+            'img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg',
+            'gt_panoptic_only_thing_classes', 'max_inst_per_class'
+        ])
+]
+cityscapes_train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', img_scale=(1024, 512)),
+    dict(type='RandomCrop', crop_size=(512, 512)),
+    dict(type='RandomFlip', prob=0.5),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='DefaultFormatBundleMmdet'),
+    dict(type='Collect', keys=['img'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(2048, 1024),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=2,
+    workers_per_gpu=4,
+    train=dict(
+        type='UDADataset',
+        source=dict(
+            type='SynthiaDataset',
+            data_root='data/synthia/',
+            img_dir='RGB',
+            depth_dir='',
+            ann_dir='panoptic-labels-crowdth-0-for-daformer/synthia_panoptic',
+            pipeline=[
+                dict(type='LoadImageFromFile'),
+                dict(type='LoadPanopticAnnotations'),
+                dict(type='Resize', img_scale=(1280, 760)),
+                dict(
+                    type='RandomCrop',
+                    crop_size=(512, 512),
+                    cat_max_ratio=0.75),
+                dict(type='RandomFlip', prob=0.5),
+                dict(
+                    type='GenPanopLabelsForMaskFormer',
+                    sigma=8,
+                    mode='train',
+                    num_classes=19,
+                    gen_instance_classids_from_zero=True),
+                dict(
+                    type='Normalize',
+                    mean=[123.675, 116.28, 103.53],
+                    std=[58.395, 57.12, 57.375],
+                    to_rgb=True),
+                dict(type='DefaultFormatBundleMmdet'),
+                dict(
+                    type='Collect',
+                    keys=[
+                        'img', 'gt_bboxes', 'gt_labels', 'gt_masks',
+                        'gt_semantic_seg', 'gt_panoptic_only_thing_classes',
+                        'max_inst_per_class'
+                    ])
+            ]),
+        target=dict(
+            type='CityscapesDataset',
+            data_root='data/cityscapes/',
+            img_dir='leftImg8bit/train',
+            depth_dir='',
+            ann_dir='gtFine_panoptic/cityscapes_panoptic_train_trainId',
+            pipeline=[
+                dict(type='LoadImageFromFile'),
+                dict(type='Resize', img_scale=(1024, 512)),
+                dict(type='RandomCrop', crop_size=(512, 512)),
+                dict(type='RandomFlip', prob=0.5),
+                dict(
+                    type='Normalize',
+                    mean=[123.675, 116.28, 103.53],
+                    std=[58.395, 57.12, 57.375],
+                    to_rgb=True),
+                dict(type='DefaultFormatBundleMmdet'),
+                dict(type='Collect', keys=['img'])
+            ]),
+        rare_class_sampling=dict(
+            min_pixels=3000, class_temp=0.01, min_crop_ratio=0.5)),
+    val=dict(
+        type='CityscapesDataset',
+        data_root='data/cityscapes',
+        img_dir='leftImg8bit/val',
+        depth_dir='',
+        ann_dir='gtFine_panoptic/cityscapes_panoptic_val',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(2048, 1024),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]),
+    test=dict(
+        type='CityscapesDataset',
+        data_root='data/cityscapes/',
+        img_dir='leftImg8bit/val',
+        depth_dir='',
+        ann_dir='gtFine_panoptic/cityscapes_panoptic_val',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(2048, 1024),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]))
+uda = dict(
+    type='DACS',
+    alpha=0.999,
+    pseudo_threshold=0.968,
+    pseudo_weight_ignore_top=15,
+    pseudo_weight_ignore_bottom=120,
+    imnet_feature_dist_lambda=0.005,
+    imnet_feature_dist_classes=[6, 7, 11, 12, 13, 14, 15, 16, 17, 18],
+    imnet_feature_dist_scale_min_ratio=0.75,
+    mix='class',
+    blur=True,
+    color_jitter_strength=0.2,
+    color_jitter_probability=0.2,
+    debug_img_interval=1000,
+    print_grad_magnitude=False,
+    share_src_backward=True,
+    disable_mix_masks=False)
+use_ddp_wrapper = True
+optimizer = dict(
+    type='AdamW',
+    lr=6e-05,
+    betas=(0.9, 0.999),
+    weight_decay=0.01,
+    paramwise_cfg=dict(
+        custom_keys=dict(
+            neck=dict(lr_mult=10.0),
+            head=dict(lr_mult=10.0),
+            pos_block=dict(decay_mult=0.0),
+            norm=dict(decay_mult=0.0))))
+optimizer_config = None
+lr_config = dict(
+    policy='poly',
+    warmup='linear',
+    warmup_iters=1500,
+    warmup_ratio=1e-06,
+    power=1.0,
+    min_lr=0.0,
+    by_epoch=False)
+debug = False
+n_gpus = 1
+gpu_mtotal = 23000
+total_train_time = '21:00:00'
+n_cpus = 16
+mem_per_cpu = 16000
+machine = 'local'
+euler_template_fname = 'euler_template_slurm_syn2city.sh'
+only_eval = False
+only_train = False
+activate_auto_scale_lr = False
+auto_scale_lr = dict(enable=False, base_batch_size=16)
+print_layer_wise_lr = False
+file_sys = 'Slurm'
+launcher = None
+generate_only_visuals_without_eval = False
+seed = 0
+evaluation = dict(
+    interval=40000,
+    metric=['mIoU', 'mPQ', 'mAP'],
+    eval_type='maskrcnn_panoptic',
+    dataset_name='cityscapes',
+    gt_dir='data/cityscapes/gtFine/val',
+    gt_dir_panop='data/cityscapes/gtFine_panoptic',
+    num_samples_debug=12,
+    post_proccess_params=dict(
+        num_classes=19,
+        ignore_label=255,
+        mapillary_dataloading_style='OURS',
+        label_divisor=1000,
+        train_id_to_eval_id=[
+            7, 8, 11, 12, 13, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 31,
+            32, 33, 0
+        ],
+        thing_list=[11, 12, 13, 14, 15, 16, 17, 18],
+        mask_score_threshold=0.95,
+        debug=False,
+        dump_semantic_pred_as_numpy_array=False,
+        load_semantic_pred_as_numpy_array=False,
+        semantic_pred_numpy_array_location=None,
+        use_semantic_decoder_for_instance_labeling=False,
+        use_semantic_decoder_for_panoptic_labeling=False,
+        nms_th=None,
+        intersec_th=None,
+        upsnet_mask_pruning=False,
+        generate_thing_cls_panoptic_from_instance_pred=False),
+    visuals_pan_eval=False,
+    evalScale='2048x1024',
+    panop_eval_folder=
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449/panoptic_eval',
+    panop_eval_temp_folder=
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449/panoptic_eval/panop_eval_16-08-2023_07-25-31-262028',
+    debug=False,
+    out_dir=
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449/panoptic_eval/panop_eval_16-08-2023_07-25-31-262028/visuals'
+)
+runner = dict(type='IterBasedRunner', max_iters=40000)
+name = '230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449'
+exp = 1
+exp_root = 'edaps_experiments'
+exp_sub = 'exp-00001'
+name_dataset = ('synthia2cityscapes', )
+name_architecture = ('maskrcnn_mitb5', )
+name_encoder = ('mitb5', )
+name_decoder = ('maskrcnn', )
+name_uda = ('dacs_rcs0.01_cpl', )
+name_opt = ('adamw_6e-05_pmTrue_poly10warm_1x1_40k', )
+work_dir = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449'
+git_rev = '2a2044c49e116d4693884d4a9a6e08b824a9b128'
+auto_resume = False
+gpu_ids = [0]
+
+2023-08-16 07:25:34,503 - mmdet - INFO - Set random seed to 0, deterministic: False
+2023-08-16 07:25:34,503 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - BEFORE MODEL BUILD
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/two_stage.py:29: UserWarning: DeprecationWarning: pretrained is deprecated, please use "init_cfg" instead
+  warnings.warn('DeprecationWarning: pretrained is deprecated, '
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/backbones/mix_transformer.py:215: UserWarning: DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead
+  warnings.warn('DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead')
+2023-08-16 07:25:38,386 - mmdet - INFO - Load mit checkpoint.
+2023-08-16 07:25:38,386 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-08-16 07:25:41,726 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-08-16 07:25:41,756 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-08-16 07:25:41,764 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-08-16 07:25:41,901 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-08-16 07:25:41,989 - mmdet - INFO - Load mit checkpoint.
+2023-08-16 07:25:41,989 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-08-16 07:25:42,500 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-08-16 07:25:42,523 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-08-16 07:25:42,531 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-08-16 07:25:42,666 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-08-16 07:25:42,755 - mmdet - INFO - Load mit checkpoint.
+2023-08-16 07:25:42,755 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-08-16 07:25:43,239 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-08-16 07:25:43,261 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-08-16 07:25:43,268 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-08-16 07:25:43,402 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-08-16 07:25:43,528 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - AFTER MODEL BUILD
+2023-08-16 07:25:43,529 - mmseg - INFO - Loaded annotations from : data/synthia/panoptic-labels-crowdth-0-for-daformer/synthia_panoptic.json
+2023-08-16 07:25:52,903 - mmseg - INFO - Loaded 9400 images from data/synthia/RGB
+2023-08-16 07:25:52,907 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_train_trainId.json
+2023-08-16 07:25:53,364 - mmseg - INFO - Loaded 2975 images from data/cityscapes/leftImg8bit/train
+2023-08-16 07:25:53,461 - mmseg - INFO - RCS Classes: [6, 7, 17, 18, 4, 3, 12, 5, 15, 13, 11, 10, 8, 0, 1, 2]
+2023-08-16 07:25:53,462 - mmseg - INFO - RCS ClassProb: [1.55649453e-01 1.45927146e-01 1.30805254e-01 1.29144296e-01
+ 1.22819245e-01 1.22646019e-01 9.97279957e-02 5.53424992e-02
+ 3.33626680e-02 2.43163528e-03 2.00466975e-03 1.35448776e-04
+ 3.78220921e-06 8.31826052e-10 3.41141226e-10 1.11511794e-14]
+2023-08-16 07:26:05,735 - mmdet - INFO - Automatic scaling of learning rate (LR) has been disabled.
+2023-08-16 07:26:15,860 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_val.json
+2023-08-16 07:26:15,949 - mmseg - INFO - Loaded 500 images from data/cityscapes/leftImg8bit/val
+2023-08-16 07:26:15,950 - mmdet - INFO - Start running, host: ppolydorou@biwirender12, work_dir: /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449
+2023-08-16 07:26:15,950 - mmdet - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) PolyLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) PolyLrUpdaterHook                  
+(NORMAL      ) NumClassCheckHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) PolyLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHookUDA                        
+ -------------------- 
+after_train_iter:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) NumClassCheckHook                  
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2023-08-16 07:26:15,950 - mmdet - INFO - workflow: [('train', 1)], max: 40000 iters
+2023-08-16 07:26:15,951 - mmdet - INFO - Checkpoints will be saved to /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449 by HardDiskBackend.
+2023-08-16 07:26:15,951 - mmdet - INFO - The best checkpoint will be saved to edaps_experiments/exp-00001/work_dirs/local-exp00001/230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449/panoptic_eval/panop_eval_16-08-2023_07-25-31-262028/visuals/230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449 by HardDiskBackend
+training with predefined config : configs/edaps/syn2cs_uda_warm_dfthings_rcs_croppl_a999_edaps_s0.py
+Run job syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0
+2023-08-16 07:28:06,380 - mmdet - INFO - Iter [20/40000]	lr: 7.597e-07, eta: 2 days, 11:58:41, time: 5.401, data_time: 0.255, memory: 9421, decode.loss_seg: 2.8129, decode.acc_seg: 5.4581, rpn.loss_rpn_cls: 0.6924, rpn.loss_rpn_bbox: 0.3348, roi.loss_cls: 2.1463, roi.acc: 19.3164, roi.loss_bbox: 0.0911, roi.loss_mask: 2.3533, src.loss_imnet_feat_dist: 0.0663, mix.decode.loss_seg: 1.5454, mix.decode.acc_seg: 12.2908
+2023-08-16 07:29:44,966 - mmdet - INFO - Iter [40/40000]	lr: 1.559e-06, eta: 2 days, 9:19:53, time: 4.929, data_time: 0.015, memory: 9543, decode.loss_seg: 2.7702, decode.acc_seg: 10.9823, rpn.loss_rpn_cls: 0.6838, rpn.loss_rpn_bbox: 0.3122, roi.loss_cls: 0.9720, roi.acc: 82.3145, roi.loss_bbox: 0.1235, roi.loss_mask: 1.6744, src.loss_imnet_feat_dist: 0.0668, mix.decode.loss_seg: 1.4600, mix.decode.acc_seg: 15.1354
+2023-08-16 07:31:24,155 - mmdet - INFO - Iter [60/40000]	lr: 2.357e-06, eta: 2 days, 8:32:34, time: 4.959, data_time: 0.015, memory: 9567, decode.loss_seg: 2.7175, decode.acc_seg: 21.9963, rpn.loss_rpn_cls: 0.6700, rpn.loss_rpn_bbox: 0.2903, roi.loss_cls: 0.6634, roi.acc: 84.8633, roi.loss_bbox: 0.1713, roi.loss_mask: 1.2548, src.loss_imnet_feat_dist: 0.0708, mix.decode.loss_seg: 1.3647, mix.decode.acc_seg: 19.6579
+2023-08-16 07:33:02,132 - mmdet - INFO - Iter [80/40000]	lr: 3.154e-06, eta: 2 days, 7:58:00, time: 4.899, data_time: 0.015, memory: 9567, decode.loss_seg: 2.6225, decode.acc_seg: 35.4279, rpn.loss_rpn_cls: 0.6554, rpn.loss_rpn_bbox: 0.2999, roi.loss_cls: 0.6022, roi.acc: 82.5000, roi.loss_bbox: 0.2507, roi.loss_mask: 0.9686, src.loss_imnet_feat_dist: 0.0719, mix.decode.loss_seg: 1.5571, mix.decode.acc_seg: 29.4985
+2023-08-16 07:34:40,062 - mmdet - INFO - Iter [100/40000]	lr: 3.950e-06, eta: 2 days, 7:36:16, time: 4.896, data_time: 0.015, memory: 9567, decode.loss_seg: 2.4582, decode.acc_seg: 49.1533, rpn.loss_rpn_cls: 0.6257, rpn.loss_rpn_bbox: 0.2654, roi.loss_cls: 0.5203, roi.acc: 84.3945, roi.loss_bbox: 0.2328, roi.loss_mask: 0.8530, src.loss_imnet_feat_dist: 0.0779, mix.decode.loss_seg: 1.3929, mix.decode.acc_seg: 40.6093
+2023-08-16 07:36:19,094 - mmdet - INFO - Iter [120/40000]	lr: 4.746e-06, eta: 2 days, 7:27:21, time: 4.952, data_time: 0.015, memory: 9567, decode.loss_seg: 2.3332, decode.acc_seg: 57.0479, rpn.loss_rpn_cls: 0.5910, rpn.loss_rpn_bbox: 0.2652, roi.loss_cls: 0.5114, roi.acc: 84.0137, roi.loss_bbox: 0.2510, roi.loss_mask: 0.7736, src.loss_imnet_feat_dist: 0.0827, mix.decode.loss_seg: 1.2276, mix.decode.acc_seg: 49.0521
+2023-08-16 07:37:57,295 - mmdet - INFO - Iter [140/40000]	lr: 5.541e-06, eta: 2 days, 7:16:35, time: 4.910, data_time: 0.015, memory: 9567, decode.loss_seg: 2.1273, decode.acc_seg: 56.4926, rpn.loss_rpn_cls: 0.5387, rpn.loss_rpn_bbox: 0.2526, roi.loss_cls: 0.5656, roi.acc: 82.9395, roi.loss_bbox: 0.3337, roi.loss_mask: 0.7294, src.loss_imnet_feat_dist: 0.0856, mix.decode.loss_seg: 1.0362, mix.decode.acc_seg: 54.1241
+2023-08-16 07:39:36,938 - mmdet - INFO - Iter [160/40000]	lr: 6.335e-06, eta: 2 days, 7:14:04, time: 4.982, data_time: 0.015, memory: 9593, decode.loss_seg: 2.0042, decode.acc_seg: 61.5123, rpn.loss_rpn_cls: 0.4337, rpn.loss_rpn_bbox: 0.2364, roi.loss_cls: 0.5669, roi.acc: 82.1240, roi.loss_bbox: 0.4173, roi.loss_mask: 0.7028, src.loss_imnet_feat_dist: 0.0891, mix.decode.loss_seg: 1.0746, mix.decode.acc_seg: 58.5781
+2023-08-16 07:41:15,666 - mmdet - INFO - Iter [180/40000]	lr: 7.128e-06, eta: 2 days, 7:08:22, time: 4.936, data_time: 0.015, memory: 9593, decode.loss_seg: 1.8379, decode.acc_seg: 60.8503, rpn.loss_rpn_cls: 0.3356, rpn.loss_rpn_bbox: 0.2386, roi.loss_cls: 0.5976, roi.acc: 79.2822, roi.loss_bbox: 0.4804, roi.loss_mask: 0.6836, src.loss_imnet_feat_dist: 0.0960, mix.decode.loss_seg: 0.9874, mix.decode.acc_seg: 59.5176
+2023-08-16 07:42:54,291 - mmdet - INFO - Iter [200/40000]	lr: 7.920e-06, eta: 2 days, 7:03:09, time: 4.931, data_time: 0.015, memory: 9593, decode.loss_seg: 1.6671, decode.acc_seg: 65.1271, rpn.loss_rpn_cls: 0.2776, rpn.loss_rpn_bbox: 0.2421, roi.loss_cls: 0.6487, roi.acc: 77.7393, roi.loss_bbox: 0.5702, roi.loss_mask: 0.6649, src.loss_imnet_feat_dist: 0.0975, mix.decode.loss_seg: 0.7366, mix.decode.acc_seg: 62.7482
+2023-08-16 07:44:33,370 - mmdet - INFO - Iter [220/40000]	lr: 8.712e-06, eta: 2 days, 6:59:56, time: 4.954, data_time: 0.015, memory: 9593, decode.loss_seg: 1.5793, decode.acc_seg: 65.0960, rpn.loss_rpn_cls: 0.2500, rpn.loss_rpn_bbox: 0.2323, roi.loss_cls: 0.6967, roi.acc: 75.5908, roi.loss_bbox: 0.6019, roi.loss_mask: 0.6535, src.loss_imnet_feat_dist: 0.1005, mix.decode.loss_seg: 0.7419, mix.decode.acc_seg: 62.8818
+2023-08-16 07:46:12,766 - mmdet - INFO - Iter [240/40000]	lr: 9.503e-06, eta: 2 days, 6:57:52, time: 4.970, data_time: 0.016, memory: 9593, decode.loss_seg: 1.4320, decode.acc_seg: 68.3809, rpn.loss_rpn_cls: 0.2341, rpn.loss_rpn_bbox: 0.2590, roi.loss_cls: 0.6888, roi.acc: 75.0049, roi.loss_bbox: 0.6588, roi.loss_mask: 0.6378, src.loss_imnet_feat_dist: 0.1019, mix.decode.loss_seg: 0.6493, mix.decode.acc_seg: 64.9114
+2023-08-16 07:47:51,457 - mmdet - INFO - Iter [260/40000]	lr: 1.029e-05, eta: 2 days, 6:54:03, time: 4.935, data_time: 0.016, memory: 9593, decode.loss_seg: 1.3092, decode.acc_seg: 69.7719, rpn.loss_rpn_cls: 0.2247, rpn.loss_rpn_bbox: 0.2040, roi.loss_cls: 0.6233, roi.acc: 78.5059, roi.loss_bbox: 0.6257, roi.loss_mask: 0.6207, src.loss_imnet_feat_dist: 0.1017, mix.decode.loss_seg: 0.6581, mix.decode.acc_seg: 65.7679
+2023-08-16 07:49:31,326 - mmdet - INFO - Iter [280/40000]	lr: 1.108e-05, eta: 2 days, 6:53:21, time: 4.993, data_time: 0.015, memory: 9593, decode.loss_seg: 1.2789, decode.acc_seg: 71.1839, rpn.loss_rpn_cls: 0.1854, rpn.loss_rpn_bbox: 0.1909, roi.loss_cls: 0.6509, roi.acc: 77.5098, roi.loss_bbox: 0.6555, roi.loss_mask: 0.6170, src.loss_imnet_feat_dist: 0.1053, mix.decode.loss_seg: 0.6867, mix.decode.acc_seg: 63.4027
+2023-08-16 07:51:10,088 - mmdet - INFO - Iter [300/40000]	lr: 1.187e-05, eta: 2 days, 6:50:04, time: 4.938, data_time: 0.016, memory: 9593, decode.loss_seg: 1.0781, decode.acc_seg: 73.4284, rpn.loss_rpn_cls: 0.1609, rpn.loss_rpn_bbox: 0.1998, roi.loss_cls: 0.6288, roi.acc: 77.0508, roi.loss_bbox: 0.6757, roi.loss_mask: 0.5970, src.loss_imnet_feat_dist: 0.1159, mix.decode.loss_seg: 0.5502, mix.decode.acc_seg: 68.4698
+2023-08-16 07:52:48,620 - mmdet - INFO - Iter [320/40000]	lr: 1.266e-05, eta: 2 days, 6:46:31, time: 4.927, data_time: 0.015, memory: 9593, decode.loss_seg: 1.0862, decode.acc_seg: 71.4940, rpn.loss_rpn_cls: 0.1687, rpn.loss_rpn_bbox: 0.2061, roi.loss_cls: 0.6426, roi.acc: 76.9873, roi.loss_bbox: 0.7126, roi.loss_mask: 0.5899, src.loss_imnet_feat_dist: 0.1235, mix.decode.loss_seg: 0.5575, mix.decode.acc_seg: 67.4881
+2023-08-16 07:54:27,865 - mmdet - INFO - Iter [340/40000]	lr: 1.345e-05, eta: 2 days, 6:44:34, time: 4.962, data_time: 0.015, memory: 9593, decode.loss_seg: 0.9718, decode.acc_seg: 72.8196, rpn.loss_rpn_cls: 0.1659, rpn.loss_rpn_bbox: 0.2121, roi.loss_cls: 0.6624, roi.acc: 76.7334, roi.loss_bbox: 0.6918, roi.loss_mask: 0.5866, src.loss_imnet_feat_dist: 0.1159, mix.decode.loss_seg: 0.5376, mix.decode.acc_seg: 64.8806
+2023-08-16 07:56:06,458 - mmdet - INFO - Iter [360/40000]	lr: 1.423e-05, eta: 2 days, 6:41:28, time: 4.930, data_time: 0.015, memory: 9593, decode.loss_seg: 0.9703, decode.acc_seg: 73.9028, rpn.loss_rpn_cls: 0.1501, rpn.loss_rpn_bbox: 0.2032, roi.loss_cls: 0.5939, roi.acc: 78.2324, roi.loss_bbox: 0.7171, roi.loss_mask: 0.5653, src.loss_imnet_feat_dist: 0.1289, mix.decode.loss_seg: 0.4296, mix.decode.acc_seg: 72.0628
+2023-08-16 07:57:46,372 - mmdet - INFO - Iter [380/40000]	lr: 1.502e-05, eta: 2 days, 6:40:49, time: 4.996, data_time: 0.015, memory: 9593, decode.loss_seg: 0.8988, decode.acc_seg: 74.6201, rpn.loss_rpn_cls: 0.1579, rpn.loss_rpn_bbox: 0.2134, roi.loss_cls: 0.5713, roi.acc: 78.4814, roi.loss_bbox: 0.6895, roi.loss_mask: 0.5565, src.loss_imnet_feat_dist: 0.1263, mix.decode.loss_seg: 0.4621, mix.decode.acc_seg: 69.4376
+2023-08-16 07:59:24,969 - mmdet - INFO - Iter [400/40000]	lr: 1.580e-05, eta: 2 days, 6:37:53, time: 4.930, data_time: 0.015, memory: 9593, decode.loss_seg: 0.9216, decode.acc_seg: 73.0952, rpn.loss_rpn_cls: 0.1890, rpn.loss_rpn_bbox: 0.2069, roi.loss_cls: 0.5884, roi.acc: 78.6182, roi.loss_bbox: 0.6929, roi.loss_mask: 0.5719, src.loss_imnet_feat_dist: 0.1265, mix.decode.loss_seg: 0.4846, mix.decode.acc_seg: 67.0604
+2023-08-16 08:01:02,928 - mmdet - INFO - Iter [420/40000]	lr: 1.658e-05, eta: 2 days, 6:34:05, time: 4.898, data_time: 0.015, memory: 9593, decode.loss_seg: 0.8345, decode.acc_seg: 76.3221, rpn.loss_rpn_cls: 0.1906, rpn.loss_rpn_bbox: 0.1813, roi.loss_cls: 0.5655, roi.acc: 79.4043, roi.loss_bbox: 0.6757, roi.loss_mask: 0.5632, src.loss_imnet_feat_dist: 0.1332, mix.decode.loss_seg: 0.4666, mix.decode.acc_seg: 67.1860
+2023-08-16 08:02:42,250 - mmdet - INFO - Iter [440/40000]	lr: 1.737e-05, eta: 2 days, 6:32:30, time: 4.966, data_time: 0.016, memory: 9593, decode.loss_seg: 0.8145, decode.acc_seg: 72.7849, rpn.loss_rpn_cls: 0.1684, rpn.loss_rpn_bbox: 0.1944, roi.loss_cls: 0.5691, roi.acc: 79.5996, roi.loss_bbox: 0.6430, roi.loss_mask: 0.5442, src.loss_imnet_feat_dist: 0.1329, mix.decode.loss_seg: 0.4116, mix.decode.acc_seg: 66.7455
+2023-08-16 08:04:20,591 - mmdet - INFO - Iter [460/40000]	lr: 1.815e-05, eta: 2 days, 6:29:32, time: 4.917, data_time: 0.016, memory: 9593, decode.loss_seg: 0.7068, decode.acc_seg: 78.5862, rpn.loss_rpn_cls: 0.1443, rpn.loss_rpn_bbox: 0.2110, roi.loss_cls: 0.5446, roi.acc: 79.4385, roi.loss_bbox: 0.6935, roi.loss_mask: 0.5318, src.loss_imnet_feat_dist: 0.1344, mix.decode.loss_seg: 0.3401, mix.decode.acc_seg: 70.1707
+2023-08-16 08:05:59,230 - mmdet - INFO - Iter [480/40000]	lr: 1.893e-05, eta: 2 days, 6:27:04, time: 4.932, data_time: 0.015, memory: 9593, decode.loss_seg: 0.7571, decode.acc_seg: 76.6568, rpn.loss_rpn_cls: 0.1477, rpn.loss_rpn_bbox: 0.1990, roi.loss_cls: 0.5493, roi.acc: 79.3066, roi.loss_bbox: 0.6703, roi.loss_mask: 0.5309, src.loss_imnet_feat_dist: 0.1243, mix.decode.loss_seg: 0.4409, mix.decode.acc_seg: 67.3797
+2023-08-16 08:07:38,874 - mmdet - INFO - Iter [500/40000]	lr: 1.971e-05, eta: 2 days, 6:26:00, time: 4.982, data_time: 0.016, memory: 9593, decode.loss_seg: 0.7014, decode.acc_seg: 75.7980, rpn.loss_rpn_cls: 0.1411, rpn.loss_rpn_bbox: 0.1992, roi.loss_cls: 0.5630, roi.acc: 80.0928, roi.loss_bbox: 0.6538, roi.loss_mask: 0.5309, src.loss_imnet_feat_dist: 0.1366, mix.decode.loss_seg: 0.3800, mix.decode.acc_seg: 68.6658
+2023-08-16 08:09:17,757 - mmdet - INFO - Iter [520/40000]	lr: 2.049e-05, eta: 2 days, 6:23:55, time: 4.944, data_time: 0.016, memory: 9593, decode.loss_seg: 0.6676, decode.acc_seg: 77.9899, rpn.loss_rpn_cls: 0.1468, rpn.loss_rpn_bbox: 0.1912, roi.loss_cls: 0.5591, roi.acc: 79.3018, roi.loss_bbox: 0.6343, roi.loss_mask: 0.5282, src.loss_imnet_feat_dist: 0.1342, mix.decode.loss_seg: 0.3925, mix.decode.acc_seg: 69.5608
+2023-08-16 08:10:56,543 - mmdet - INFO - Iter [540/40000]	lr: 2.127e-05, eta: 2 days, 6:21:45, time: 4.939, data_time: 0.015, memory: 9593, decode.loss_seg: 0.6630, decode.acc_seg: 76.5281, rpn.loss_rpn_cls: 0.1663, rpn.loss_rpn_bbox: 0.2025, roi.loss_cls: 0.5571, roi.acc: 79.2578, roi.loss_bbox: 0.6442, roi.loss_mask: 0.5288, src.loss_imnet_feat_dist: 0.1340, mix.decode.loss_seg: 0.3876, mix.decode.acc_seg: 68.6152
+2023-08-16 08:12:36,345 - mmdet - INFO - Iter [560/40000]	lr: 2.205e-05, eta: 2 days, 6:20:49, time: 4.990, data_time: 0.016, memory: 9593, decode.loss_seg: 0.7532, decode.acc_seg: 74.0823, rpn.loss_rpn_cls: 0.1784, rpn.loss_rpn_bbox: 0.2124, roi.loss_cls: 0.5921, roi.acc: 78.7500, roi.loss_bbox: 0.6759, roi.loss_mask: 0.5318, src.loss_imnet_feat_dist: 0.1457, mix.decode.loss_seg: 0.3865, mix.decode.acc_seg: 67.3530
+2023-08-16 08:14:15,318 - mmdet - INFO - Iter [580/40000]	lr: 2.282e-05, eta: 2 days, 6:18:53, time: 4.949, data_time: 0.016, memory: 9593, decode.loss_seg: 0.6458, decode.acc_seg: 78.6855, rpn.loss_rpn_cls: 0.1440, rpn.loss_rpn_bbox: 0.1937, roi.loss_cls: 0.5400, roi.acc: 79.7998, roi.loss_bbox: 0.6510, roi.loss_mask: 0.5267, src.loss_imnet_feat_dist: 0.1329, mix.decode.loss_seg: 0.3719, mix.decode.acc_seg: 69.4894
+2023-08-16 08:15:54,428 - mmdet - INFO - Iter [600/40000]	lr: 2.360e-05, eta: 2 days, 6:17:07, time: 4.955, data_time: 0.015, memory: 9593, decode.loss_seg: 0.5115, decode.acc_seg: 81.1770, rpn.loss_rpn_cls: 0.1113, rpn.loss_rpn_bbox: 0.1935, roi.loss_cls: 0.4873, roi.acc: 81.9336, roi.loss_bbox: 0.6453, roi.loss_mask: 0.5234, src.loss_imnet_feat_dist: 0.1449, mix.decode.loss_seg: 0.2580, mix.decode.acc_seg: 74.3763
+2023-08-16 08:17:33,513 - mmdet - INFO - Iter [620/40000]	lr: 2.438e-05, eta: 2 days, 6:15:21, time: 4.954, data_time: 0.016, memory: 9593, decode.loss_seg: 0.5892, decode.acc_seg: 80.9934, rpn.loss_rpn_cls: 0.1529, rpn.loss_rpn_bbox: 0.2135, roi.loss_cls: 0.4983, roi.acc: 81.4209, roi.loss_bbox: 0.5950, roi.loss_mask: 0.5019, src.loss_imnet_feat_dist: 0.1287, mix.decode.loss_seg: 0.3102, mix.decode.acc_seg: 71.5782
+2023-08-16 08:19:11,632 - mmdet - INFO - Iter [640/40000]	lr: 2.515e-05, eta: 2 days, 6:12:35, time: 4.906, data_time: 0.016, memory: 9593, decode.loss_seg: 0.5679, decode.acc_seg: 78.6403, rpn.loss_rpn_cls: 0.1304, rpn.loss_rpn_bbox: 0.1811, roi.loss_cls: 0.5060, roi.acc: 81.2598, roi.loss_bbox: 0.6339, roi.loss_mask: 0.5134, src.loss_imnet_feat_dist: 0.1395, mix.decode.loss_seg: 0.3116, mix.decode.acc_seg: 71.5569
+2023-08-16 08:20:51,307 - mmdet - INFO - Iter [660/40000]	lr: 2.593e-05, eta: 2 days, 6:11:27, time: 4.984, data_time: 0.016, memory: 9593, decode.loss_seg: 0.5665, decode.acc_seg: 79.5304, rpn.loss_rpn_cls: 0.1540, rpn.loss_rpn_bbox: 0.1793, roi.loss_cls: 0.4871, roi.acc: 81.7725, roi.loss_bbox: 0.6421, roi.loss_mask: 0.5037, src.loss_imnet_feat_dist: 0.1351, mix.decode.loss_seg: 0.3130, mix.decode.acc_seg: 71.1524
+2023-08-16 08:22:30,041 - mmdet - INFO - Iter [680/40000]	lr: 2.670e-05, eta: 2 days, 6:09:22, time: 4.937, data_time: 0.016, memory: 9593, decode.loss_seg: 0.6063, decode.acc_seg: 78.9305, rpn.loss_rpn_cls: 0.1296, rpn.loss_rpn_bbox: 0.2078, roi.loss_cls: 0.5207, roi.acc: 81.2549, roi.loss_bbox: 0.6565, roi.loss_mask: 0.5136, src.loss_imnet_feat_dist: 0.1425, mix.decode.loss_seg: 0.3036, mix.decode.acc_seg: 71.1554
+2023-08-16 08:24:08,685 - mmdet - INFO - Iter [700/40000]	lr: 2.747e-05, eta: 2 days, 6:07:13, time: 4.932, data_time: 0.015, memory: 9593, decode.loss_seg: 0.4928, decode.acc_seg: 81.7002, rpn.loss_rpn_cls: 0.1244, rpn.loss_rpn_bbox: 0.1944, roi.loss_cls: 0.4789, roi.acc: 81.8164, roi.loss_bbox: 0.6427, roi.loss_mask: 0.4939, src.loss_imnet_feat_dist: 0.1421, mix.decode.loss_seg: 0.2902, mix.decode.acc_seg: 73.1542
+2023-08-16 08:25:48,244 - mmdet - INFO - Iter [720/40000]	lr: 2.824e-05, eta: 2 days, 6:05:56, time: 4.978, data_time: 0.016, memory: 9593, decode.loss_seg: 0.4884, decode.acc_seg: 80.8365, rpn.loss_rpn_cls: 0.1233, rpn.loss_rpn_bbox: 0.1881, roi.loss_cls: 0.4843, roi.acc: 82.0459, roi.loss_bbox: 0.6364, roi.loss_mask: 0.4711, src.loss_imnet_feat_dist: 0.1385, mix.decode.loss_seg: 0.2438, mix.decode.acc_seg: 68.8302
+2023-08-16 08:27:26,826 - mmdet - INFO - Iter [740/40000]	lr: 2.901e-05, eta: 2 days, 6:03:46, time: 4.929, data_time: 0.016, memory: 9593, decode.loss_seg: 0.4461, decode.acc_seg: 82.2882, rpn.loss_rpn_cls: 0.1181, rpn.loss_rpn_bbox: 0.1697, roi.loss_cls: 0.4662, roi.acc: 82.6611, roi.loss_bbox: 0.6303, roi.loss_mask: 0.4712, src.loss_imnet_feat_dist: 0.1293, mix.decode.loss_seg: 0.2021, mix.decode.acc_seg: 74.3147
+2023-08-16 08:29:04,929 - mmdet - INFO - Iter [760/40000]	lr: 2.978e-05, eta: 2 days, 6:01:13, time: 4.905, data_time: 0.016, memory: 9593, decode.loss_seg: 0.4639, decode.acc_seg: 83.6123, rpn.loss_rpn_cls: 0.1181, rpn.loss_rpn_bbox: 0.1929, roi.loss_cls: 0.4994, roi.acc: 81.4648, roi.loss_bbox: 0.6423, roi.loss_mask: 0.4936, src.loss_imnet_feat_dist: 0.1410, mix.decode.loss_seg: 0.2481, mix.decode.acc_seg: 73.7369
+2023-08-16 08:30:44,876 - mmdet - INFO - Iter [780/40000]	lr: 3.055e-05, eta: 2 days, 6:00:15, time: 4.997, data_time: 0.016, memory: 9593, decode.loss_seg: 0.4026, decode.acc_seg: 83.9932, rpn.loss_rpn_cls: 0.0980, rpn.loss_rpn_bbox: 0.1696, roi.loss_cls: 0.4585, roi.acc: 82.6318, roi.loss_bbox: 0.6309, roi.loss_mask: 0.4788, src.loss_imnet_feat_dist: 0.1468, mix.decode.loss_seg: 0.2131, mix.decode.acc_seg: 74.9557
+2023-08-16 08:32:24,063 - mmdet - INFO - Iter [800/40000]	lr: 3.132e-05, eta: 2 days, 5:58:39, time: 4.959, data_time: 0.016, memory: 9593, decode.loss_seg: 0.4352, decode.acc_seg: 79.3624, rpn.loss_rpn_cls: 0.1109, rpn.loss_rpn_bbox: 0.1973, roi.loss_cls: 0.4755, roi.acc: 82.1631, roi.loss_bbox: 0.6265, roi.loss_mask: 0.4803, src.loss_imnet_feat_dist: 0.1484, mix.decode.loss_seg: 0.2338, mix.decode.acc_seg: 70.6215
+2023-08-16 08:34:02,541 - mmdet - INFO - Iter [820/40000]	lr: 3.209e-05, eta: 2 days, 5:56:28, time: 4.924, data_time: 0.016, memory: 9593, decode.loss_seg: 0.4217, decode.acc_seg: 83.4402, rpn.loss_rpn_cls: 0.1309, rpn.loss_rpn_bbox: 0.1849, roi.loss_cls: 0.4661, roi.acc: 82.5879, roi.loss_bbox: 0.6435, roi.loss_mask: 0.4603, src.loss_imnet_feat_dist: 0.1552, mix.decode.loss_seg: 0.2325, mix.decode.acc_seg: 75.3379
+2023-08-16 08:35:41,653 - mmdet - INFO - Iter [840/40000]	lr: 3.286e-05, eta: 2 days, 5:54:48, time: 4.956, data_time: 0.016, memory: 9593, decode.loss_seg: 0.4447, decode.acc_seg: 82.5455, rpn.loss_rpn_cls: 0.1107, rpn.loss_rpn_bbox: 0.1836, roi.loss_cls: 0.5285, roi.acc: 81.1523, roi.loss_bbox: 0.6110, roi.loss_mask: 0.4756, src.loss_imnet_feat_dist: 0.1382, mix.decode.loss_seg: 0.2591, mix.decode.acc_seg: 71.3469
+2023-08-16 08:37:19,768 - mmdet - INFO - Iter [860/40000]	lr: 3.362e-05, eta: 2 days, 5:52:23, time: 4.906, data_time: 0.016, memory: 9593, decode.loss_seg: 0.4950, decode.acc_seg: 81.5390, rpn.loss_rpn_cls: 0.1138, rpn.loss_rpn_bbox: 0.2151, roi.loss_cls: 0.4901, roi.acc: 82.0557, roi.loss_bbox: 0.6423, roi.loss_mask: 0.4682, src.loss_imnet_feat_dist: 0.1461, mix.decode.loss_seg: 0.2480, mix.decode.acc_seg: 68.4125
+2023-08-16 08:38:59,031 - mmdet - INFO - Iter [880/40000]	lr: 3.439e-05, eta: 2 days, 5:50:51, time: 4.963, data_time: 0.016, memory: 9593, decode.loss_seg: 0.5120, decode.acc_seg: 79.7309, rpn.loss_rpn_cls: 0.1179, rpn.loss_rpn_bbox: 0.1819, roi.loss_cls: 0.4538, roi.acc: 83.0664, roi.loss_bbox: 0.5931, roi.loss_mask: 0.4659, src.loss_imnet_feat_dist: 0.1416, mix.decode.loss_seg: 0.2252, mix.decode.acc_seg: 73.4037
+2023-08-16 08:40:38,094 - mmdet - INFO - Iter [900/40000]	lr: 3.515e-05, eta: 2 days, 5:49:10, time: 4.953, data_time: 0.016, memory: 9593, decode.loss_seg: 0.4355, decode.acc_seg: 81.7993, rpn.loss_rpn_cls: 0.1158, rpn.loss_rpn_bbox: 0.1747, roi.loss_cls: 0.4465, roi.acc: 83.7500, roi.loss_bbox: 0.5816, roi.loss_mask: 0.4618, src.loss_imnet_feat_dist: 0.1367, mix.decode.loss_seg: 0.2395, mix.decode.acc_seg: 73.1850
+2023-08-16 08:42:16,348 - mmdet - INFO - Iter [920/40000]	lr: 3.592e-05, eta: 2 days, 5:46:55, time: 4.913, data_time: 0.015, memory: 9593, decode.loss_seg: 0.4136, decode.acc_seg: 84.2730, rpn.loss_rpn_cls: 0.0959, rpn.loss_rpn_bbox: 0.1628, roi.loss_cls: 0.4416, roi.acc: 83.1543, roi.loss_bbox: 0.5939, roi.loss_mask: 0.4494, src.loss_imnet_feat_dist: 0.1506, mix.decode.loss_seg: 0.2338, mix.decode.acc_seg: 72.1555
+2023-08-16 08:43:55,527 - mmdet - INFO - Iter [940/40000]	lr: 3.668e-05, eta: 2 days, 5:45:19, time: 4.959, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3614, decode.acc_seg: 84.5379, rpn.loss_rpn_cls: 0.0968, rpn.loss_rpn_bbox: 0.1594, roi.loss_cls: 0.4287, roi.acc: 84.0527, roi.loss_bbox: 0.5932, roi.loss_mask: 0.4354, src.loss_imnet_feat_dist: 0.1462, mix.decode.loss_seg: 0.2150, mix.decode.acc_seg: 72.3246
+2023-08-16 08:45:33,800 - mmdet - INFO - Iter [960/40000]	lr: 3.744e-05, eta: 2 days, 5:43:07, time: 4.914, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3665, decode.acc_seg: 83.0700, rpn.loss_rpn_cls: 0.1033, rpn.loss_rpn_bbox: 0.1669, roi.loss_cls: 0.4487, roi.acc: 83.3984, roi.loss_bbox: 0.5816, roi.loss_mask: 0.4568, src.loss_imnet_feat_dist: 0.1489, mix.decode.loss_seg: 0.2477, mix.decode.acc_seg: 72.9608
+2023-08-16 08:47:11,886 - mmdet - INFO - Iter [980/40000]	lr: 3.820e-05, eta: 2 days, 5:40:49, time: 4.904, data_time: 0.015, memory: 9593, decode.loss_seg: 0.3794, decode.acc_seg: 83.6672, rpn.loss_rpn_cls: 0.0876, rpn.loss_rpn_bbox: 0.1656, roi.loss_cls: 0.4306, roi.acc: 83.7549, roi.loss_bbox: 0.5627, roi.loss_mask: 0.4407, src.loss_imnet_feat_dist: 0.1405, mix.decode.loss_seg: 0.2883, mix.decode.acc_seg: 71.3828
+2023-08-16 08:48:51,314 - mmdet - INFO - Exp name: 230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449
+2023-08-16 08:48:51,315 - mmdet - INFO - Iter [1000/40000]	lr: 3.896e-05, eta: 2 days, 5:39:24, time: 4.971, data_time: 0.015, memory: 9593, decode.loss_seg: 0.3900, decode.acc_seg: 83.4945, rpn.loss_rpn_cls: 0.0906, rpn.loss_rpn_bbox: 0.1668, roi.loss_cls: 0.4378, roi.acc: 83.5840, roi.loss_bbox: 0.6004, roi.loss_mask: 0.4411, src.loss_imnet_feat_dist: 0.1426, mix.decode.loss_seg: 0.2694, mix.decode.acc_seg: 69.5203
+2023-08-16 08:50:31,666 - mmdet - INFO - Iter [1020/40000]	lr: 3.972e-05, eta: 2 days, 5:38:35, time: 5.018, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3610, decode.acc_seg: 82.5157, rpn.loss_rpn_cls: 0.1257, rpn.loss_rpn_bbox: 0.1742, roi.loss_cls: 0.4549, roi.acc: 82.8613, roi.loss_bbox: 0.5966, roi.loss_mask: 0.4463, src.loss_imnet_feat_dist: 0.1340, mix.decode.loss_seg: 0.2564, mix.decode.acc_seg: 70.5724
+2023-08-16 08:52:11,221 - mmdet - INFO - Iter [1040/40000]	lr: 4.048e-05, eta: 2 days, 5:37:13, time: 4.978, data_time: 0.015, memory: 9593, decode.loss_seg: 0.3781, decode.acc_seg: 83.8543, rpn.loss_rpn_cls: 0.1270, rpn.loss_rpn_bbox: 0.1928, roi.loss_cls: 0.4787, roi.acc: 82.5977, roi.loss_bbox: 0.6138, roi.loss_mask: 0.4379, src.loss_imnet_feat_dist: 0.1362, mix.decode.loss_seg: 0.2308, mix.decode.acc_seg: 75.9781
+2023-08-16 08:53:49,912 - mmdet - INFO - Iter [1060/40000]	lr: 4.124e-05, eta: 2 days, 5:35:19, time: 4.935, data_time: 0.015, memory: 9593, decode.loss_seg: 0.3904, decode.acc_seg: 82.6731, rpn.loss_rpn_cls: 0.1280, rpn.loss_rpn_bbox: 0.1799, roi.loss_cls: 0.4371, roi.acc: 83.4424, roi.loss_bbox: 0.5637, roi.loss_mask: 0.4409, src.loss_imnet_feat_dist: 0.1390, mix.decode.loss_seg: 0.2516, mix.decode.acc_seg: 72.4818
+2023-08-16 08:55:28,077 - mmdet - INFO - Iter [1080/40000]	lr: 4.200e-05, eta: 2 days, 5:33:07, time: 4.908, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3649, decode.acc_seg: 83.1543, rpn.loss_rpn_cls: 0.1370, rpn.loss_rpn_bbox: 0.1877, roi.loss_cls: 0.4471, roi.acc: 83.1885, roi.loss_bbox: 0.6080, roi.loss_mask: 0.4276, src.loss_imnet_feat_dist: 0.1431, mix.decode.loss_seg: 0.1799, mix.decode.acc_seg: 69.2930
+2023-08-16 08:57:07,019 - mmdet - INFO - Iter [1100/40000]	lr: 4.275e-05, eta: 2 days, 5:31:24, time: 4.947, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3334, decode.acc_seg: 84.9402, rpn.loss_rpn_cls: 0.1269, rpn.loss_rpn_bbox: 0.1855, roi.loss_cls: 0.4408, roi.acc: 83.6670, roi.loss_bbox: 0.5870, roi.loss_mask: 0.4396, src.loss_imnet_feat_dist: 0.1464, mix.decode.loss_seg: 0.1799, mix.decode.acc_seg: 71.1108
+2023-08-16 08:58:45,255 - mmdet - INFO - Iter [1120/40000]	lr: 4.351e-05, eta: 2 days, 5:29:16, time: 4.912, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3758, decode.acc_seg: 83.2688, rpn.loss_rpn_cls: 0.1083, rpn.loss_rpn_bbox: 0.1648, roi.loss_cls: 0.4375, roi.acc: 83.8672, roi.loss_bbox: 0.5794, roi.loss_mask: 0.4208, src.loss_imnet_feat_dist: 0.1450, mix.decode.loss_seg: 0.1923, mix.decode.acc_seg: 72.6290
+2023-08-16 09:00:23,685 - mmdet - INFO - Iter [1140/40000]	lr: 4.426e-05, eta: 2 days, 5:27:15, time: 4.921, data_time: 0.015, memory: 9593, decode.loss_seg: 0.3636, decode.acc_seg: 82.7264, rpn.loss_rpn_cls: 0.1178, rpn.loss_rpn_bbox: 0.1762, roi.loss_cls: 0.4478, roi.acc: 83.5498, roi.loss_bbox: 0.5738, roi.loss_mask: 0.4478, src.loss_imnet_feat_dist: 0.1360, mix.decode.loss_seg: 0.1943, mix.decode.acc_seg: 72.5736
+2023-08-16 09:02:03,535 - mmdet - INFO - Iter [1160/40000]	lr: 4.502e-05, eta: 2 days, 5:26:04, time: 4.992, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3763, decode.acc_seg: 84.6886, rpn.loss_rpn_cls: 0.0997, rpn.loss_rpn_bbox: 0.1707, roi.loss_cls: 0.4532, roi.acc: 83.3691, roi.loss_bbox: 0.5625, roi.loss_mask: 0.4357, src.loss_imnet_feat_dist: 0.1537, mix.decode.loss_seg: 0.2517, mix.decode.acc_seg: 68.3142
+2023-08-16 09:03:41,893 - mmdet - INFO - Iter [1180/40000]	lr: 4.577e-05, eta: 2 days, 5:24:02, time: 4.918, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3838, decode.acc_seg: 84.6924, rpn.loss_rpn_cls: 0.1232, rpn.loss_rpn_bbox: 0.2024, roi.loss_cls: 0.4594, roi.acc: 82.3682, roi.loss_bbox: 0.5983, roi.loss_mask: 0.4360, src.loss_imnet_feat_dist: 0.1543, mix.decode.loss_seg: 0.1619, mix.decode.acc_seg: 73.4690
+2023-08-16 09:05:20,212 - mmdet - INFO - Iter [1200/40000]	lr: 4.652e-05, eta: 2 days, 5:21:59, time: 4.916, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3335, decode.acc_seg: 83.9504, rpn.loss_rpn_cls: 0.1041, rpn.loss_rpn_bbox: 0.1763, roi.loss_cls: 0.4455, roi.acc: 83.2861, roi.loss_bbox: 0.5812, roi.loss_mask: 0.4322, src.loss_imnet_feat_dist: 0.1424, mix.decode.loss_seg: 0.1974, mix.decode.acc_seg: 73.7409
+2023-08-16 09:06:59,560 - mmdet - INFO - Iter [1220/40000]	lr: 4.727e-05, eta: 2 days, 5:20:30, time: 4.967, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3249, decode.acc_seg: 84.7131, rpn.loss_rpn_cls: 0.1040, rpn.loss_rpn_bbox: 0.1736, roi.loss_cls: 0.4375, roi.acc: 83.7598, roi.loss_bbox: 0.5830, roi.loss_mask: 0.4144, src.loss_imnet_feat_dist: 0.1424, mix.decode.loss_seg: 0.1764, mix.decode.acc_seg: 75.0002
+2023-08-16 09:08:37,999 - mmdet - INFO - Iter [1240/40000]	lr: 4.802e-05, eta: 2 days, 5:18:32, time: 4.922, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3013, decode.acc_seg: 85.2083, rpn.loss_rpn_cls: 0.0944, rpn.loss_rpn_bbox: 0.1700, roi.loss_cls: 0.4446, roi.acc: 83.4326, roi.loss_bbox: 0.6136, roi.loss_mask: 0.4322, src.loss_imnet_feat_dist: 0.1401, mix.decode.loss_seg: 0.1804, mix.decode.acc_seg: 77.4498
+2023-08-16 09:10:17,366 - mmdet - INFO - Iter [1260/40000]	lr: 4.877e-05, eta: 2 days, 5:17:04, time: 4.968, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3073, decode.acc_seg: 86.2471, rpn.loss_rpn_cls: 0.0997, rpn.loss_rpn_bbox: 0.1706, roi.loss_cls: 0.4359, roi.acc: 83.8867, roi.loss_bbox: 0.5715, roi.loss_mask: 0.4367, src.loss_imnet_feat_dist: 0.1425, mix.decode.loss_seg: 0.1845, mix.decode.acc_seg: 78.3788
+2023-08-16 09:11:55,384 - mmdet - INFO - Iter [1280/40000]	lr: 4.952e-05, eta: 2 days, 5:14:54, time: 4.901, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2978, decode.acc_seg: 86.7200, rpn.loss_rpn_cls: 0.1438, rpn.loss_rpn_bbox: 0.1713, roi.loss_cls: 0.4256, roi.acc: 84.3457, roi.loss_bbox: 0.5838, roi.loss_mask: 0.4257, src.loss_imnet_feat_dist: 0.1483, mix.decode.loss_seg: 0.1539, mix.decode.acc_seg: 75.1958
+2023-08-16 09:13:33,471 - mmdet - INFO - Iter [1300/40000]	lr: 5.027e-05, eta: 2 days, 5:12:48, time: 4.904, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3398, decode.acc_seg: 84.9780, rpn.loss_rpn_cls: 0.1206, rpn.loss_rpn_bbox: 0.1855, roi.loss_cls: 0.4338, roi.acc: 83.6084, roi.loss_bbox: 0.5858, roi.loss_mask: 0.4291, src.loss_imnet_feat_dist: 0.1467, mix.decode.loss_seg: 0.2522, mix.decode.acc_seg: 74.7568
+2023-08-16 09:15:12,222 - mmdet - INFO - Iter [1320/40000]	lr: 5.102e-05, eta: 2 days, 5:11:01, time: 4.938, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3874, decode.acc_seg: 82.9577, rpn.loss_rpn_cls: 0.1192, rpn.loss_rpn_bbox: 0.1805, roi.loss_cls: 0.4203, roi.acc: 84.5703, roi.loss_bbox: 0.5619, roi.loss_mask: 0.4228, src.loss_imnet_feat_dist: 0.1507, mix.decode.loss_seg: 0.2814, mix.decode.acc_seg: 72.0672
+2023-08-16 09:16:50,628 - mmdet - INFO - Iter [1340/40000]	lr: 5.177e-05, eta: 2 days, 5:09:05, time: 4.920, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3586, decode.acc_seg: 85.3857, rpn.loss_rpn_cls: 0.0922, rpn.loss_rpn_bbox: 0.1745, roi.loss_cls: 0.4215, roi.acc: 84.6338, roi.loss_bbox: 0.5599, roi.loss_mask: 0.4103, src.loss_imnet_feat_dist: 0.1378, mix.decode.loss_seg: 0.2940, mix.decode.acc_seg: 74.2090
+2023-08-16 09:18:28,997 - mmdet - INFO - Iter [1360/40000]	lr: 5.251e-05, eta: 2 days, 5:07:09, time: 4.918, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3475, decode.acc_seg: 84.6848, rpn.loss_rpn_cls: 0.1049, rpn.loss_rpn_bbox: 0.1891, roi.loss_cls: 0.4143, roi.acc: 85.0537, roi.loss_bbox: 0.5654, roi.loss_mask: 0.4201, src.loss_imnet_feat_dist: 0.1454, mix.decode.loss_seg: 0.2423, mix.decode.acc_seg: 73.6816
+2023-08-16 09:20:08,851 - mmdet - INFO - Iter [1380/40000]	lr: 5.326e-05, eta: 2 days, 5:05:54, time: 4.993, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3276, decode.acc_seg: 85.1848, rpn.loss_rpn_cls: 0.1184, rpn.loss_rpn_bbox: 0.1845, roi.loss_cls: 0.4091, roi.acc: 84.6973, roi.loss_bbox: 0.5349, roi.loss_mask: 0.4262, src.loss_imnet_feat_dist: 0.1390, mix.decode.loss_seg: 0.2321, mix.decode.acc_seg: 76.7682
+2023-08-16 09:21:47,147 - mmdet - INFO - Iter [1400/40000]	lr: 5.400e-05, eta: 2 days, 5:03:56, time: 4.915, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3279, decode.acc_seg: 85.0124, rpn.loss_rpn_cls: 0.1225, rpn.loss_rpn_bbox: 0.1820, roi.loss_cls: 0.3951, roi.acc: 85.5566, roi.loss_bbox: 0.5446, roi.loss_mask: 0.4184, src.loss_imnet_feat_dist: 0.1489, mix.decode.loss_seg: 0.2278, mix.decode.acc_seg: 73.9560
+2023-08-16 09:23:25,795 - mmdet - INFO - Iter [1420/40000]	lr: 5.475e-05, eta: 2 days, 5:02:08, time: 4.932, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3209, decode.acc_seg: 84.5623, rpn.loss_rpn_cls: 0.0974, rpn.loss_rpn_bbox: 0.1669, roi.loss_cls: 0.4115, roi.acc: 84.8242, roi.loss_bbox: 0.5919, roi.loss_mask: 0.3937, src.loss_imnet_feat_dist: 0.1453, mix.decode.loss_seg: 0.2153, mix.decode.acc_seg: 74.8389
+2023-08-16 09:25:04,927 - mmdet - INFO - Iter [1440/40000]	lr: 5.549e-05, eta: 2 days, 5:00:33, time: 4.957, data_time: 0.015, memory: 9593, decode.loss_seg: 0.3122, decode.acc_seg: 86.5126, rpn.loss_rpn_cls: 0.0924, rpn.loss_rpn_bbox: 0.1740, roi.loss_cls: 0.4359, roi.acc: 83.8135, roi.loss_bbox: 0.5982, roi.loss_mask: 0.4126, src.loss_imnet_feat_dist: 0.1481, mix.decode.loss_seg: 0.3306, mix.decode.acc_seg: 76.7145
+2023-08-16 09:26:43,056 - mmdet - INFO - Iter [1460/40000]	lr: 5.623e-05, eta: 2 days, 4:58:31, time: 4.906, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3047, decode.acc_seg: 84.2002, rpn.loss_rpn_cls: 0.0948, rpn.loss_rpn_bbox: 0.1445, roi.loss_cls: 0.4157, roi.acc: 84.4824, roi.loss_bbox: 0.5752, roi.loss_mask: 0.4268, src.loss_imnet_feat_dist: 0.1453, mix.decode.loss_seg: 0.2113, mix.decode.acc_seg: 76.4153
+2023-08-16 09:28:21,368 - mmdet - INFO - Iter [1480/40000]	lr: 5.697e-05, eta: 2 days, 4:56:35, time: 4.916, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2849, decode.acc_seg: 85.7633, rpn.loss_rpn_cls: 0.0975, rpn.loss_rpn_bbox: 0.1777, roi.loss_cls: 0.4340, roi.acc: 84.1895, roi.loss_bbox: 0.5976, roi.loss_mask: 0.4085, src.loss_imnet_feat_dist: 0.1510, mix.decode.loss_seg: 0.1964, mix.decode.acc_seg: 78.6366
+2023-08-16 09:30:00,660 - mmdet - INFO - Iter [1500/40000]	lr: 5.771e-05, eta: 2 days, 4:55:05, time: 4.965, data_time: 0.016, memory: 9593, decode.loss_seg: 0.3034, decode.acc_seg: 85.3902, rpn.loss_rpn_cls: 0.1044, rpn.loss_rpn_bbox: 0.1881, roi.loss_cls: 0.4590, roi.acc: 82.8906, roi.loss_bbox: 0.5810, roi.loss_mask: 0.4292, src.loss_imnet_feat_dist: 0.1618, mix.decode.loss_seg: 0.2176, mix.decode.acc_seg: 76.5580
+2023-08-16 09:31:38,865 - mmdet - INFO - Iter [1520/40000]	lr: 5.772e-05, eta: 2 days, 4:53:07, time: 4.910, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2718, decode.acc_seg: 87.5489, rpn.loss_rpn_cls: 0.1060, rpn.loss_rpn_bbox: 0.1793, roi.loss_cls: 0.4172, roi.acc: 84.6143, roi.loss_bbox: 0.5626, roi.loss_mask: 0.3921, src.loss_imnet_feat_dist: 0.1422, mix.decode.loss_seg: 0.1661, mix.decode.acc_seg: 79.7193
+2023-08-16 09:33:17,824 - mmdet - INFO - Iter [1540/40000]	lr: 5.769e-05, eta: 2 days, 4:51:28, time: 4.948, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2435, decode.acc_seg: 87.6702, rpn.loss_rpn_cls: 0.0790, rpn.loss_rpn_bbox: 0.1737, roi.loss_cls: 0.4274, roi.acc: 84.1064, roi.loss_bbox: 0.5815, roi.loss_mask: 0.4149, src.loss_imnet_feat_dist: 0.1500, mix.decode.loss_seg: 0.1672, mix.decode.acc_seg: 77.8418
+2023-08-16 09:34:56,387 - mmdet - INFO - Iter [1560/40000]	lr: 5.766e-05, eta: 2 days, 4:49:39, time: 4.928, data_time: 0.015, memory: 9593, decode.loss_seg: 0.3080, decode.acc_seg: 84.8457, rpn.loss_rpn_cls: 0.1260, rpn.loss_rpn_bbox: 0.1892, roi.loss_cls: 0.4442, roi.acc: 83.8037, roi.loss_bbox: 0.5879, roi.loss_mask: 0.4137, src.loss_imnet_feat_dist: 0.1466, mix.decode.loss_seg: 0.2526, mix.decode.acc_seg: 77.0268
+2023-08-16 09:36:35,105 - mmdet - INFO - Iter [1580/40000]	lr: 5.763e-05, eta: 2 days, 4:47:55, time: 4.936, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2628, decode.acc_seg: 87.5311, rpn.loss_rpn_cls: 0.0897, rpn.loss_rpn_bbox: 0.1734, roi.loss_cls: 0.4163, roi.acc: 84.8193, roi.loss_bbox: 0.5650, roi.loss_mask: 0.4219, src.loss_imnet_feat_dist: 0.1474, mix.decode.loss_seg: 0.1775, mix.decode.acc_seg: 79.5201
+2023-08-16 09:38:14,013 - mmdet - INFO - Iter [1600/40000]	lr: 5.760e-05, eta: 2 days, 4:46:15, time: 4.945, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2681, decode.acc_seg: 86.6148, rpn.loss_rpn_cls: 0.1240, rpn.loss_rpn_bbox: 0.1954, roi.loss_cls: 0.4345, roi.acc: 84.0869, roi.loss_bbox: 0.5761, roi.loss_mask: 0.4083, src.loss_imnet_feat_dist: 0.1524, mix.decode.loss_seg: 0.1817, mix.decode.acc_seg: 80.5716
+2023-08-16 09:39:51,650 - mmdet - INFO - Iter [1620/40000]	lr: 5.757e-05, eta: 2 days, 4:44:05, time: 4.882, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2712, decode.acc_seg: 88.0870, rpn.loss_rpn_cls: 0.0933, rpn.loss_rpn_bbox: 0.1553, roi.loss_cls: 0.4082, roi.acc: 85.0781, roi.loss_bbox: 0.5550, roi.loss_mask: 0.3898, src.loss_imnet_feat_dist: 0.1488, mix.decode.loss_seg: 0.1873, mix.decode.acc_seg: 80.4155
+2023-08-16 09:41:29,561 - mmdet - INFO - Iter [1640/40000]	lr: 5.754e-05, eta: 2 days, 4:42:02, time: 4.896, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2584, decode.acc_seg: 87.1852, rpn.loss_rpn_cls: 0.0862, rpn.loss_rpn_bbox: 0.1536, roi.loss_cls: 0.4072, roi.acc: 85.4639, roi.loss_bbox: 0.5624, roi.loss_mask: 0.4043, src.loss_imnet_feat_dist: 0.1519, mix.decode.loss_seg: 0.1959, mix.decode.acc_seg: 80.4415
+2023-08-16 09:43:08,550 - mmdet - INFO - Iter [1660/40000]	lr: 5.751e-05, eta: 2 days, 4:40:25, time: 4.949, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2989, decode.acc_seg: 86.5567, rpn.loss_rpn_cls: 0.0831, rpn.loss_rpn_bbox: 0.1507, roi.loss_cls: 0.3810, roi.acc: 85.8203, roi.loss_bbox: 0.5526, roi.loss_mask: 0.3531, src.loss_imnet_feat_dist: 0.1565, mix.decode.loss_seg: 0.2586, mix.decode.acc_seg: 76.6748
+2023-08-16 09:44:46,988 - mmdet - INFO - Iter [1680/40000]	lr: 5.748e-05, eta: 2 days, 4:38:35, time: 4.922, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2675, decode.acc_seg: 85.2002, rpn.loss_rpn_cls: 0.0978, rpn.loss_rpn_bbox: 0.1783, roi.loss_cls: 0.4078, roi.acc: 84.4678, roi.loss_bbox: 0.5555, roi.loss_mask: 0.4202, src.loss_imnet_feat_dist: 0.1491, mix.decode.loss_seg: 0.1931, mix.decode.acc_seg: 77.8118
+2023-08-16 09:46:26,303 - mmdet - INFO - Iter [1700/40000]	lr: 5.745e-05, eta: 2 days, 4:37:05, time: 4.966, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2917, decode.acc_seg: 85.3896, rpn.loss_rpn_cls: 0.1000, rpn.loss_rpn_bbox: 0.1795, roi.loss_cls: 0.4176, roi.acc: 84.5996, roi.loss_bbox: 0.5574, roi.loss_mask: 0.3931, src.loss_imnet_feat_dist: 0.1463, mix.decode.loss_seg: 0.2264, mix.decode.acc_seg: 77.1481
+2023-08-16 09:48:04,481 - mmdet - INFO - Iter [1720/40000]	lr: 5.742e-05, eta: 2 days, 4:35:10, time: 4.909, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2793, decode.acc_seg: 86.1700, rpn.loss_rpn_cls: 0.0906, rpn.loss_rpn_bbox: 0.1489, roi.loss_cls: 0.4009, roi.acc: 84.9707, roi.loss_bbox: 0.5632, roi.loss_mask: 0.3888, src.loss_imnet_feat_dist: 0.1494, mix.decode.loss_seg: 0.1776, mix.decode.acc_seg: 78.3425
+2023-08-16 09:49:42,368 - mmdet - INFO - Iter [1740/40000]	lr: 5.739e-05, eta: 2 days, 4:33:09, time: 4.894, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2689, decode.acc_seg: 85.7399, rpn.loss_rpn_cls: 0.1177, rpn.loss_rpn_bbox: 0.1683, roi.loss_cls: 0.4110, roi.acc: 84.5605, roi.loss_bbox: 0.5505, roi.loss_mask: 0.4017, src.loss_imnet_feat_dist: 0.1510, mix.decode.loss_seg: 0.2238, mix.decode.acc_seg: 79.5529
+2023-08-16 09:51:21,194 - mmdet - INFO - Iter [1760/40000]	lr: 5.736e-05, eta: 2 days, 4:31:28, time: 4.941, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2611, decode.acc_seg: 86.5001, rpn.loss_rpn_cls: 0.0979, rpn.loss_rpn_bbox: 0.1918, roi.loss_cls: 0.4010, roi.acc: 85.1221, roi.loss_bbox: 0.5384, roi.loss_mask: 0.4161, src.loss_imnet_feat_dist: 0.1440, mix.decode.loss_seg: 0.1987, mix.decode.acc_seg: 80.0590
+2023-08-16 09:52:59,531 - mmdet - INFO - Iter [1780/40000]	lr: 5.733e-05, eta: 2 days, 4:29:37, time: 4.917, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2791, decode.acc_seg: 86.7139, rpn.loss_rpn_cls: 0.0839, rpn.loss_rpn_bbox: 0.1584, roi.loss_cls: 0.4029, roi.acc: 85.2539, roi.loss_bbox: 0.5506, roi.loss_mask: 0.4044, src.loss_imnet_feat_dist: 0.1437, mix.decode.loss_seg: 0.1961, mix.decode.acc_seg: 81.3809
+2023-08-16 09:54:37,728 - mmdet - INFO - Iter [1800/40000]	lr: 5.730e-05, eta: 2 days, 4:27:44, time: 4.910, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2557, decode.acc_seg: 87.0076, rpn.loss_rpn_cls: 0.0951, rpn.loss_rpn_bbox: 0.1873, roi.loss_cls: 0.4161, roi.acc: 84.3359, roi.loss_bbox: 0.5625, roi.loss_mask: 0.3980, src.loss_imnet_feat_dist: 0.1588, mix.decode.loss_seg: 0.1761, mix.decode.acc_seg: 80.1307
+2023-08-16 09:56:17,045 - mmdet - INFO - Iter [1820/40000]	lr: 5.727e-05, eta: 2 days, 4:26:14, time: 4.966, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2275, decode.acc_seg: 87.7754, rpn.loss_rpn_cls: 0.0913, rpn.loss_rpn_bbox: 0.1698, roi.loss_cls: 0.3715, roi.acc: 85.7080, roi.loss_bbox: 0.5360, roi.loss_mask: 0.3677, src.loss_imnet_feat_dist: 0.1389, mix.decode.loss_seg: 0.2153, mix.decode.acc_seg: 81.3873
+2023-08-16 09:57:55,334 - mmdet - INFO - Iter [1840/40000]	lr: 5.724e-05, eta: 2 days, 4:24:23, time: 4.914, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2628, decode.acc_seg: 86.4270, rpn.loss_rpn_cls: 0.1120, rpn.loss_rpn_bbox: 0.1873, roi.loss_cls: 0.4133, roi.acc: 84.9805, roi.loss_bbox: 0.5671, roi.loss_mask: 0.3953, src.loss_imnet_feat_dist: 0.1510, mix.decode.loss_seg: 0.1959, mix.decode.acc_seg: 79.4449
+2023-08-16 09:59:33,515 - mmdet - INFO - Iter [1860/40000]	lr: 5.721e-05, eta: 2 days, 4:22:29, time: 4.909, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2563, decode.acc_seg: 87.5356, rpn.loss_rpn_cls: 0.0918, rpn.loss_rpn_bbox: 0.1712, roi.loss_cls: 0.4046, roi.acc: 84.9316, roi.loss_bbox: 0.5468, roi.loss_mask: 0.3755, src.loss_imnet_feat_dist: 0.1442, mix.decode.loss_seg: 0.1862, mix.decode.acc_seg: 81.3610
+2023-08-16 10:01:12,979 - mmdet - INFO - Iter [1880/40000]	lr: 5.718e-05, eta: 2 days, 4:21:03, time: 4.973, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2352, decode.acc_seg: 86.1611, rpn.loss_rpn_cls: 0.0938, rpn.loss_rpn_bbox: 0.1539, roi.loss_cls: 0.3874, roi.acc: 85.8301, roi.loss_bbox: 0.5566, roi.loss_mask: 0.3860, src.loss_imnet_feat_dist: 0.1443, mix.decode.loss_seg: 0.2318, mix.decode.acc_seg: 77.9906
+2023-08-16 10:02:51,064 - mmdet - INFO - Iter [1900/40000]	lr: 5.715e-05, eta: 2 days, 4:19:08, time: 4.904, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2608, decode.acc_seg: 85.7471, rpn.loss_rpn_cls: 0.0978, rpn.loss_rpn_bbox: 0.1754, roi.loss_cls: 0.3897, roi.acc: 85.9277, roi.loss_bbox: 0.5198, roi.loss_mask: 0.3989, src.loss_imnet_feat_dist: 0.1551, mix.decode.loss_seg: 0.1924, mix.decode.acc_seg: 81.4981
+2023-08-16 10:04:30,295 - mmdet - INFO - Iter [1920/40000]	lr: 5.712e-05, eta: 2 days, 4:17:36, time: 4.962, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2297, decode.acc_seg: 85.6828, rpn.loss_rpn_cls: 0.0725, rpn.loss_rpn_bbox: 0.1579, roi.loss_cls: 0.3895, roi.acc: 85.6934, roi.loss_bbox: 0.5791, roi.loss_mask: 0.3846, src.loss_imnet_feat_dist: 0.1606, mix.decode.loss_seg: 0.1933, mix.decode.acc_seg: 81.1453
+2023-08-16 10:06:08,612 - mmdet - INFO - Iter [1940/40000]	lr: 5.709e-05, eta: 2 days, 4:15:46, time: 4.916, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2744, decode.acc_seg: 85.3978, rpn.loss_rpn_cls: 0.0864, rpn.loss_rpn_bbox: 0.1610, roi.loss_cls: 0.4086, roi.acc: 84.7949, roi.loss_bbox: 0.5605, roi.loss_mask: 0.4089, src.loss_imnet_feat_dist: 0.1549, mix.decode.loss_seg: 0.2408, mix.decode.acc_seg: 79.9513
+2023-08-16 10:07:47,101 - mmdet - INFO - Iter [1960/40000]	lr: 5.706e-05, eta: 2 days, 4:14:00, time: 4.924, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2681, decode.acc_seg: 85.7162, rpn.loss_rpn_cls: 0.0801, rpn.loss_rpn_bbox: 0.1840, roi.loss_cls: 0.3973, roi.acc: 85.2979, roi.loss_bbox: 0.5333, roi.loss_mask: 0.4060, src.loss_imnet_feat_dist: 0.1600, mix.decode.loss_seg: 0.2720, mix.decode.acc_seg: 79.1578
+2023-08-16 10:09:26,240 - mmdet - INFO - Iter [1980/40000]	lr: 5.703e-05, eta: 2 days, 4:12:26, time: 4.957, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2533, decode.acc_seg: 86.6064, rpn.loss_rpn_cls: 0.0868, rpn.loss_rpn_bbox: 0.1474, roi.loss_cls: 0.3698, roi.acc: 86.4111, roi.loss_bbox: 0.5256, roi.loss_mask: 0.3738, src.loss_imnet_feat_dist: 0.1501, mix.decode.loss_seg: 0.2393, mix.decode.acc_seg: 80.5644
+2023-08-16 10:11:04,537 - mmdet - INFO - Exp name: 230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449
+2023-08-16 10:11:04,537 - mmdet - INFO - Iter [2000/40000]	lr: 5.700e-05, eta: 2 days, 4:10:37, time: 4.915, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2265, decode.acc_seg: 87.4195, rpn.loss_rpn_cls: 0.0813, rpn.loss_rpn_bbox: 0.1468, roi.loss_cls: 0.3851, roi.acc: 85.6299, roi.loss_bbox: 0.5229, roi.loss_mask: 0.3896, src.loss_imnet_feat_dist: 0.1558, mix.decode.loss_seg: 0.1696, mix.decode.acc_seg: 82.8296
+2023-08-16 10:12:45,407 - mmdet - INFO - Iter [2020/40000]	lr: 5.697e-05, eta: 2 days, 4:09:36, time: 5.044, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2799, decode.acc_seg: 86.6483, rpn.loss_rpn_cls: 0.0974, rpn.loss_rpn_bbox: 0.1853, roi.loss_cls: 0.4211, roi.acc: 84.7070, roi.loss_bbox: 0.5436, roi.loss_mask: 0.3919, src.loss_imnet_feat_dist: 0.1569, mix.decode.loss_seg: 0.2959, mix.decode.acc_seg: 78.2524
+2023-08-16 10:14:22,912 - mmdet - INFO - Iter [2040/40000]	lr: 5.694e-05, eta: 2 days, 4:07:31, time: 4.875, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2446, decode.acc_seg: 86.5034, rpn.loss_rpn_cls: 0.0825, rpn.loss_rpn_bbox: 0.1646, roi.loss_cls: 0.3797, roi.acc: 85.9180, roi.loss_bbox: 0.5460, roi.loss_mask: 0.3755, src.loss_imnet_feat_dist: 0.1487, mix.decode.loss_seg: 0.2352, mix.decode.acc_seg: 80.8309
+2023-08-16 10:16:00,778 - mmdet - INFO - Iter [2060/40000]	lr: 5.691e-05, eta: 2 days, 4:05:34, time: 4.893, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2485, decode.acc_seg: 87.4376, rpn.loss_rpn_cls: 0.0876, rpn.loss_rpn_bbox: 0.1752, roi.loss_cls: 0.3816, roi.acc: 85.9473, roi.loss_bbox: 0.5447, roi.loss_mask: 0.3782, src.loss_imnet_feat_dist: 0.1459, mix.decode.loss_seg: 0.2035, mix.decode.acc_seg: 83.0594
+2023-08-16 10:17:39,745 - mmdet - INFO - Iter [2080/40000]	lr: 5.688e-05, eta: 2 days, 4:03:57, time: 4.948, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2418, decode.acc_seg: 85.3695, rpn.loss_rpn_cls: 0.1010, rpn.loss_rpn_bbox: 0.1705, roi.loss_cls: 0.3787, roi.acc: 86.0059, roi.loss_bbox: 0.5398, roi.loss_mask: 0.3812, src.loss_imnet_feat_dist: 0.1626, mix.decode.loss_seg: 0.2117, mix.decode.acc_seg: 81.8826
+2023-08-16 10:19:17,851 - mmdet - INFO - Iter [2100/40000]	lr: 5.685e-05, eta: 2 days, 4:02:04, time: 4.905, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2558, decode.acc_seg: 86.3516, rpn.loss_rpn_cls: 0.0871, rpn.loss_rpn_bbox: 0.1714, roi.loss_cls: 0.3820, roi.acc: 85.5811, roi.loss_bbox: 0.5530, roi.loss_mask: 0.3690, src.loss_imnet_feat_dist: 0.1572, mix.decode.loss_seg: 0.2645, mix.decode.acc_seg: 80.2640
+2023-08-16 10:20:56,127 - mmdet - INFO - Iter [2120/40000]	lr: 5.682e-05, eta: 2 days, 4:00:15, time: 4.914, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2430, decode.acc_seg: 88.2308, rpn.loss_rpn_cls: 0.0716, rpn.loss_rpn_bbox: 0.1445, roi.loss_cls: 0.3621, roi.acc: 86.3867, roi.loss_bbox: 0.5320, roi.loss_mask: 0.3612, src.loss_imnet_feat_dist: 0.1482, mix.decode.loss_seg: 0.2239, mix.decode.acc_seg: 83.0223
+2023-08-16 10:22:35,483 - mmdet - INFO - Iter [2140/40000]	lr: 5.679e-05, eta: 2 days, 3:58:45, time: 4.968, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2368, decode.acc_seg: 87.7749, rpn.loss_rpn_cls: 0.0837, rpn.loss_rpn_bbox: 0.1574, roi.loss_cls: 0.3806, roi.acc: 85.9033, roi.loss_bbox: 0.5255, roi.loss_mask: 0.3810, src.loss_imnet_feat_dist: 0.1559, mix.decode.loss_seg: 0.2118, mix.decode.acc_seg: 82.3975
+2023-08-16 10:24:13,851 - mmdet - INFO - Iter [2160/40000]	lr: 5.676e-05, eta: 2 days, 3:56:58, time: 4.918, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2390, decode.acc_seg: 87.3416, rpn.loss_rpn_cls: 0.0929, rpn.loss_rpn_bbox: 0.1647, roi.loss_cls: 0.3701, roi.acc: 85.9814, roi.loss_bbox: 0.5261, roi.loss_mask: 0.3742, src.loss_imnet_feat_dist: 0.1619, mix.decode.loss_seg: 0.2140, mix.decode.acc_seg: 81.4118
+2023-08-16 10:25:53,353 - mmdet - INFO - Iter [2180/40000]	lr: 5.673e-05, eta: 2 days, 3:55:31, time: 4.975, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2300, decode.acc_seg: 87.4116, rpn.loss_rpn_cls: 0.0832, rpn.loss_rpn_bbox: 0.1689, roi.loss_cls: 0.3699, roi.acc: 86.2012, roi.loss_bbox: 0.5194, roi.loss_mask: 0.3786, src.loss_imnet_feat_dist: 0.1477, mix.decode.loss_seg: 0.2107, mix.decode.acc_seg: 81.6680
+2023-08-16 10:27:31,419 - mmdet - INFO - Iter [2200/40000]	lr: 5.670e-05, eta: 2 days, 3:53:38, time: 4.903, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2574, decode.acc_seg: 86.8854, rpn.loss_rpn_cls: 0.0861, rpn.loss_rpn_bbox: 0.1732, roi.loss_cls: 0.3892, roi.acc: 85.7764, roi.loss_bbox: 0.5317, roi.loss_mask: 0.3718, src.loss_imnet_feat_dist: 0.1601, mix.decode.loss_seg: 0.2164, mix.decode.acc_seg: 83.1645
+2023-08-16 10:29:09,913 - mmdet - INFO - Iter [2220/40000]	lr: 5.667e-05, eta: 2 days, 3:51:53, time: 4.925, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2106, decode.acc_seg: 87.5409, rpn.loss_rpn_cls: 0.0830, rpn.loss_rpn_bbox: 0.1543, roi.loss_cls: 0.3744, roi.acc: 86.1816, roi.loss_bbox: 0.5398, roi.loss_mask: 0.3612, src.loss_imnet_feat_dist: 0.1466, mix.decode.loss_seg: 0.1978, mix.decode.acc_seg: 82.2806
+2023-08-16 10:30:49,707 - mmdet - INFO - Iter [2240/40000]	lr: 5.664e-05, eta: 2 days, 3:50:31, time: 4.990, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2193, decode.acc_seg: 88.2414, rpn.loss_rpn_cls: 0.0782, rpn.loss_rpn_bbox: 0.1658, roi.loss_cls: 0.3855, roi.acc: 85.7910, roi.loss_bbox: 0.5335, roi.loss_mask: 0.3669, src.loss_imnet_feat_dist: 0.1465, mix.decode.loss_seg: 0.1813, mix.decode.acc_seg: 83.5926
+2023-08-16 10:32:27,821 - mmdet - INFO - Iter [2260/40000]	lr: 5.661e-05, eta: 2 days, 3:48:39, time: 4.906, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2343, decode.acc_seg: 88.1929, rpn.loss_rpn_cls: 0.0883, rpn.loss_rpn_bbox: 0.1782, roi.loss_cls: 0.3916, roi.acc: 85.2734, roi.loss_bbox: 0.5430, roi.loss_mask: 0.3609, src.loss_imnet_feat_dist: 0.1456, mix.decode.loss_seg: 0.2001, mix.decode.acc_seg: 83.5661
+2023-08-16 10:34:06,075 - mmdet - INFO - Iter [2280/40000]	lr: 5.658e-05, eta: 2 days, 3:46:51, time: 4.913, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2277, decode.acc_seg: 88.5318, rpn.loss_rpn_cls: 0.0972, rpn.loss_rpn_bbox: 0.1641, roi.loss_cls: 0.3711, roi.acc: 86.3477, roi.loss_bbox: 0.5123, roi.loss_mask: 0.3746, src.loss_imnet_feat_dist: 0.1508, mix.decode.loss_seg: 0.2018, mix.decode.acc_seg: 83.7618
+2023-08-16 10:35:45,471 - mmdet - INFO - Iter [2300/40000]	lr: 5.655e-05, eta: 2 days, 3:45:21, time: 4.970, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2192, decode.acc_seg: 87.9966, rpn.loss_rpn_cls: 0.0893, rpn.loss_rpn_bbox: 0.1669, roi.loss_cls: 0.3724, roi.acc: 85.8594, roi.loss_bbox: 0.5330, roi.loss_mask: 0.3716, src.loss_imnet_feat_dist: 0.1569, mix.decode.loss_seg: 0.2054, mix.decode.acc_seg: 82.4509
+2023-08-16 10:37:23,533 - mmdet - INFO - Iter [2320/40000]	lr: 5.652e-05, eta: 2 days, 3:43:30, time: 4.903, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2587, decode.acc_seg: 85.3191, rpn.loss_rpn_cls: 0.0922, rpn.loss_rpn_bbox: 0.1727, roi.loss_cls: 0.3946, roi.acc: 85.1807, roi.loss_bbox: 0.5314, roi.loss_mask: 0.3809, src.loss_imnet_feat_dist: 0.1545, mix.decode.loss_seg: 0.2403, mix.decode.acc_seg: 81.2274
+2023-08-16 10:39:01,775 - mmdet - INFO - Iter [2340/40000]	lr: 5.649e-05, eta: 2 days, 3:41:41, time: 4.912, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2251, decode.acc_seg: 87.8108, rpn.loss_rpn_cls: 0.0751, rpn.loss_rpn_bbox: 0.1649, roi.loss_cls: 0.3688, roi.acc: 86.0645, roi.loss_bbox: 0.5408, roi.loss_mask: 0.3492, src.loss_imnet_feat_dist: 0.1568, mix.decode.loss_seg: 0.1849, mix.decode.acc_seg: 84.5830
+2023-08-16 10:40:41,173 - mmdet - INFO - Iter [2360/40000]	lr: 5.646e-05, eta: 2 days, 3:40:11, time: 4.970, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1955, decode.acc_seg: 88.4855, rpn.loss_rpn_cls: 0.1064, rpn.loss_rpn_bbox: 0.1800, roi.loss_cls: 0.3798, roi.acc: 86.1572, roi.loss_bbox: 0.5510, roi.loss_mask: 0.3654, src.loss_imnet_feat_dist: 0.1413, mix.decode.loss_seg: 0.1787, mix.decode.acc_seg: 83.3788
+2023-08-16 10:42:19,400 - mmdet - INFO - Iter [2380/40000]	lr: 5.643e-05, eta: 2 days, 3:38:23, time: 4.911, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2185, decode.acc_seg: 87.6854, rpn.loss_rpn_cls: 0.0995, rpn.loss_rpn_bbox: 0.1654, roi.loss_cls: 0.3510, roi.acc: 86.9092, roi.loss_bbox: 0.5090, roi.loss_mask: 0.3654, src.loss_imnet_feat_dist: 0.1479, mix.decode.loss_seg: 0.2083, mix.decode.acc_seg: 84.3743
+2023-08-16 10:43:58,536 - mmdet - INFO - Iter [2400/40000]	lr: 5.640e-05, eta: 2 days, 3:36:49, time: 4.957, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2184, decode.acc_seg: 87.2726, rpn.loss_rpn_cls: 0.0765, rpn.loss_rpn_bbox: 0.1597, roi.loss_cls: 0.3901, roi.acc: 85.4395, roi.loss_bbox: 0.5548, roi.loss_mask: 0.3785, src.loss_imnet_feat_dist: 0.1543, mix.decode.loss_seg: 0.1811, mix.decode.acc_seg: 85.2898
+2023-08-16 10:45:36,590 - mmdet - INFO - Iter [2420/40000]	lr: 5.637e-05, eta: 2 days, 3:34:58, time: 4.903, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2075, decode.acc_seg: 88.2018, rpn.loss_rpn_cls: 0.0995, rpn.loss_rpn_bbox: 0.1689, roi.loss_cls: 0.3597, roi.acc: 86.2939, roi.loss_bbox: 0.5263, roi.loss_mask: 0.3657, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.1953, mix.decode.acc_seg: 85.0183
+2023-08-16 10:47:14,496 - mmdet - INFO - Iter [2440/40000]	lr: 5.634e-05, eta: 2 days, 3:33:05, time: 4.895, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2512, decode.acc_seg: 87.0482, rpn.loss_rpn_cls: 0.0812, rpn.loss_rpn_bbox: 0.1558, roi.loss_cls: 0.3654, roi.acc: 86.7041, roi.loss_bbox: 0.5000, roi.loss_mask: 0.3763, src.loss_imnet_feat_dist: 0.1522, mix.decode.loss_seg: 0.2049, mix.decode.acc_seg: 85.3291
+2023-08-16 10:48:53,442 - mmdet - INFO - Iter [2460/40000]	lr: 5.631e-05, eta: 2 days, 3:31:28, time: 4.947, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2233, decode.acc_seg: 89.1677, rpn.loss_rpn_cls: 0.0696, rpn.loss_rpn_bbox: 0.1671, roi.loss_cls: 0.3719, roi.acc: 86.3037, roi.loss_bbox: 0.5255, roi.loss_mask: 0.3636, src.loss_imnet_feat_dist: 0.1506, mix.decode.loss_seg: 0.1871, mix.decode.acc_seg: 84.7022
+2023-08-16 10:50:31,552 - mmdet - INFO - Iter [2480/40000]	lr: 5.628e-05, eta: 2 days, 3:29:38, time: 4.906, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2220, decode.acc_seg: 87.5252, rpn.loss_rpn_cls: 0.0756, rpn.loss_rpn_bbox: 0.1677, roi.loss_cls: 0.3632, roi.acc: 86.1377, roi.loss_bbox: 0.5220, roi.loss_mask: 0.3739, src.loss_imnet_feat_dist: 0.1555, mix.decode.loss_seg: 0.2147, mix.decode.acc_seg: 83.1253
+2023-08-16 10:52:09,766 - mmdet - INFO - Iter [2500/40000]	lr: 5.625e-05, eta: 2 days, 3:27:50, time: 4.911, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2251, decode.acc_seg: 87.1037, rpn.loss_rpn_cls: 0.0881, rpn.loss_rpn_bbox: 0.1615, roi.loss_cls: 0.3437, roi.acc: 87.0850, roi.loss_bbox: 0.4998, roi.loss_mask: 0.3663, src.loss_imnet_feat_dist: 0.1554, mix.decode.loss_seg: 0.2034, mix.decode.acc_seg: 83.0507
+2023-08-16 10:53:48,878 - mmdet - INFO - Iter [2520/40000]	lr: 5.622e-05, eta: 2 days, 3:26:16, time: 4.956, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2474, decode.acc_seg: 85.8901, rpn.loss_rpn_cls: 0.0808, rpn.loss_rpn_bbox: 0.1796, roi.loss_cls: 0.3889, roi.acc: 85.6250, roi.loss_bbox: 0.5428, roi.loss_mask: 0.3721, src.loss_imnet_feat_dist: 0.1492, mix.decode.loss_seg: 0.2230, mix.decode.acc_seg: 82.5456
+2023-08-16 10:55:27,242 - mmdet - INFO - Iter [2540/40000]	lr: 5.619e-05, eta: 2 days, 3:24:31, time: 4.918, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2463, decode.acc_seg: 85.0643, rpn.loss_rpn_cls: 0.0778, rpn.loss_rpn_bbox: 0.1553, roi.loss_cls: 0.3611, roi.acc: 86.3086, roi.loss_bbox: 0.5185, roi.loss_mask: 0.3571, src.loss_imnet_feat_dist: 0.1381, mix.decode.loss_seg: 0.2377, mix.decode.acc_seg: 82.8577
+2023-08-16 10:57:06,542 - mmdet - INFO - Iter [2560/40000]	lr: 5.616e-05, eta: 2 days, 3:22:59, time: 4.965, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2204, decode.acc_seg: 87.6124, rpn.loss_rpn_cls: 0.0778, rpn.loss_rpn_bbox: 0.1462, roi.loss_cls: 0.3452, roi.acc: 87.0361, roi.loss_bbox: 0.4987, roi.loss_mask: 0.3486, src.loss_imnet_feat_dist: 0.1543, mix.decode.loss_seg: 0.2133, mix.decode.acc_seg: 83.9012
+2023-08-16 10:58:44,372 - mmdet - INFO - Iter [2580/40000]	lr: 5.613e-05, eta: 2 days, 3:21:06, time: 4.892, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2318, decode.acc_seg: 88.0478, rpn.loss_rpn_cls: 0.0712, rpn.loss_rpn_bbox: 0.1556, roi.loss_cls: 0.3573, roi.acc: 86.8604, roi.loss_bbox: 0.4815, roi.loss_mask: 0.3837, src.loss_imnet_feat_dist: 0.1430, mix.decode.loss_seg: 0.2112, mix.decode.acc_seg: 84.6054
+2023-08-16 11:00:22,983 - mmdet - INFO - Iter [2600/40000]	lr: 5.610e-05, eta: 2 days, 3:19:24, time: 4.931, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2149, decode.acc_seg: 87.2312, rpn.loss_rpn_cls: 0.0788, rpn.loss_rpn_bbox: 0.1691, roi.loss_cls: 0.3740, roi.acc: 85.9814, roi.loss_bbox: 0.5047, roi.loss_mask: 0.3559, src.loss_imnet_feat_dist: 0.1513, mix.decode.loss_seg: 0.2087, mix.decode.acc_seg: 83.3211
+2023-08-16 11:02:02,032 - mmdet - INFO - Iter [2620/40000]	lr: 5.607e-05, eta: 2 days, 3:17:49, time: 4.952, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2783, decode.acc_seg: 87.1466, rpn.loss_rpn_cls: 0.1349, rpn.loss_rpn_bbox: 0.1695, roi.loss_cls: 0.3710, roi.acc: 86.2402, roi.loss_bbox: 0.5028, roi.loss_mask: 0.3670, src.loss_imnet_feat_dist: 0.1495, mix.decode.loss_seg: 0.2879, mix.decode.acc_seg: 82.8696
+2023-08-16 11:03:39,902 - mmdet - INFO - Iter [2640/40000]	lr: 5.604e-05, eta: 2 days, 3:15:57, time: 4.893, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2930, decode.acc_seg: 85.0650, rpn.loss_rpn_cls: 0.0770, rpn.loss_rpn_bbox: 0.1554, roi.loss_cls: 0.3655, roi.acc: 86.4453, roi.loss_bbox: 0.5232, roi.loss_mask: 0.3927, src.loss_imnet_feat_dist: 0.1627, mix.decode.loss_seg: 0.3125, mix.decode.acc_seg: 77.9971
+2023-08-16 11:05:17,952 - mmdet - INFO - Iter [2660/40000]	lr: 5.601e-05, eta: 2 days, 3:14:08, time: 4.903, data_time: 0.017, memory: 9593, decode.loss_seg: 0.3756, decode.acc_seg: 84.9134, rpn.loss_rpn_cls: 0.0950, rpn.loss_rpn_bbox: 0.1708, roi.loss_cls: 0.3736, roi.acc: 86.2500, roi.loss_bbox: 0.5334, roi.loss_mask: 0.3930, src.loss_imnet_feat_dist: 0.1670, mix.decode.loss_seg: 0.4045, mix.decode.acc_seg: 79.4207
+2023-08-16 11:06:57,102 - mmdet - INFO - Iter [2680/40000]	lr: 5.598e-05, eta: 2 days, 3:12:34, time: 4.958, data_time: 0.015, memory: 9593, decode.loss_seg: 0.3005, decode.acc_seg: 85.4759, rpn.loss_rpn_cls: 0.0812, rpn.loss_rpn_bbox: 0.1515, roi.loss_cls: 0.3701, roi.acc: 86.5332, roi.loss_bbox: 0.4830, roi.loss_mask: 0.3884, src.loss_imnet_feat_dist: 0.1486, mix.decode.loss_seg: 0.2732, mix.decode.acc_seg: 80.6619
+2023-08-16 11:08:35,366 - mmdet - INFO - Iter [2700/40000]	lr: 5.595e-05, eta: 2 days, 3:10:48, time: 4.913, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2672, decode.acc_seg: 85.6028, rpn.loss_rpn_cls: 0.0893, rpn.loss_rpn_bbox: 0.1798, roi.loss_cls: 0.3846, roi.acc: 86.1035, roi.loss_bbox: 0.5151, roi.loss_mask: 0.3636, src.loss_imnet_feat_dist: 0.1529, mix.decode.loss_seg: 0.2641, mix.decode.acc_seg: 80.5467
+2023-08-16 11:10:13,380 - mmdet - INFO - Iter [2720/40000]	lr: 5.592e-05, eta: 2 days, 3:08:58, time: 4.901, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2219, decode.acc_seg: 87.8803, rpn.loss_rpn_cls: 0.0768, rpn.loss_rpn_bbox: 0.1602, roi.loss_cls: 0.3724, roi.acc: 86.4746, roi.loss_bbox: 0.5097, roi.loss_mask: 0.3844, src.loss_imnet_feat_dist: 0.1518, mix.decode.loss_seg: 0.2175, mix.decode.acc_seg: 85.1136
+2023-08-16 11:11:52,755 - mmdet - INFO - Iter [2740/40000]	lr: 5.589e-05, eta: 2 days, 3:07:27, time: 4.969, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2223, decode.acc_seg: 87.3684, rpn.loss_rpn_cls: 0.0790, rpn.loss_rpn_bbox: 0.1721, roi.loss_cls: 0.3869, roi.acc: 85.9033, roi.loss_bbox: 0.5400, roi.loss_mask: 0.3925, src.loss_imnet_feat_dist: 0.1574, mix.decode.loss_seg: 0.2052, mix.decode.acc_seg: 83.6892
+2023-08-16 11:13:31,376 - mmdet - INFO - Iter [2760/40000]	lr: 5.586e-05, eta: 2 days, 3:05:46, time: 4.931, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1911, decode.acc_seg: 87.5518, rpn.loss_rpn_cls: 0.0802, rpn.loss_rpn_bbox: 0.1649, roi.loss_cls: 0.3639, roi.acc: 86.7920, roi.loss_bbox: 0.5031, roi.loss_mask: 0.3692, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.1809, mix.decode.acc_seg: 83.3636
+2023-08-16 11:15:10,614 - mmdet - INFO - Iter [2780/40000]	lr: 5.583e-05, eta: 2 days, 3:04:13, time: 4.962, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2095, decode.acc_seg: 88.7444, rpn.loss_rpn_cls: 0.0636, rpn.loss_rpn_bbox: 0.1665, roi.loss_cls: 0.3591, roi.acc: 86.4062, roi.loss_bbox: 0.5180, roi.loss_mask: 0.3624, src.loss_imnet_feat_dist: 0.1626, mix.decode.loss_seg: 0.2063, mix.decode.acc_seg: 86.1977
+2023-08-16 11:16:49,055 - mmdet - INFO - Iter [2800/40000]	lr: 5.580e-05, eta: 2 days, 3:02:30, time: 4.922, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2028, decode.acc_seg: 87.2175, rpn.loss_rpn_cls: 0.0694, rpn.loss_rpn_bbox: 0.1695, roi.loss_cls: 0.3739, roi.acc: 85.6348, roi.loss_bbox: 0.5308, roi.loss_mask: 0.3531, src.loss_imnet_feat_dist: 0.1511, mix.decode.loss_seg: 0.1802, mix.decode.acc_seg: 85.3413
+2023-08-16 11:18:26,567 - mmdet - INFO - Iter [2820/40000]	lr: 5.577e-05, eta: 2 days, 3:00:34, time: 4.876, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2320, decode.acc_seg: 86.9331, rpn.loss_rpn_cls: 0.0726, rpn.loss_rpn_bbox: 0.1770, roi.loss_cls: 0.3736, roi.acc: 86.1475, roi.loss_bbox: 0.5140, roi.loss_mask: 0.3804, src.loss_imnet_feat_dist: 0.1541, mix.decode.loss_seg: 0.2399, mix.decode.acc_seg: 83.0745
+2023-08-16 11:20:05,171 - mmdet - INFO - Iter [2840/40000]	lr: 5.574e-05, eta: 2 days, 2:58:53, time: 4.930, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2298, decode.acc_seg: 89.3328, rpn.loss_rpn_cls: 0.0665, rpn.loss_rpn_bbox: 0.1543, roi.loss_cls: 0.3725, roi.acc: 86.5967, roi.loss_bbox: 0.5288, roi.loss_mask: 0.3659, src.loss_imnet_feat_dist: 0.1617, mix.decode.loss_seg: 0.2313, mix.decode.acc_seg: 86.2151
+2023-08-16 11:21:43,684 - mmdet - INFO - Iter [2860/40000]	lr: 5.571e-05, eta: 2 days, 2:57:11, time: 4.926, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2170, decode.acc_seg: 87.7716, rpn.loss_rpn_cls: 0.0956, rpn.loss_rpn_bbox: 0.1569, roi.loss_cls: 0.3756, roi.acc: 85.9570, roi.loss_bbox: 0.5251, roi.loss_mask: 0.3677, src.loss_imnet_feat_dist: 0.1555, mix.decode.loss_seg: 0.2049, mix.decode.acc_seg: 85.2960
+2023-08-16 11:23:21,828 - mmdet - INFO - Iter [2880/40000]	lr: 5.568e-05, eta: 2 days, 2:55:24, time: 4.907, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2318, decode.acc_seg: 87.4117, rpn.loss_rpn_cls: 0.0896, rpn.loss_rpn_bbox: 0.1425, roi.loss_cls: 0.3648, roi.acc: 86.8799, roi.loss_bbox: 0.5084, roi.loss_mask: 0.3617, src.loss_imnet_feat_dist: 0.1608, mix.decode.loss_seg: 0.2361, mix.decode.acc_seg: 84.7878
+2023-08-16 11:25:01,159 - mmdet - INFO - Iter [2900/40000]	lr: 5.565e-05, eta: 2 days, 2:53:52, time: 4.967, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1976, decode.acc_seg: 87.6395, rpn.loss_rpn_cls: 0.0816, rpn.loss_rpn_bbox: 0.1480, roi.loss_cls: 0.3549, roi.acc: 86.6943, roi.loss_bbox: 0.4926, roi.loss_mask: 0.3491, src.loss_imnet_feat_dist: 0.1650, mix.decode.loss_seg: 0.2183, mix.decode.acc_seg: 84.1718
+2023-08-16 11:26:39,171 - mmdet - INFO - Iter [2920/40000]	lr: 5.562e-05, eta: 2 days, 2:52:04, time: 4.901, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2328, decode.acc_seg: 86.7518, rpn.loss_rpn_cls: 0.0765, rpn.loss_rpn_bbox: 0.1357, roi.loss_cls: 0.3303, roi.acc: 87.5928, roi.loss_bbox: 0.4883, roi.loss_mask: 0.3612, src.loss_imnet_feat_dist: 0.1577, mix.decode.loss_seg: 0.2774, mix.decode.acc_seg: 81.8460
+2023-08-16 11:28:17,455 - mmdet - INFO - Iter [2940/40000]	lr: 5.559e-05, eta: 2 days, 2:50:19, time: 4.914, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2093, decode.acc_seg: 87.4137, rpn.loss_rpn_cls: 0.0849, rpn.loss_rpn_bbox: 0.1701, roi.loss_cls: 0.3830, roi.acc: 85.6152, roi.loss_bbox: 0.5198, roi.loss_mask: 0.3663, src.loss_imnet_feat_dist: 0.1475, mix.decode.loss_seg: 0.2451, mix.decode.acc_seg: 82.4397
+2023-08-16 11:29:56,553 - mmdet - INFO - Iter [2960/40000]	lr: 5.556e-05, eta: 2 days, 2:48:44, time: 4.955, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2120, decode.acc_seg: 88.4496, rpn.loss_rpn_cls: 0.0802, rpn.loss_rpn_bbox: 0.1631, roi.loss_cls: 0.3515, roi.acc: 87.1143, roi.loss_bbox: 0.4967, roi.loss_mask: 0.3634, src.loss_imnet_feat_dist: 0.1518, mix.decode.loss_seg: 0.2089, mix.decode.acc_seg: 84.7007
+2023-08-16 11:31:34,515 - mmdet - INFO - Iter [2980/40000]	lr: 5.553e-05, eta: 2 days, 2:46:55, time: 4.898, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2210, decode.acc_seg: 88.5358, rpn.loss_rpn_cls: 0.0959, rpn.loss_rpn_bbox: 0.1677, roi.loss_cls: 0.3796, roi.acc: 86.3672, roi.loss_bbox: 0.5404, roi.loss_mask: 0.3642, src.loss_imnet_feat_dist: 0.1529, mix.decode.loss_seg: 0.1940, mix.decode.acc_seg: 86.3421
+2023-08-16 11:33:12,870 - mmdet - INFO - Exp name: 230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449
+2023-08-16 11:33:12,871 - mmdet - INFO - Iter [3000/40000]	lr: 5.550e-05, eta: 2 days, 2:45:12, time: 4.918, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2207, decode.acc_seg: 87.4677, rpn.loss_rpn_cls: 0.0850, rpn.loss_rpn_bbox: 0.1627, roi.loss_cls: 0.3598, roi.acc: 86.3574, roi.loss_bbox: 0.5167, roi.loss_mask: 0.3554, src.loss_imnet_feat_dist: 0.1567, mix.decode.loss_seg: 0.2151, mix.decode.acc_seg: 84.9836
+2023-08-16 11:34:53,585 - mmdet - INFO - Iter [3020/40000]	lr: 5.547e-05, eta: 2 days, 2:43:57, time: 5.036, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2012, decode.acc_seg: 87.9317, rpn.loss_rpn_cls: 0.0718, rpn.loss_rpn_bbox: 0.1545, roi.loss_cls: 0.3378, roi.acc: 87.3535, roi.loss_bbox: 0.4807, roi.loss_mask: 0.3420, src.loss_imnet_feat_dist: 0.1489, mix.decode.loss_seg: 0.1940, mix.decode.acc_seg: 84.9048
+2023-08-16 11:36:31,723 - mmdet - INFO - Iter [3040/40000]	lr: 5.544e-05, eta: 2 days, 2:42:10, time: 4.907, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2465, decode.acc_seg: 85.4685, rpn.loss_rpn_cls: 0.0876, rpn.loss_rpn_bbox: 0.1671, roi.loss_cls: 0.3510, roi.acc: 86.9141, roi.loss_bbox: 0.4910, roi.loss_mask: 0.3598, src.loss_imnet_feat_dist: 0.1331, mix.decode.loss_seg: 0.2369, mix.decode.acc_seg: 84.2865
+2023-08-16 11:38:10,861 - mmdet - INFO - Iter [3060/40000]	lr: 5.541e-05, eta: 2 days, 2:40:36, time: 4.957, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1890, decode.acc_seg: 88.4862, rpn.loss_rpn_cls: 0.0781, rpn.loss_rpn_bbox: 0.1564, roi.loss_cls: 0.3562, roi.acc: 86.3818, roi.loss_bbox: 0.5172, roi.loss_mask: 0.3462, src.loss_imnet_feat_dist: 0.1585, mix.decode.loss_seg: 0.1756, mix.decode.acc_seg: 85.6012
+2023-08-16 11:39:48,589 - mmdet - INFO - Iter [3080/40000]	lr: 5.538e-05, eta: 2 days, 2:38:45, time: 4.886, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2158, decode.acc_seg: 86.5773, rpn.loss_rpn_cls: 0.0811, rpn.loss_rpn_bbox: 0.1733, roi.loss_cls: 0.3754, roi.acc: 86.0400, roi.loss_bbox: 0.5263, roi.loss_mask: 0.3677, src.loss_imnet_feat_dist: 0.1563, mix.decode.loss_seg: 0.2159, mix.decode.acc_seg: 83.0091
+2023-08-16 11:41:26,828 - mmdet - INFO - Iter [3100/40000]	lr: 5.535e-05, eta: 2 days, 2:36:59, time: 4.912, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2145, decode.acc_seg: 88.4732, rpn.loss_rpn_cls: 0.0770, rpn.loss_rpn_bbox: 0.1585, roi.loss_cls: 0.3458, roi.acc: 87.2168, roi.loss_bbox: 0.4862, roi.loss_mask: 0.3528, src.loss_imnet_feat_dist: 0.1465, mix.decode.loss_seg: 0.2363, mix.decode.acc_seg: 85.2227
+2023-08-16 11:43:06,069 - mmdet - INFO - Iter [3120/40000]	lr: 5.532e-05, eta: 2 days, 2:35:26, time: 4.962, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2150, decode.acc_seg: 87.2921, rpn.loss_rpn_cls: 0.0860, rpn.loss_rpn_bbox: 0.1644, roi.loss_cls: 0.3682, roi.acc: 86.4893, roi.loss_bbox: 0.5112, roi.loss_mask: 0.3601, src.loss_imnet_feat_dist: 0.1543, mix.decode.loss_seg: 0.2275, mix.decode.acc_seg: 83.5854
+2023-08-16 11:44:44,141 - mmdet - INFO - Iter [3140/40000]	lr: 5.529e-05, eta: 2 days, 2:33:39, time: 4.904, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2433, decode.acc_seg: 87.0248, rpn.loss_rpn_cls: 0.0946, rpn.loss_rpn_bbox: 0.1532, roi.loss_cls: 0.3782, roi.acc: 86.3867, roi.loss_bbox: 0.5460, roi.loss_mask: 0.3583, src.loss_imnet_feat_dist: 0.1704, mix.decode.loss_seg: 0.2299, mix.decode.acc_seg: 83.9441
+2023-08-16 11:46:22,611 - mmdet - INFO - Iter [3160/40000]	lr: 5.526e-05, eta: 2 days, 2:31:57, time: 4.924, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2704, decode.acc_seg: 86.3413, rpn.loss_rpn_cls: 0.0666, rpn.loss_rpn_bbox: 0.1622, roi.loss_cls: 0.3628, roi.acc: 86.3379, roi.loss_bbox: 0.5209, roi.loss_mask: 0.3536, src.loss_imnet_feat_dist: 0.1516, mix.decode.loss_seg: 0.2685, mix.decode.acc_seg: 83.6628
+2023-08-16 11:48:01,709 - mmdet - INFO - Iter [3180/40000]	lr: 5.523e-05, eta: 2 days, 2:30:22, time: 4.955, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2455, decode.acc_seg: 86.6471, rpn.loss_rpn_cls: 0.0719, rpn.loss_rpn_bbox: 0.1483, roi.loss_cls: 0.3450, roi.acc: 86.8359, roi.loss_bbox: 0.5014, roi.loss_mask: 0.3566, src.loss_imnet_feat_dist: 0.1703, mix.decode.loss_seg: 0.2129, mix.decode.acc_seg: 84.4250
+2023-08-16 11:49:39,569 - mmdet - INFO - Iter [3200/40000]	lr: 5.520e-05, eta: 2 days, 2:28:33, time: 4.893, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2135, decode.acc_seg: 87.6379, rpn.loss_rpn_cls: 0.0808, rpn.loss_rpn_bbox: 0.1595, roi.loss_cls: 0.3526, roi.acc: 87.0947, roi.loss_bbox: 0.5033, roi.loss_mask: 0.3719, src.loss_imnet_feat_dist: 0.1569, mix.decode.loss_seg: 0.1899, mix.decode.acc_seg: 85.0384
+2023-08-16 11:51:17,913 - mmdet - INFO - Iter [3220/40000]	lr: 5.517e-05, eta: 2 days, 2:26:50, time: 4.917, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1985, decode.acc_seg: 88.2759, rpn.loss_rpn_cls: 0.0794, rpn.loss_rpn_bbox: 0.1861, roi.loss_cls: 0.3435, roi.acc: 87.0508, roi.loss_bbox: 0.4850, roi.loss_mask: 0.3666, src.loss_imnet_feat_dist: 0.1519, mix.decode.loss_seg: 0.1988, mix.decode.acc_seg: 84.6378
+2023-08-16 11:52:57,295 - mmdet - INFO - Iter [3240/40000]	lr: 5.514e-05, eta: 2 days, 2:25:18, time: 4.969, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1885, decode.acc_seg: 88.1879, rpn.loss_rpn_cls: 0.0710, rpn.loss_rpn_bbox: 0.1579, roi.loss_cls: 0.3473, roi.acc: 87.5049, roi.loss_bbox: 0.4607, roi.loss_mask: 0.3395, src.loss_imnet_feat_dist: 0.1618, mix.decode.loss_seg: 0.2397, mix.decode.acc_seg: 83.3823
+2023-08-16 11:54:36,033 - mmdet - INFO - Iter [3260/40000]	lr: 5.511e-05, eta: 2 days, 2:23:39, time: 4.937, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2173, decode.acc_seg: 88.6491, rpn.loss_rpn_cls: 0.0682, rpn.loss_rpn_bbox: 0.1625, roi.loss_cls: 0.3434, roi.acc: 86.9629, roi.loss_bbox: 0.4874, roi.loss_mask: 0.3356, src.loss_imnet_feat_dist: 0.1513, mix.decode.loss_seg: 0.1921, mix.decode.acc_seg: 85.7725
+2023-08-16 11:56:13,919 - mmdet - INFO - Iter [3280/40000]	lr: 5.508e-05, eta: 2 days, 2:21:51, time: 4.894, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1942, decode.acc_seg: 88.8696, rpn.loss_rpn_cls: 0.0784, rpn.loss_rpn_bbox: 0.1818, roi.loss_cls: 0.3552, roi.acc: 86.5918, roi.loss_bbox: 0.5196, roi.loss_mask: 0.3353, src.loss_imnet_feat_dist: 0.1591, mix.decode.loss_seg: 0.1850, mix.decode.acc_seg: 84.8403
+2023-08-16 11:57:52,759 - mmdet - INFO - Iter [3300/40000]	lr: 5.505e-05, eta: 2 days, 2:20:13, time: 4.942, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1994, decode.acc_seg: 89.4858, rpn.loss_rpn_cls: 0.0768, rpn.loss_rpn_bbox: 0.1523, roi.loss_cls: 0.3508, roi.acc: 87.0117, roi.loss_bbox: 0.5106, roi.loss_mask: 0.3419, src.loss_imnet_feat_dist: 0.1538, mix.decode.loss_seg: 0.2004, mix.decode.acc_seg: 85.5974
+2023-08-16 11:59:30,724 - mmdet - INFO - Iter [3320/40000]	lr: 5.502e-05, eta: 2 days, 2:18:25, time: 4.898, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2052, decode.acc_seg: 87.1363, rpn.loss_rpn_cls: 0.0748, rpn.loss_rpn_bbox: 0.1652, roi.loss_cls: 0.3696, roi.acc: 86.3867, roi.loss_bbox: 0.5191, roi.loss_mask: 0.3536, src.loss_imnet_feat_dist: 0.1393, mix.decode.loss_seg: 0.2104, mix.decode.acc_seg: 83.6809
+2023-08-16 12:01:10,069 - mmdet - INFO - Iter [3340/40000]	lr: 5.499e-05, eta: 2 days, 2:16:53, time: 4.967, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2829, decode.acc_seg: 86.8958, rpn.loss_rpn_cls: 0.0776, rpn.loss_rpn_bbox: 0.1650, roi.loss_cls: 0.3593, roi.acc: 86.6602, roi.loss_bbox: 0.5030, roi.loss_mask: 0.3735, src.loss_imnet_feat_dist: 0.1638, mix.decode.loss_seg: 0.2677, mix.decode.acc_seg: 84.8123
+2023-08-16 12:02:48,454 - mmdet - INFO - Iter [3360/40000]	lr: 5.496e-05, eta: 2 days, 2:15:10, time: 4.919, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2026, decode.acc_seg: 87.3464, rpn.loss_rpn_cls: 0.0658, rpn.loss_rpn_bbox: 0.1457, roi.loss_cls: 0.3335, roi.acc: 87.6025, roi.loss_bbox: 0.4890, roi.loss_mask: 0.3480, src.loss_imnet_feat_dist: 0.1585, mix.decode.loss_seg: 0.2000, mix.decode.acc_seg: 85.8163
+2023-08-16 12:04:26,497 - mmdet - INFO - Iter [3380/40000]	lr: 5.493e-05, eta: 2 days, 2:13:24, time: 4.902, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1780, decode.acc_seg: 89.9282, rpn.loss_rpn_cls: 0.0699, rpn.loss_rpn_bbox: 0.1534, roi.loss_cls: 0.3419, roi.acc: 87.1924, roi.loss_bbox: 0.4971, roi.loss_mask: 0.3390, src.loss_imnet_feat_dist: 0.1519, mix.decode.loss_seg: 0.2185, mix.decode.acc_seg: 85.8501
+2023-08-16 12:06:05,801 - mmdet - INFO - Iter [3400/40000]	lr: 5.490e-05, eta: 2 days, 2:11:51, time: 4.965, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2208, decode.acc_seg: 86.6219, rpn.loss_rpn_cls: 0.1044, rpn.loss_rpn_bbox: 0.1641, roi.loss_cls: 0.3484, roi.acc: 87.1240, roi.loss_bbox: 0.4999, roi.loss_mask: 0.3538, src.loss_imnet_feat_dist: 0.1538, mix.decode.loss_seg: 0.2314, mix.decode.acc_seg: 84.2828
+2023-08-16 12:07:44,236 - mmdet - INFO - Iter [3420/40000]	lr: 5.487e-05, eta: 2 days, 2:10:09, time: 4.922, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2087, decode.acc_seg: 88.4554, rpn.loss_rpn_cls: 0.0762, rpn.loss_rpn_bbox: 0.1589, roi.loss_cls: 0.3409, roi.acc: 87.5635, roi.loss_bbox: 0.4830, roi.loss_mask: 0.3590, src.loss_imnet_feat_dist: 0.1624, mix.decode.loss_seg: 0.2299, mix.decode.acc_seg: 85.0903
+2023-08-16 12:09:22,414 - mmdet - INFO - Iter [3440/40000]	lr: 5.484e-05, eta: 2 days, 2:08:24, time: 4.909, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2196, decode.acc_seg: 88.1155, rpn.loss_rpn_cls: 0.0728, rpn.loss_rpn_bbox: 0.1556, roi.loss_cls: 0.3582, roi.acc: 86.7627, roi.loss_bbox: 0.5107, roi.loss_mask: 0.3750, src.loss_imnet_feat_dist: 0.1657, mix.decode.loss_seg: 0.1996, mix.decode.acc_seg: 86.3335
+2023-08-16 12:11:01,690 - mmdet - INFO - Iter [3460/40000]	lr: 5.481e-05, eta: 2 days, 2:06:51, time: 4.964, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1947, decode.acc_seg: 89.3424, rpn.loss_rpn_cls: 0.0732, rpn.loss_rpn_bbox: 0.1596, roi.loss_cls: 0.3549, roi.acc: 86.4990, roi.loss_bbox: 0.4996, roi.loss_mask: 0.3552, src.loss_imnet_feat_dist: 0.1461, mix.decode.loss_seg: 0.1924, mix.decode.acc_seg: 85.7519
+2023-08-16 12:12:39,385 - mmdet - INFO - Iter [3480/40000]	lr: 5.478e-05, eta: 2 days, 2:05:01, time: 4.885, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1980, decode.acc_seg: 89.4504, rpn.loss_rpn_cls: 0.0637, rpn.loss_rpn_bbox: 0.1434, roi.loss_cls: 0.3472, roi.acc: 87.3145, roi.loss_bbox: 0.5164, roi.loss_mask: 0.3581, src.loss_imnet_feat_dist: 0.1534, mix.decode.loss_seg: 0.1645, mix.decode.acc_seg: 87.3908
+2023-08-16 12:14:17,775 - mmdet - INFO - Iter [3500/40000]	lr: 5.475e-05, eta: 2 days, 2:03:19, time: 4.920, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2199, decode.acc_seg: 87.7693, rpn.loss_rpn_cls: 0.0781, rpn.loss_rpn_bbox: 0.1509, roi.loss_cls: 0.3421, roi.acc: 87.1924, roi.loss_bbox: 0.4919, roi.loss_mask: 0.3467, src.loss_imnet_feat_dist: 0.1625, mix.decode.loss_seg: 0.2237, mix.decode.acc_seg: 84.9531
+2023-08-16 12:15:57,089 - mmdet - INFO - Iter [3520/40000]	lr: 5.472e-05, eta: 2 days, 2:01:46, time: 4.966, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1952, decode.acc_seg: 88.5356, rpn.loss_rpn_cls: 0.0667, rpn.loss_rpn_bbox: 0.1384, roi.loss_cls: 0.3287, roi.acc: 87.7051, roi.loss_bbox: 0.4639, roi.loss_mask: 0.3620, src.loss_imnet_feat_dist: 0.1679, mix.decode.loss_seg: 0.2574, mix.decode.acc_seg: 84.5472
+2023-08-16 12:17:35,056 - mmdet - INFO - Iter [3540/40000]	lr: 5.469e-05, eta: 2 days, 1:59:59, time: 4.898, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2289, decode.acc_seg: 88.0616, rpn.loss_rpn_cls: 0.0746, rpn.loss_rpn_bbox: 0.1580, roi.loss_cls: 0.3614, roi.acc: 86.7480, roi.loss_bbox: 0.5206, roi.loss_mask: 0.3486, src.loss_imnet_feat_dist: 0.1558, mix.decode.loss_seg: 0.2654, mix.decode.acc_seg: 82.1502
+2023-08-16 12:19:12,321 - mmdet - INFO - Iter [3560/40000]	lr: 5.466e-05, eta: 2 days, 1:58:06, time: 4.863, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1938, decode.acc_seg: 89.3111, rpn.loss_rpn_cls: 0.0690, rpn.loss_rpn_bbox: 0.1602, roi.loss_cls: 0.3282, roi.acc: 87.6904, roi.loss_bbox: 0.5154, roi.loss_mask: 0.3269, src.loss_imnet_feat_dist: 0.1696, mix.decode.loss_seg: 0.2207, mix.decode.acc_seg: 86.7804
+2023-08-16 12:20:51,296 - mmdet - INFO - Iter [3580/40000]	lr: 5.463e-05, eta: 2 days, 1:56:29, time: 4.949, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2129, decode.acc_seg: 87.8212, rpn.loss_rpn_cls: 0.0797, rpn.loss_rpn_bbox: 0.1628, roi.loss_cls: 0.3631, roi.acc: 86.4355, roi.loss_bbox: 0.5025, roi.loss_mask: 0.3630, src.loss_imnet_feat_dist: 0.1660, mix.decode.loss_seg: 0.2108, mix.decode.acc_seg: 85.0794
+2023-08-16 12:22:29,131 - mmdet - INFO - Iter [3600/40000]	lr: 5.460e-05, eta: 2 days, 1:54:42, time: 4.892, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1949, decode.acc_seg: 86.4487, rpn.loss_rpn_cls: 0.0706, rpn.loss_rpn_bbox: 0.1785, roi.loss_cls: 0.3510, roi.acc: 86.9727, roi.loss_bbox: 0.4969, roi.loss_mask: 0.3265, src.loss_imnet_feat_dist: 0.1552, mix.decode.loss_seg: 0.1787, mix.decode.acc_seg: 84.7265
+2023-08-16 12:24:07,773 - mmdet - INFO - Iter [3620/40000]	lr: 5.457e-05, eta: 2 days, 1:53:02, time: 4.932, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1824, decode.acc_seg: 88.8088, rpn.loss_rpn_cls: 0.0617, rpn.loss_rpn_bbox: 0.1455, roi.loss_cls: 0.3103, roi.acc: 88.4082, roi.loss_bbox: 0.4760, roi.loss_mask: 0.3571, src.loss_imnet_feat_dist: 0.1517, mix.decode.loss_seg: 0.2343, mix.decode.acc_seg: 85.8536
+2023-08-16 12:25:45,705 - mmdet - INFO - Iter [3640/40000]	lr: 5.454e-05, eta: 2 days, 1:51:15, time: 4.897, data_time: 0.017, memory: 9593, decode.loss_seg: 0.1819, decode.acc_seg: 88.0518, rpn.loss_rpn_cls: 0.0760, rpn.loss_rpn_bbox: 0.1522, roi.loss_cls: 0.3385, roi.acc: 87.4512, roi.loss_bbox: 0.4807, roi.loss_mask: 0.3478, src.loss_imnet_feat_dist: 0.1509, mix.decode.loss_seg: 0.1985, mix.decode.acc_seg: 87.1399
+2023-08-16 12:27:24,483 - mmdet - INFO - Iter [3660/40000]	lr: 5.451e-05, eta: 2 days, 1:49:37, time: 4.939, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2167, decode.acc_seg: 86.5184, rpn.loss_rpn_cls: 0.0897, rpn.loss_rpn_bbox: 0.1700, roi.loss_cls: 0.3358, roi.acc: 87.2900, roi.loss_bbox: 0.4743, roi.loss_mask: 0.3500, src.loss_imnet_feat_dist: 0.1478, mix.decode.loss_seg: 0.2293, mix.decode.acc_seg: 83.4878
+2023-08-16 12:29:03,720 - mmdet - INFO - Iter [3680/40000]	lr: 5.448e-05, eta: 2 days, 1:48:04, time: 4.962, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2045, decode.acc_seg: 88.1056, rpn.loss_rpn_cls: 0.0671, rpn.loss_rpn_bbox: 0.1486, roi.loss_cls: 0.3259, roi.acc: 87.9395, roi.loss_bbox: 0.4502, roi.loss_mask: 0.3585, src.loss_imnet_feat_dist: 0.1498, mix.decode.loss_seg: 0.2149, mix.decode.acc_seg: 85.8689
+2023-08-16 12:30:42,225 - mmdet - INFO - Iter [3700/40000]	lr: 5.445e-05, eta: 2 days, 1:46:23, time: 4.925, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1942, decode.acc_seg: 90.0998, rpn.loss_rpn_cls: 0.0714, rpn.loss_rpn_bbox: 0.1707, roi.loss_cls: 0.3594, roi.acc: 86.5137, roi.loss_bbox: 0.4874, roi.loss_mask: 0.3527, src.loss_imnet_feat_dist: 0.1487, mix.decode.loss_seg: 0.2116, mix.decode.acc_seg: 86.1893
+2023-08-16 12:32:20,980 - mmdet - INFO - Iter [3720/40000]	lr: 5.442e-05, eta: 2 days, 1:44:44, time: 4.938, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1885, decode.acc_seg: 89.4376, rpn.loss_rpn_cls: 0.0666, rpn.loss_rpn_bbox: 0.1531, roi.loss_cls: 0.3384, roi.acc: 87.2656, roi.loss_bbox: 0.4942, roi.loss_mask: 0.3349, src.loss_imnet_feat_dist: 0.1512, mix.decode.loss_seg: 0.2127, mix.decode.acc_seg: 86.8775
+2023-08-16 12:34:00,398 - mmdet - INFO - Iter [3740/40000]	lr: 5.439e-05, eta: 2 days, 1:43:12, time: 4.971, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1910, decode.acc_seg: 88.7575, rpn.loss_rpn_cls: 0.0661, rpn.loss_rpn_bbox: 0.1593, roi.loss_cls: 0.3450, roi.acc: 87.3047, roi.loss_bbox: 0.4920, roi.loss_mask: 0.3326, src.loss_imnet_feat_dist: 0.1469, mix.decode.loss_seg: 0.2238, mix.decode.acc_seg: 86.4659
+2023-08-16 12:35:38,873 - mmdet - INFO - Iter [3760/40000]	lr: 5.436e-05, eta: 2 days, 1:41:31, time: 4.924, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1947, decode.acc_seg: 87.9737, rpn.loss_rpn_cls: 0.0760, rpn.loss_rpn_bbox: 0.1710, roi.loss_cls: 0.3495, roi.acc: 87.4609, roi.loss_bbox: 0.5048, roi.loss_mask: 0.3338, src.loss_imnet_feat_dist: 0.1503, mix.decode.loss_seg: 0.2084, mix.decode.acc_seg: 85.6258
+2023-08-16 12:37:18,502 - mmdet - INFO - Iter [3780/40000]	lr: 5.433e-05, eta: 2 days, 1:40:01, time: 4.981, data_time: 0.017, memory: 9593, decode.loss_seg: 0.2344, decode.acc_seg: 86.7014, rpn.loss_rpn_cls: 0.0731, rpn.loss_rpn_bbox: 0.1587, roi.loss_cls: 0.3475, roi.acc: 86.9629, roi.loss_bbox: 0.4871, roi.loss_mask: 0.3537, src.loss_imnet_feat_dist: 0.1613, mix.decode.loss_seg: 0.2141, mix.decode.acc_seg: 86.0469
+2023-08-16 12:38:56,824 - mmdet - INFO - Iter [3800/40000]	lr: 5.430e-05, eta: 2 days, 1:38:18, time: 4.916, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1970, decode.acc_seg: 87.4276, rpn.loss_rpn_cls: 0.0809, rpn.loss_rpn_bbox: 0.1522, roi.loss_cls: 0.3528, roi.acc: 87.0264, roi.loss_bbox: 0.5028, roi.loss_mask: 0.3377, src.loss_imnet_feat_dist: 0.1575, mix.decode.loss_seg: 0.1925, mix.decode.acc_seg: 85.4235
+2023-08-16 12:40:35,152 - mmdet - INFO - Iter [3820/40000]	lr: 5.427e-05, eta: 2 days, 1:36:36, time: 4.916, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2246, decode.acc_seg: 88.2929, rpn.loss_rpn_cls: 0.0713, rpn.loss_rpn_bbox: 0.1446, roi.loss_cls: 0.3395, roi.acc: 87.1973, roi.loss_bbox: 0.5022, roi.loss_mask: 0.3429, src.loss_imnet_feat_dist: 0.1587, mix.decode.loss_seg: 0.2221, mix.decode.acc_seg: 86.9453
+2023-08-16 12:42:13,926 - mmdet - INFO - Iter [3840/40000]	lr: 5.424e-05, eta: 2 days, 1:34:58, time: 4.939, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1734, decode.acc_seg: 87.8249, rpn.loss_rpn_cls: 0.0674, rpn.loss_rpn_bbox: 0.1540, roi.loss_cls: 0.3358, roi.acc: 87.5928, roi.loss_bbox: 0.4826, roi.loss_mask: 0.3436, src.loss_imnet_feat_dist: 0.1612, mix.decode.loss_seg: 0.1882, mix.decode.acc_seg: 86.0627
+2023-08-16 12:43:52,385 - mmdet - INFO - Iter [3860/40000]	lr: 5.421e-05, eta: 2 days, 1:33:16, time: 4.923, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1992, decode.acc_seg: 86.9122, rpn.loss_rpn_cls: 0.0818, rpn.loss_rpn_bbox: 0.1647, roi.loss_cls: 0.3525, roi.acc: 86.8164, roi.loss_bbox: 0.5171, roi.loss_mask: 0.3496, src.loss_imnet_feat_dist: 0.1550, mix.decode.loss_seg: 0.2245, mix.decode.acc_seg: 84.8247
+2023-08-16 12:45:30,174 - mmdet - INFO - Iter [3880/40000]	lr: 5.418e-05, eta: 2 days, 1:31:29, time: 4.889, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1775, decode.acc_seg: 89.2828, rpn.loss_rpn_cls: 0.0571, rpn.loss_rpn_bbox: 0.1517, roi.loss_cls: 0.3422, roi.acc: 87.5635, roi.loss_bbox: 0.4930, roi.loss_mask: 0.3426, src.loss_imnet_feat_dist: 0.1647, mix.decode.loss_seg: 0.2004, mix.decode.acc_seg: 86.5131
+2023-08-16 12:47:09,416 - mmdet - INFO - Iter [3900/40000]	lr: 5.415e-05, eta: 2 days, 1:29:55, time: 4.962, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1877, decode.acc_seg: 86.3940, rpn.loss_rpn_cls: 0.0642, rpn.loss_rpn_bbox: 0.1513, roi.loss_cls: 0.3261, roi.acc: 87.5684, roi.loss_bbox: 0.4958, roi.loss_mask: 0.3296, src.loss_imnet_feat_dist: 0.1529, mix.decode.loss_seg: 0.1949, mix.decode.acc_seg: 84.8949
+2023-08-16 12:48:47,653 - mmdet - INFO - Iter [3920/40000]	lr: 5.412e-05, eta: 2 days, 1:28:12, time: 4.912, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1675, decode.acc_seg: 90.1495, rpn.loss_rpn_cls: 0.0615, rpn.loss_rpn_bbox: 0.1593, roi.loss_cls: 0.3285, roi.acc: 87.8027, roi.loss_bbox: 0.4811, roi.loss_mask: 0.3373, src.loss_imnet_feat_dist: 0.1549, mix.decode.loss_seg: 0.1739, mix.decode.acc_seg: 87.6299
+2023-08-16 12:50:26,627 - mmdet - INFO - Iter [3940/40000]	lr: 5.409e-05, eta: 2 days, 1:26:35, time: 4.949, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1726, decode.acc_seg: 90.2558, rpn.loss_rpn_cls: 0.0631, rpn.loss_rpn_bbox: 0.1471, roi.loss_cls: 0.3150, roi.acc: 88.0273, roi.loss_bbox: 0.4820, roi.loss_mask: 0.3356, src.loss_imnet_feat_dist: 0.1586, mix.decode.loss_seg: 0.1988, mix.decode.acc_seg: 87.2661
+2023-08-16 12:52:04,393 - mmdet - INFO - Iter [3960/40000]	lr: 5.406e-05, eta: 2 days, 1:24:48, time: 4.888, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1940, decode.acc_seg: 87.5867, rpn.loss_rpn_cls: 0.0765, rpn.loss_rpn_bbox: 0.1589, roi.loss_cls: 0.3436, roi.acc: 86.9678, roi.loss_bbox: 0.4866, roi.loss_mask: 0.3487, src.loss_imnet_feat_dist: 0.1502, mix.decode.loss_seg: 0.1956, mix.decode.acc_seg: 85.7174
+2023-08-16 12:53:42,212 - mmdet - INFO - Iter [3980/40000]	lr: 5.403e-05, eta: 2 days, 1:23:01, time: 4.891, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1834, decode.acc_seg: 89.9080, rpn.loss_rpn_cls: 0.0677, rpn.loss_rpn_bbox: 0.1563, roi.loss_cls: 0.3513, roi.acc: 86.8311, roi.loss_bbox: 0.4952, roi.loss_mask: 0.3371, src.loss_imnet_feat_dist: 0.1512, mix.decode.loss_seg: 0.2135, mix.decode.acc_seg: 86.6613
+2023-08-16 12:55:21,133 - mmdet - INFO - Exp name: 230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449
+2023-08-16 12:55:21,134 - mmdet - INFO - Iter [4000/40000]	lr: 5.400e-05, eta: 2 days, 1:21:24, time: 4.946, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1724, decode.acc_seg: 90.1745, rpn.loss_rpn_cls: 0.0594, rpn.loss_rpn_bbox: 0.1428, roi.loss_cls: 0.3057, roi.acc: 88.7012, roi.loss_bbox: 0.4361, roi.loss_mask: 0.3215, src.loss_imnet_feat_dist: 0.1527, mix.decode.loss_seg: 0.1988, mix.decode.acc_seg: 87.8120
+2023-08-16 12:57:00,734 - mmdet - INFO - Iter [4020/40000]	lr: 5.397e-05, eta: 2 days, 1:19:54, time: 4.980, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2011, decode.acc_seg: 88.1728, rpn.loss_rpn_cls: 0.0820, rpn.loss_rpn_bbox: 0.1537, roi.loss_cls: 0.3227, roi.acc: 87.8857, roi.loss_bbox: 0.4838, roi.loss_mask: 0.3230, src.loss_imnet_feat_dist: 0.1471, mix.decode.loss_seg: 0.1890, mix.decode.acc_seg: 86.7400
+2023-08-16 12:58:38,829 - mmdet - INFO - Iter [4040/40000]	lr: 5.394e-05, eta: 2 days, 1:18:09, time: 4.905, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1929, decode.acc_seg: 88.7216, rpn.loss_rpn_cls: 0.0715, rpn.loss_rpn_bbox: 0.1571, roi.loss_cls: 0.3387, roi.acc: 87.6660, roi.loss_bbox: 0.4934, roi.loss_mask: 0.3440, src.loss_imnet_feat_dist: 0.1476, mix.decode.loss_seg: 0.2444, mix.decode.acc_seg: 84.1915
+2023-08-16 13:00:18,217 - mmdet - INFO - Iter [4060/40000]	lr: 5.391e-05, eta: 2 days, 1:16:37, time: 4.969, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1683, decode.acc_seg: 88.7624, rpn.loss_rpn_cls: 0.0728, rpn.loss_rpn_bbox: 0.1597, roi.loss_cls: 0.3236, roi.acc: 88.1152, roi.loss_bbox: 0.4804, roi.loss_mask: 0.3548, src.loss_imnet_feat_dist: 0.1622, mix.decode.loss_seg: 0.1912, mix.decode.acc_seg: 85.8369
+2023-08-16 13:01:56,357 - mmdet - INFO - Iter [4080/40000]	lr: 5.388e-05, eta: 2 days, 1:14:53, time: 4.907, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1781, decode.acc_seg: 89.2878, rpn.loss_rpn_cls: 0.0725, rpn.loss_rpn_bbox: 0.1382, roi.loss_cls: 0.3283, roi.acc: 87.4902, roi.loss_bbox: 0.4709, roi.loss_mask: 0.3360, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.1833, mix.decode.acc_seg: 87.0696
+2023-08-16 13:03:34,534 - mmdet - INFO - Iter [4100/40000]	lr: 5.385e-05, eta: 2 days, 1:13:09, time: 4.909, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1952, decode.acc_seg: 86.6693, rpn.loss_rpn_cls: 0.0710, rpn.loss_rpn_bbox: 0.1494, roi.loss_cls: 0.3329, roi.acc: 87.6562, roi.loss_bbox: 0.4746, roi.loss_mask: 0.3467, src.loss_imnet_feat_dist: 0.1551, mix.decode.loss_seg: 0.1920, mix.decode.acc_seg: 85.9854
+2023-08-16 13:05:13,405 - mmdet - INFO - Iter [4120/40000]	lr: 5.382e-05, eta: 2 days, 1:11:32, time: 4.944, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1722, decode.acc_seg: 89.1708, rpn.loss_rpn_cls: 0.0590, rpn.loss_rpn_bbox: 0.1489, roi.loss_cls: 0.3127, roi.acc: 88.2227, roi.loss_bbox: 0.4951, roi.loss_mask: 0.3432, src.loss_imnet_feat_dist: 0.1619, mix.decode.loss_seg: 0.2069, mix.decode.acc_seg: 84.1228
+2023-08-16 13:06:51,816 - mmdet - INFO - Iter [4140/40000]	lr: 5.379e-05, eta: 2 days, 1:09:51, time: 4.921, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1813, decode.acc_seg: 90.1222, rpn.loss_rpn_cls: 0.0677, rpn.loss_rpn_bbox: 0.1644, roi.loss_cls: 0.3343, roi.acc: 87.2803, roi.loss_bbox: 0.4962, roi.loss_mask: 0.3284, src.loss_imnet_feat_dist: 0.1499, mix.decode.loss_seg: 0.1940, mix.decode.acc_seg: 87.0173
+2023-08-16 13:08:31,007 - mmdet - INFO - Iter [4160/40000]	lr: 5.376e-05, eta: 2 days, 1:08:16, time: 4.960, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1892, decode.acc_seg: 88.9628, rpn.loss_rpn_cls: 0.0642, rpn.loss_rpn_bbox: 0.1534, roi.loss_cls: 0.3458, roi.acc: 87.2656, roi.loss_bbox: 0.4910, roi.loss_mask: 0.3378, src.loss_imnet_feat_dist: 0.1547, mix.decode.loss_seg: 0.1853, mix.decode.acc_seg: 86.5153
+2023-08-16 13:10:09,336 - mmdet - INFO - Iter [4180/40000]	lr: 5.373e-05, eta: 2 days, 1:06:34, time: 4.916, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1716, decode.acc_seg: 89.6046, rpn.loss_rpn_cls: 0.0593, rpn.loss_rpn_bbox: 0.1454, roi.loss_cls: 0.3271, roi.acc: 88.0322, roi.loss_bbox: 0.4632, roi.loss_mask: 0.3589, src.loss_imnet_feat_dist: 0.1619, mix.decode.loss_seg: 0.1907, mix.decode.acc_seg: 86.5575
+2023-08-16 13:11:47,342 - mmdet - INFO - Iter [4200/40000]	lr: 5.370e-05, eta: 2 days, 1:04:49, time: 4.900, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1580, decode.acc_seg: 89.4613, rpn.loss_rpn_cls: 0.0738, rpn.loss_rpn_bbox: 0.1385, roi.loss_cls: 0.3246, roi.acc: 87.9297, roi.loss_bbox: 0.4549, roi.loss_mask: 0.3402, src.loss_imnet_feat_dist: 0.1544, mix.decode.loss_seg: 0.1832, mix.decode.acc_seg: 87.6295
+2023-08-16 13:13:26,410 - mmdet - INFO - Iter [4220/40000]	lr: 5.367e-05, eta: 2 days, 1:03:14, time: 4.953, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1757, decode.acc_seg: 88.4866, rpn.loss_rpn_cls: 0.0754, rpn.loss_rpn_bbox: 0.1454, roi.loss_cls: 0.3365, roi.acc: 87.4463, roi.loss_bbox: 0.4960, roi.loss_mask: 0.3197, src.loss_imnet_feat_dist: 0.1524, mix.decode.loss_seg: 0.2150, mix.decode.acc_seg: 86.1172
+2023-08-16 13:15:03,830 - mmdet - INFO - Iter [4240/40000]	lr: 5.364e-05, eta: 2 days, 1:01:24, time: 4.871, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1708, decode.acc_seg: 86.9539, rpn.loss_rpn_cls: 0.0853, rpn.loss_rpn_bbox: 0.1615, roi.loss_cls: 0.3380, roi.acc: 87.5439, roi.loss_bbox: 0.4937, roi.loss_mask: 0.3438, src.loss_imnet_feat_dist: 0.1416, mix.decode.loss_seg: 0.2085, mix.decode.acc_seg: 85.5346
+2023-08-16 13:16:42,064 - mmdet - INFO - Iter [4260/40000]	lr: 5.361e-05, eta: 2 days, 0:59:41, time: 4.912, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1882, decode.acc_seg: 89.6342, rpn.loss_rpn_cls: 0.0726, rpn.loss_rpn_bbox: 0.1417, roi.loss_cls: 0.3185, roi.acc: 88.2373, roi.loss_bbox: 0.4544, roi.loss_mask: 0.3389, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.2008, mix.decode.acc_seg: 86.7809
+2023-08-16 13:18:20,826 - mmdet - INFO - Iter [4280/40000]	lr: 5.358e-05, eta: 2 days, 0:58:03, time: 4.938, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1672, decode.acc_seg: 89.4192, rpn.loss_rpn_cls: 0.0732, rpn.loss_rpn_bbox: 0.1515, roi.loss_cls: 0.3454, roi.acc: 87.0752, roi.loss_bbox: 0.5067, roi.loss_mask: 0.3289, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.2003, mix.decode.acc_seg: 86.9350
+2023-08-16 13:19:59,190 - mmdet - INFO - Iter [4300/40000]	lr: 5.355e-05, eta: 2 days, 0:56:22, time: 4.918, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1891, decode.acc_seg: 87.1572, rpn.loss_rpn_cls: 0.0643, rpn.loss_rpn_bbox: 0.1505, roi.loss_cls: 0.3194, roi.acc: 87.7979, roi.loss_bbox: 0.4735, roi.loss_mask: 0.3368, src.loss_imnet_feat_dist: 0.1544, mix.decode.loss_seg: 0.3015, mix.decode.acc_seg: 83.0042
+2023-08-16 13:21:37,368 - mmdet - INFO - Iter [4320/40000]	lr: 5.352e-05, eta: 2 days, 0:54:39, time: 4.909, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2070, decode.acc_seg: 88.2727, rpn.loss_rpn_cls: 0.0600, rpn.loss_rpn_bbox: 0.1318, roi.loss_cls: 0.2878, roi.acc: 88.9990, roi.loss_bbox: 0.4623, roi.loss_mask: 0.3186, src.loss_imnet_feat_dist: 0.1645, mix.decode.loss_seg: 0.2312, mix.decode.acc_seg: 84.9505
+2023-08-16 13:23:16,655 - mmdet - INFO - Iter [4340/40000]	lr: 5.349e-05, eta: 2 days, 0:53:05, time: 4.964, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2037, decode.acc_seg: 87.2039, rpn.loss_rpn_cls: 0.0647, rpn.loss_rpn_bbox: 0.1317, roi.loss_cls: 0.3279, roi.acc: 87.8125, roi.loss_bbox: 0.4801, roi.loss_mask: 0.3195, src.loss_imnet_feat_dist: 0.1503, mix.decode.loss_seg: 0.2540, mix.decode.acc_seg: 84.0699
+2023-08-16 13:24:54,855 - mmdet - INFO - Iter [4360/40000]	lr: 5.346e-05, eta: 2 days, 0:51:22, time: 4.910, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2038, decode.acc_seg: 88.5199, rpn.loss_rpn_cls: 0.0830, rpn.loss_rpn_bbox: 0.1640, roi.loss_cls: 0.3230, roi.acc: 87.6953, roi.loss_bbox: 0.4596, roi.loss_mask: 0.3135, src.loss_imnet_feat_dist: 0.1433, mix.decode.loss_seg: 0.2224, mix.decode.acc_seg: 86.0205
+2023-08-16 13:26:33,654 - mmdet - INFO - Iter [4380/40000]	lr: 5.343e-05, eta: 2 days, 0:49:44, time: 4.940, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1948, decode.acc_seg: 88.1252, rpn.loss_rpn_cls: 0.0692, rpn.loss_rpn_bbox: 0.1499, roi.loss_cls: 0.3409, roi.acc: 87.5146, roi.loss_bbox: 0.4773, roi.loss_mask: 0.3360, src.loss_imnet_feat_dist: 0.1596, mix.decode.loss_seg: 0.2112, mix.decode.acc_seg: 85.8961
+2023-08-16 13:28:11,466 - mmdet - INFO - Iter [4400/40000]	lr: 5.340e-05, eta: 2 days, 0:47:58, time: 4.891, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1688, decode.acc_seg: 89.8580, rpn.loss_rpn_cls: 0.0519, rpn.loss_rpn_bbox: 0.1366, roi.loss_cls: 0.3145, roi.acc: 88.0811, roi.loss_bbox: 0.4907, roi.loss_mask: 0.3530, src.loss_imnet_feat_dist: 0.1508, mix.decode.loss_seg: 0.1737, mix.decode.acc_seg: 88.5376
+2023-08-16 13:29:48,958 - mmdet - INFO - Iter [4420/40000]	lr: 5.337e-05, eta: 2 days, 0:46:10, time: 4.875, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1719, decode.acc_seg: 88.5692, rpn.loss_rpn_cls: 0.0738, rpn.loss_rpn_bbox: 0.1567, roi.loss_cls: 0.3461, roi.acc: 86.8848, roi.loss_bbox: 0.5043, roi.loss_mask: 0.3494, src.loss_imnet_feat_dist: 0.1607, mix.decode.loss_seg: 0.1771, mix.decode.acc_seg: 87.5227
+2023-08-16 13:31:28,030 - mmdet - INFO - Iter [4440/40000]	lr: 5.334e-05, eta: 2 days, 0:44:34, time: 4.954, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1830, decode.acc_seg: 88.2287, rpn.loss_rpn_cls: 0.0731, rpn.loss_rpn_bbox: 0.1718, roi.loss_cls: 0.3690, roi.acc: 86.5918, roi.loss_bbox: 0.5077, roi.loss_mask: 0.3386, src.loss_imnet_feat_dist: 0.1680, mix.decode.loss_seg: 0.1611, mix.decode.acc_seg: 87.6668
+2023-08-16 13:33:05,960 - mmdet - INFO - Iter [4460/40000]	lr: 5.331e-05, eta: 2 days, 0:42:49, time: 4.896, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1745, decode.acc_seg: 88.5082, rpn.loss_rpn_cls: 0.0650, rpn.loss_rpn_bbox: 0.1590, roi.loss_cls: 0.3423, roi.acc: 86.9287, roi.loss_bbox: 0.4862, roi.loss_mask: 0.3259, src.loss_imnet_feat_dist: 0.1516, mix.decode.loss_seg: 0.1900, mix.decode.acc_seg: 87.2613
+2023-08-16 13:34:44,175 - mmdet - INFO - Iter [4480/40000]	lr: 5.328e-05, eta: 2 days, 0:41:07, time: 4.911, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1786, decode.acc_seg: 89.0512, rpn.loss_rpn_cls: 0.0740, rpn.loss_rpn_bbox: 0.1565, roi.loss_cls: 0.3288, roi.acc: 87.7881, roi.loss_bbox: 0.4633, roi.loss_mask: 0.3326, src.loss_imnet_feat_dist: 0.1513, mix.decode.loss_seg: 0.1882, mix.decode.acc_seg: 87.5715
+2023-08-16 13:36:23,075 - mmdet - INFO - Iter [4500/40000]	lr: 5.325e-05, eta: 2 days, 0:39:30, time: 4.945, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1883, decode.acc_seg: 88.5552, rpn.loss_rpn_cls: 0.0577, rpn.loss_rpn_bbox: 0.1278, roi.loss_cls: 0.2959, roi.acc: 88.7451, roi.loss_bbox: 0.4511, roi.loss_mask: 0.3335, src.loss_imnet_feat_dist: 0.1670, mix.decode.loss_seg: 0.2052, mix.decode.acc_seg: 87.1437
+2023-08-16 13:38:01,307 - mmdet - INFO - Iter [4520/40000]	lr: 5.322e-05, eta: 2 days, 0:37:48, time: 4.912, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2298, decode.acc_seg: 87.8004, rpn.loss_rpn_cls: 0.0884, rpn.loss_rpn_bbox: 0.1518, roi.loss_cls: 0.3309, roi.acc: 87.8174, roi.loss_bbox: 0.4635, roi.loss_mask: 0.3395, src.loss_imnet_feat_dist: 0.1712, mix.decode.loss_seg: 0.1970, mix.decode.acc_seg: 87.2266
+2023-08-16 13:39:39,571 - mmdet - INFO - Iter [4540/40000]	lr: 5.319e-05, eta: 2 days, 0:36:06, time: 4.913, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1997, decode.acc_seg: 87.5713, rpn.loss_rpn_cls: 0.0701, rpn.loss_rpn_bbox: 0.1477, roi.loss_cls: 0.3296, roi.acc: 88.1104, roi.loss_bbox: 0.4719, roi.loss_mask: 0.3479, src.loss_imnet_feat_dist: 0.1491, mix.decode.loss_seg: 0.2071, mix.decode.acc_seg: 86.6284
+2023-08-16 13:41:18,367 - mmdet - INFO - Iter [4560/40000]	lr: 5.316e-05, eta: 2 days, 0:34:28, time: 4.940, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1842, decode.acc_seg: 89.0123, rpn.loss_rpn_cls: 0.0687, rpn.loss_rpn_bbox: 0.1472, roi.loss_cls: 0.3307, roi.acc: 87.7930, roi.loss_bbox: 0.4929, roi.loss_mask: 0.3426, src.loss_imnet_feat_dist: 0.1538, mix.decode.loss_seg: 0.2121, mix.decode.acc_seg: 86.0010
+2023-08-16 13:42:56,432 - mmdet - INFO - Iter [4580/40000]	lr: 5.313e-05, eta: 2 days, 0:32:44, time: 4.903, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1685, decode.acc_seg: 88.9914, rpn.loss_rpn_cls: 0.0583, rpn.loss_rpn_bbox: 0.1247, roi.loss_cls: 0.3162, roi.acc: 88.1348, roi.loss_bbox: 0.4315, roi.loss_mask: 0.3142, src.loss_imnet_feat_dist: 0.1566, mix.decode.loss_seg: 0.1719, mix.decode.acc_seg: 86.8948
+2023-08-16 13:44:35,854 - mmdet - INFO - Iter [4600/40000]	lr: 5.310e-05, eta: 2 days, 0:31:11, time: 4.971, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1887, decode.acc_seg: 87.4748, rpn.loss_rpn_cls: 0.0703, rpn.loss_rpn_bbox: 0.1480, roi.loss_cls: 0.3419, roi.acc: 87.4951, roi.loss_bbox: 0.4945, roi.loss_mask: 0.3304, src.loss_imnet_feat_dist: 0.1504, mix.decode.loss_seg: 0.1905, mix.decode.acc_seg: 87.4371
+2023-08-16 13:46:14,302 - mmdet - INFO - Iter [4620/40000]	lr: 5.307e-05, eta: 2 days, 0:29:31, time: 4.922, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1846, decode.acc_seg: 88.9075, rpn.loss_rpn_cls: 0.0645, rpn.loss_rpn_bbox: 0.1419, roi.loss_cls: 0.3396, roi.acc: 87.3975, roi.loss_bbox: 0.4779, roi.loss_mask: 0.3312, src.loss_imnet_feat_dist: 0.1600, mix.decode.loss_seg: 0.2630, mix.decode.acc_seg: 86.3097
+2023-08-16 13:47:52,174 - mmdet - INFO - Iter [4640/40000]	lr: 5.304e-05, eta: 2 days, 0:27:46, time: 4.894, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1847, decode.acc_seg: 88.0797, rpn.loss_rpn_cls: 0.0659, rpn.loss_rpn_bbox: 0.1473, roi.loss_cls: 0.3255, roi.acc: 87.7051, roi.loss_bbox: 0.4731, roi.loss_mask: 0.3288, src.loss_imnet_feat_dist: 0.1473, mix.decode.loss_seg: 0.1970, mix.decode.acc_seg: 86.3359
+2023-08-16 13:49:30,965 - mmdet - INFO - Iter [4660/40000]	lr: 5.301e-05, eta: 2 days, 0:26:08, time: 4.940, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1747, decode.acc_seg: 89.0746, rpn.loss_rpn_cls: 0.0682, rpn.loss_rpn_bbox: 0.1390, roi.loss_cls: 0.3040, roi.acc: 88.6084, roi.loss_bbox: 0.4540, roi.loss_mask: 0.3071, src.loss_imnet_feat_dist: 0.1552, mix.decode.loss_seg: 0.2219, mix.decode.acc_seg: 86.8947
+2023-08-16 13:51:09,283 - mmdet - INFO - Iter [4680/40000]	lr: 5.298e-05, eta: 2 days, 0:24:27, time: 4.916, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1858, decode.acc_seg: 87.4861, rpn.loss_rpn_cls: 0.0709, rpn.loss_rpn_bbox: 0.1455, roi.loss_cls: 0.3225, roi.acc: 88.1982, roi.loss_bbox: 0.4731, roi.loss_mask: 0.3205, src.loss_imnet_feat_dist: 0.1592, mix.decode.loss_seg: 0.2517, mix.decode.acc_seg: 86.5741
+2023-08-16 13:52:48,621 - mmdet - INFO - Iter [4700/40000]	lr: 5.295e-05, eta: 2 days, 0:22:53, time: 4.967, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1634, decode.acc_seg: 90.2160, rpn.loss_rpn_cls: 0.0566, rpn.loss_rpn_bbox: 0.1478, roi.loss_cls: 0.3338, roi.acc: 87.7002, roi.loss_bbox: 0.4748, roi.loss_mask: 0.3301, src.loss_imnet_feat_dist: 0.1576, mix.decode.loss_seg: 0.1638, mix.decode.acc_seg: 88.6192
+2023-08-16 13:54:26,993 - mmdet - INFO - Iter [4720/40000]	lr: 5.292e-05, eta: 2 days, 0:21:12, time: 4.919, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1658, decode.acc_seg: 89.4155, rpn.loss_rpn_cls: 0.0692, rpn.loss_rpn_bbox: 0.1436, roi.loss_cls: 0.3134, roi.acc: 88.1006, roi.loss_bbox: 0.4810, roi.loss_mask: 0.3371, src.loss_imnet_feat_dist: 0.1581, mix.decode.loss_seg: 0.2019, mix.decode.acc_seg: 87.4677
+2023-08-16 13:56:05,051 - mmdet - INFO - Iter [4740/40000]	lr: 5.289e-05, eta: 2 days, 0:19:29, time: 4.903, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2032, decode.acc_seg: 87.4674, rpn.loss_rpn_cls: 0.0785, rpn.loss_rpn_bbox: 0.1668, roi.loss_cls: 0.3526, roi.acc: 86.7627, roi.loss_bbox: 0.4907, roi.loss_mask: 0.3408, src.loss_imnet_feat_dist: 0.1446, mix.decode.loss_seg: 0.2286, mix.decode.acc_seg: 86.7236
+2023-08-16 13:57:43,965 - mmdet - INFO - Iter [4760/40000]	lr: 5.286e-05, eta: 2 days, 0:17:52, time: 4.946, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1663, decode.acc_seg: 89.4077, rpn.loss_rpn_cls: 0.0579, rpn.loss_rpn_bbox: 0.1550, roi.loss_cls: 0.3051, roi.acc: 88.2080, roi.loss_bbox: 0.4609, roi.loss_mask: 0.3208, src.loss_imnet_feat_dist: 0.1538, mix.decode.loss_seg: 0.2045, mix.decode.acc_seg: 86.9516
+2023-08-16 13:59:21,782 - mmdet - INFO - Iter [4780/40000]	lr: 5.283e-05, eta: 2 days, 0:16:07, time: 4.891, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1708, decode.acc_seg: 89.0545, rpn.loss_rpn_cls: 0.0678, rpn.loss_rpn_bbox: 0.1483, roi.loss_cls: 0.3106, roi.acc: 87.9980, roi.loss_bbox: 0.4673, roi.loss_mask: 0.3275, src.loss_imnet_feat_dist: 0.1544, mix.decode.loss_seg: 0.1885, mix.decode.acc_seg: 88.9310
+2023-08-16 14:00:59,667 - mmdet - INFO - Iter [4800/40000]	lr: 5.280e-05, eta: 2 days, 0:14:22, time: 4.894, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1759, decode.acc_seg: 90.5648, rpn.loss_rpn_cls: 0.0770, rpn.loss_rpn_bbox: 0.1217, roi.loss_cls: 0.2848, roi.acc: 89.5410, roi.loss_bbox: 0.4318, roi.loss_mask: 0.3179, src.loss_imnet_feat_dist: 0.1382, mix.decode.loss_seg: 0.1809, mix.decode.acc_seg: 89.2381
+2023-08-16 14:02:38,636 - mmdet - INFO - Iter [4820/40000]	lr: 5.277e-05, eta: 2 days, 0:12:46, time: 4.948, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1726, decode.acc_seg: 89.3365, rpn.loss_rpn_cls: 0.0720, rpn.loss_rpn_bbox: 0.1592, roi.loss_cls: 0.3471, roi.acc: 87.3438, roi.loss_bbox: 0.4928, roi.loss_mask: 0.3490, src.loss_imnet_feat_dist: 0.1617, mix.decode.loss_seg: 0.1770, mix.decode.acc_seg: 88.5630
+2023-08-16 14:04:16,837 - mmdet - INFO - Iter [4840/40000]	lr: 5.274e-05, eta: 2 days, 0:11:04, time: 4.910, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1572, decode.acc_seg: 89.1852, rpn.loss_rpn_cls: 0.0659, rpn.loss_rpn_bbox: 0.1478, roi.loss_cls: 0.3257, roi.acc: 87.5488, roi.loss_bbox: 0.4985, roi.loss_mask: 0.3236, src.loss_imnet_feat_dist: 0.1576, mix.decode.loss_seg: 0.1875, mix.decode.acc_seg: 87.5903
+2023-08-16 14:05:54,280 - mmdet - INFO - Iter [4860/40000]	lr: 5.271e-05, eta: 2 days, 0:09:16, time: 4.872, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1465, decode.acc_seg: 89.0157, rpn.loss_rpn_cls: 0.0547, rpn.loss_rpn_bbox: 0.1353, roi.loss_cls: 0.3030, roi.acc: 88.7451, roi.loss_bbox: 0.4723, roi.loss_mask: 0.3244, src.loss_imnet_feat_dist: 0.1449, mix.decode.loss_seg: 0.1748, mix.decode.acc_seg: 87.3505
+2023-08-16 14:07:33,250 - mmdet - INFO - Iter [4880/40000]	lr: 5.268e-05, eta: 2 days, 0:07:40, time: 4.948, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1689, decode.acc_seg: 88.6625, rpn.loss_rpn_cls: 0.0633, rpn.loss_rpn_bbox: 0.1664, roi.loss_cls: 0.3366, roi.acc: 87.7295, roi.loss_bbox: 0.4849, roi.loss_mask: 0.3430, src.loss_imnet_feat_dist: 0.1640, mix.decode.loss_seg: 0.1817, mix.decode.acc_seg: 88.6950
+2023-08-16 14:09:10,690 - mmdet - INFO - Iter [4900/40000]	lr: 5.265e-05, eta: 2 days, 0:05:52, time: 4.872, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2332, decode.acc_seg: 86.8154, rpn.loss_rpn_cls: 0.0796, rpn.loss_rpn_bbox: 0.1560, roi.loss_cls: 0.3325, roi.acc: 88.0615, roi.loss_bbox: 0.4640, roi.loss_mask: 0.3441, src.loss_imnet_feat_dist: 0.1460, mix.decode.loss_seg: 0.2151, mix.decode.acc_seg: 86.0726
+2023-08-16 14:10:50,036 - mmdet - INFO - Iter [4920/40000]	lr: 5.262e-05, eta: 2 days, 0:04:18, time: 4.967, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1682, decode.acc_seg: 88.6479, rpn.loss_rpn_cls: 0.0596, rpn.loss_rpn_bbox: 0.1542, roi.loss_cls: 0.3417, roi.acc: 87.2754, roi.loss_bbox: 0.4988, roi.loss_mask: 0.3409, src.loss_imnet_feat_dist: 0.1546, mix.decode.loss_seg: 0.1704, mix.decode.acc_seg: 87.3033
+2023-08-16 14:12:27,855 - mmdet - INFO - Iter [4940/40000]	lr: 5.259e-05, eta: 2 days, 0:02:34, time: 4.891, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2457, decode.acc_seg: 86.2113, rpn.loss_rpn_cls: 0.0575, rpn.loss_rpn_bbox: 0.1458, roi.loss_cls: 0.3308, roi.acc: 87.8369, roi.loss_bbox: 0.4792, roi.loss_mask: 0.3389, src.loss_imnet_feat_dist: 0.1540, mix.decode.loss_seg: 0.2074, mix.decode.acc_seg: 87.3830
+2023-08-16 14:14:05,519 - mmdet - INFO - Iter [4960/40000]	lr: 5.256e-05, eta: 2 days, 0:00:48, time: 4.883, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1825, decode.acc_seg: 88.8168, rpn.loss_rpn_cls: 0.0739, rpn.loss_rpn_bbox: 0.1678, roi.loss_cls: 0.3388, roi.acc: 87.2852, roi.loss_bbox: 0.5016, roi.loss_mask: 0.3402, src.loss_imnet_feat_dist: 0.1569, mix.decode.loss_seg: 0.1898, mix.decode.acc_seg: 87.5085
+2023-08-16 14:15:44,305 - mmdet - INFO - Iter [4980/40000]	lr: 5.253e-05, eta: 1 day, 23:59:10, time: 4.939, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2038, decode.acc_seg: 87.3963, rpn.loss_rpn_cls: 0.0721, rpn.loss_rpn_bbox: 0.1445, roi.loss_cls: 0.3265, roi.acc: 87.8662, roi.loss_bbox: 0.4801, roi.loss_mask: 0.3413, src.loss_imnet_feat_dist: 0.1498, mix.decode.loss_seg: 0.2182, mix.decode.acc_seg: 86.7373
+2023-08-16 14:17:22,265 - mmdet - INFO - Exp name: 230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449
+2023-08-16 14:17:22,266 - mmdet - INFO - Iter [5000/40000]	lr: 5.250e-05, eta: 1 day, 23:57:27, time: 4.898, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1805, decode.acc_seg: 89.3931, rpn.loss_rpn_cls: 0.0634, rpn.loss_rpn_bbox: 0.1561, roi.loss_cls: 0.3294, roi.acc: 87.6025, roi.loss_bbox: 0.4830, roi.loss_mask: 0.3343, src.loss_imnet_feat_dist: 0.1578, mix.decode.loss_seg: 0.1926, mix.decode.acc_seg: 87.7143
+2023-08-16 14:19:02,027 - mmdet - INFO - Iter [5020/40000]	lr: 5.247e-05, eta: 1 day, 23:55:56, time: 4.988, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1795, decode.acc_seg: 88.9958, rpn.loss_rpn_cls: 0.0846, rpn.loss_rpn_bbox: 0.1727, roi.loss_cls: 0.3479, roi.acc: 86.9385, roi.loss_bbox: 0.4842, roi.loss_mask: 0.3490, src.loss_imnet_feat_dist: 0.1670, mix.decode.loss_seg: 0.1970, mix.decode.acc_seg: 86.2242
+2023-08-16 14:20:41,066 - mmdet - INFO - Iter [5040/40000]	lr: 5.244e-05, eta: 1 day, 23:54:20, time: 4.952, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1703, decode.acc_seg: 89.1547, rpn.loss_rpn_cls: 0.0637, rpn.loss_rpn_bbox: 0.1628, roi.loss_cls: 0.3375, roi.acc: 87.6025, roi.loss_bbox: 0.4669, roi.loss_mask: 0.3364, src.loss_imnet_feat_dist: 0.1534, mix.decode.loss_seg: 0.1904, mix.decode.acc_seg: 85.9777
+2023-08-16 14:22:18,903 - mmdet - INFO - Iter [5060/40000]	lr: 5.241e-05, eta: 1 day, 23:52:35, time: 4.892, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1596, decode.acc_seg: 88.5959, rpn.loss_rpn_cls: 0.0691, rpn.loss_rpn_bbox: 0.1367, roi.loss_cls: 0.2967, roi.acc: 88.9795, roi.loss_bbox: 0.4381, roi.loss_mask: 0.3333, src.loss_imnet_feat_dist: 0.1602, mix.decode.loss_seg: 0.1784, mix.decode.acc_seg: 86.5915
+2023-08-16 14:23:56,522 - mmdet - INFO - Iter [5080/40000]	lr: 5.238e-05, eta: 1 day, 23:50:50, time: 4.881, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1706, decode.acc_seg: 88.6855, rpn.loss_rpn_cls: 0.0631, rpn.loss_rpn_bbox: 0.1438, roi.loss_cls: 0.3187, roi.acc: 88.3252, roi.loss_bbox: 0.4598, roi.loss_mask: 0.3382, src.loss_imnet_feat_dist: 0.1569, mix.decode.loss_seg: 0.2033, mix.decode.acc_seg: 87.7163
+2023-08-16 14:25:35,726 - mmdet - INFO - Iter [5100/40000]	lr: 5.235e-05, eta: 1 day, 23:49:15, time: 4.960, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1539, decode.acc_seg: 90.4573, rpn.loss_rpn_cls: 0.0610, rpn.loss_rpn_bbox: 0.1401, roi.loss_cls: 0.3093, roi.acc: 88.1348, roi.loss_bbox: 0.4579, roi.loss_mask: 0.3200, src.loss_imnet_feat_dist: 0.1458, mix.decode.loss_seg: 0.1836, mix.decode.acc_seg: 88.7494
+2023-08-16 14:27:13,622 - mmdet - INFO - Iter [5120/40000]	lr: 5.232e-05, eta: 1 day, 23:47:31, time: 4.895, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1855, decode.acc_seg: 88.6935, rpn.loss_rpn_cls: 0.0740, rpn.loss_rpn_bbox: 0.1489, roi.loss_cls: 0.3443, roi.acc: 87.3535, roi.loss_bbox: 0.4968, roi.loss_mask: 0.3379, src.loss_imnet_feat_dist: 0.1586, mix.decode.loss_seg: 0.1888, mix.decode.acc_seg: 88.2090
+2023-08-16 14:28:52,399 - mmdet - INFO - Iter [5140/40000]	lr: 5.229e-05, eta: 1 day, 23:45:53, time: 4.939, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1906, decode.acc_seg: 88.0115, rpn.loss_rpn_cls: 0.0614, rpn.loss_rpn_bbox: 0.1520, roi.loss_cls: 0.3249, roi.acc: 88.1787, roi.loss_bbox: 0.4741, roi.loss_mask: 0.3340, src.loss_imnet_feat_dist: 0.1641, mix.decode.loss_seg: 0.1909, mix.decode.acc_seg: 87.3442
+2023-08-16 14:30:30,133 - mmdet - INFO - Iter [5160/40000]	lr: 5.226e-05, eta: 1 day, 23:44:08, time: 4.887, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1539, decode.acc_seg: 89.9747, rpn.loss_rpn_cls: 0.0658, rpn.loss_rpn_bbox: 0.1407, roi.loss_cls: 0.3200, roi.acc: 88.3057, roi.loss_bbox: 0.4450, roi.loss_mask: 0.3237, src.loss_imnet_feat_dist: 0.1590, mix.decode.loss_seg: 0.1803, mix.decode.acc_seg: 88.1528
+2023-08-16 14:32:07,929 - mmdet - INFO - Iter [5180/40000]	lr: 5.223e-05, eta: 1 day, 23:42:24, time: 4.890, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1700, decode.acc_seg: 90.2596, rpn.loss_rpn_cls: 0.0549, rpn.loss_rpn_bbox: 0.1359, roi.loss_cls: 0.3158, roi.acc: 88.4277, roi.loss_bbox: 0.4556, roi.loss_mask: 0.3112, src.loss_imnet_feat_dist: 0.1553, mix.decode.loss_seg: 0.2256, mix.decode.acc_seg: 87.8768
+2023-08-16 14:33:46,956 - mmdet - INFO - Iter [5200/40000]	lr: 5.220e-05, eta: 1 day, 23:40:48, time: 4.951, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2333, decode.acc_seg: 88.3937, rpn.loss_rpn_cls: 0.0609, rpn.loss_rpn_bbox: 0.1562, roi.loss_cls: 0.3145, roi.acc: 88.2910, roi.loss_bbox: 0.4538, roi.loss_mask: 0.3117, src.loss_imnet_feat_dist: 0.1625, mix.decode.loss_seg: 0.1968, mix.decode.acc_seg: 87.9624
+2023-08-16 14:35:24,940 - mmdet - INFO - Iter [5220/40000]	lr: 5.217e-05, eta: 1 day, 23:39:05, time: 4.899, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1890, decode.acc_seg: 88.9884, rpn.loss_rpn_cls: 0.0569, rpn.loss_rpn_bbox: 0.1390, roi.loss_cls: 0.3328, roi.acc: 87.8613, roi.loss_bbox: 0.4808, roi.loss_mask: 0.3367, src.loss_imnet_feat_dist: 0.1610, mix.decode.loss_seg: 0.1801, mix.decode.acc_seg: 88.3644
+2023-08-16 14:37:03,003 - mmdet - INFO - Iter [5240/40000]	lr: 5.214e-05, eta: 1 day, 23:37:22, time: 4.903, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1569, decode.acc_seg: 89.4914, rpn.loss_rpn_cls: 0.0593, rpn.loss_rpn_bbox: 0.1369, roi.loss_cls: 0.3170, roi.acc: 87.7637, roi.loss_bbox: 0.4944, roi.loss_mask: 0.3209, src.loss_imnet_feat_dist: 0.1637, mix.decode.loss_seg: 0.1580, mix.decode.acc_seg: 88.6644
+2023-08-16 14:38:41,614 - mmdet - INFO - Iter [5260/40000]	lr: 5.211e-05, eta: 1 day, 23:35:43, time: 4.931, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1836, decode.acc_seg: 87.6877, rpn.loss_rpn_cls: 0.0624, rpn.loss_rpn_bbox: 0.1539, roi.loss_cls: 0.3277, roi.acc: 87.6318, roi.loss_bbox: 0.4848, roi.loss_mask: 0.3050, src.loss_imnet_feat_dist: 0.1443, mix.decode.loss_seg: 0.2302, mix.decode.acc_seg: 85.3842
+2023-08-16 14:40:20,226 - mmdet - INFO - Iter [5280/40000]	lr: 5.208e-05, eta: 1 day, 23:34:04, time: 4.931, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1687, decode.acc_seg: 89.5415, rpn.loss_rpn_cls: 0.0605, rpn.loss_rpn_bbox: 0.1290, roi.loss_cls: 0.3017, roi.acc: 88.2812, roi.loss_bbox: 0.4503, roi.loss_mask: 0.3222, src.loss_imnet_feat_dist: 0.1415, mix.decode.loss_seg: 0.1680, mix.decode.acc_seg: 88.4707
+2023-08-16 14:41:57,859 - mmdet - INFO - Iter [5300/40000]	lr: 5.205e-05, eta: 1 day, 23:32:19, time: 4.882, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1644, decode.acc_seg: 90.4710, rpn.loss_rpn_cls: 0.0653, rpn.loss_rpn_bbox: 0.1532, roi.loss_cls: 0.3091, roi.acc: 88.3057, roi.loss_bbox: 0.4578, roi.loss_mask: 0.3117, src.loss_imnet_feat_dist: 0.1524, mix.decode.loss_seg: 0.1894, mix.decode.acc_seg: 89.3506
+2023-08-16 14:43:36,965 - mmdet - INFO - Iter [5320/40000]	lr: 5.202e-05, eta: 1 day, 23:30:44, time: 4.955, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1666, decode.acc_seg: 88.7814, rpn.loss_rpn_cls: 0.0584, rpn.loss_rpn_bbox: 0.1427, roi.loss_cls: 0.3004, roi.acc: 88.6182, roi.loss_bbox: 0.4497, roi.loss_mask: 0.3100, src.loss_imnet_feat_dist: 0.1447, mix.decode.loss_seg: 0.1818, mix.decode.acc_seg: 89.2177
+2023-08-16 14:45:15,242 - mmdet - INFO - Iter [5340/40000]	lr: 5.199e-05, eta: 1 day, 23:29:02, time: 4.914, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1728, decode.acc_seg: 90.3843, rpn.loss_rpn_cls: 0.0610, rpn.loss_rpn_bbox: 0.1466, roi.loss_cls: 0.3285, roi.acc: 87.3877, roi.loss_bbox: 0.4826, roi.loss_mask: 0.3150, src.loss_imnet_feat_dist: 0.1603, mix.decode.loss_seg: 0.2078, mix.decode.acc_seg: 88.4976
+2023-08-16 14:46:53,096 - mmdet - INFO - Iter [5360/40000]	lr: 5.196e-05, eta: 1 day, 23:27:19, time: 4.893, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1935, decode.acc_seg: 89.4384, rpn.loss_rpn_cls: 0.0690, rpn.loss_rpn_bbox: 0.1472, roi.loss_cls: 0.3102, roi.acc: 88.5889, roi.loss_bbox: 0.4681, roi.loss_mask: 0.3355, src.loss_imnet_feat_dist: 0.1490, mix.decode.loss_seg: 0.2189, mix.decode.acc_seg: 87.7427
+2023-08-16 14:48:31,843 - mmdet - INFO - Iter [5380/40000]	lr: 5.193e-05, eta: 1 day, 23:25:41, time: 4.937, data_time: 0.017, memory: 9593, decode.loss_seg: 0.1840, decode.acc_seg: 89.2838, rpn.loss_rpn_cls: 0.0572, rpn.loss_rpn_bbox: 0.1295, roi.loss_cls: 0.2931, roi.acc: 88.7793, roi.loss_bbox: 0.4498, roi.loss_mask: 0.3117, src.loss_imnet_feat_dist: 0.1528, mix.decode.loss_seg: 0.2051, mix.decode.acc_seg: 86.3600
+2023-08-16 14:50:09,586 - mmdet - INFO - Iter [5400/40000]	lr: 5.190e-05, eta: 1 day, 23:23:56, time: 4.887, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1679, decode.acc_seg: 88.6888, rpn.loss_rpn_cls: 0.0659, rpn.loss_rpn_bbox: 0.1577, roi.loss_cls: 0.3419, roi.acc: 87.1045, roi.loss_bbox: 0.4836, roi.loss_mask: 0.3279, src.loss_imnet_feat_dist: 0.1450, mix.decode.loss_seg: 0.1921, mix.decode.acc_seg: 87.5121
+2023-08-16 14:51:48,347 - mmdet - INFO - Iter [5420/40000]	lr: 5.187e-05, eta: 1 day, 23:22:19, time: 4.938, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2263, decode.acc_seg: 88.6635, rpn.loss_rpn_cls: 0.0604, rpn.loss_rpn_bbox: 0.1363, roi.loss_cls: 0.3028, roi.acc: 88.5840, roi.loss_bbox: 0.4547, roi.loss_mask: 0.3273, src.loss_imnet_feat_dist: 0.1641, mix.decode.loss_seg: 0.3049, mix.decode.acc_seg: 83.6448
+2023-08-16 14:53:26,001 - mmdet - INFO - Iter [5440/40000]	lr: 5.184e-05, eta: 1 day, 23:20:34, time: 4.883, data_time: 0.015, memory: 9593, decode.loss_seg: 0.2226, decode.acc_seg: 87.0781, rpn.loss_rpn_cls: 0.0691, rpn.loss_rpn_bbox: 0.1552, roi.loss_cls: 0.3170, roi.acc: 88.3398, roi.loss_bbox: 0.4594, roi.loss_mask: 0.3261, src.loss_imnet_feat_dist: 0.1611, mix.decode.loss_seg: 0.2367, mix.decode.acc_seg: 84.5878
+2023-08-16 14:55:03,687 - mmdet - INFO - Iter [5460/40000]	lr: 5.181e-05, eta: 1 day, 23:18:49, time: 4.884, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1918, decode.acc_seg: 89.2807, rpn.loss_rpn_cls: 0.0647, rpn.loss_rpn_bbox: 0.1360, roi.loss_cls: 0.3088, roi.acc: 88.1836, roi.loss_bbox: 0.4688, roi.loss_mask: 0.3301, src.loss_imnet_feat_dist: 0.1592, mix.decode.loss_seg: 0.2739, mix.decode.acc_seg: 87.1235
+2023-08-16 14:56:42,344 - mmdet - INFO - Iter [5480/40000]	lr: 5.178e-05, eta: 1 day, 23:17:11, time: 4.933, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1958, decode.acc_seg: 89.9384, rpn.loss_rpn_cls: 0.0645, rpn.loss_rpn_bbox: 0.1351, roi.loss_cls: 0.3063, roi.acc: 88.4229, roi.loss_bbox: 0.4592, roi.loss_mask: 0.3083, src.loss_imnet_feat_dist: 0.1587, mix.decode.loss_seg: 0.2086, mix.decode.acc_seg: 87.8225
+2023-08-16 14:58:20,295 - mmdet - INFO - Iter [5500/40000]	lr: 5.175e-05, eta: 1 day, 23:15:28, time: 4.898, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1909, decode.acc_seg: 90.4028, rpn.loss_rpn_cls: 0.0592, rpn.loss_rpn_bbox: 0.1411, roi.loss_cls: 0.3268, roi.acc: 87.9150, roi.loss_bbox: 0.4660, roi.loss_mask: 0.3313, src.loss_imnet_feat_dist: 0.1566, mix.decode.loss_seg: 0.1816, mix.decode.acc_seg: 89.4029
+2023-08-16 14:59:57,357 - mmdet - INFO - Iter [5520/40000]	lr: 5.172e-05, eta: 1 day, 23:13:39, time: 4.853, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1705, decode.acc_seg: 89.3058, rpn.loss_rpn_cls: 0.0609, rpn.loss_rpn_bbox: 0.1300, roi.loss_cls: 0.3205, roi.acc: 88.0566, roi.loss_bbox: 0.4720, roi.loss_mask: 0.3083, src.loss_imnet_feat_dist: 0.1595, mix.decode.loss_seg: 0.2001, mix.decode.acc_seg: 88.1699
+2023-08-16 15:01:36,304 - mmdet - INFO - Iter [5540/40000]	lr: 5.169e-05, eta: 1 day, 23:12:03, time: 4.947, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2007, decode.acc_seg: 87.4376, rpn.loss_rpn_cls: 0.0605, rpn.loss_rpn_bbox: 0.1357, roi.loss_cls: 0.3153, roi.acc: 87.9736, roi.loss_bbox: 0.4603, roi.loss_mask: 0.3251, src.loss_imnet_feat_dist: 0.1586, mix.decode.loss_seg: 0.2043, mix.decode.acc_seg: 87.1937
+2023-08-16 15:03:13,747 - mmdet - INFO - Iter [5560/40000]	lr: 5.166e-05, eta: 1 day, 23:10:17, time: 4.872, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1761, decode.acc_seg: 89.5956, rpn.loss_rpn_cls: 0.0729, rpn.loss_rpn_bbox: 0.1481, roi.loss_cls: 0.3209, roi.acc: 87.9883, roi.loss_bbox: 0.4681, roi.loss_mask: 0.3415, src.loss_imnet_feat_dist: 0.1525, mix.decode.loss_seg: 0.2062, mix.decode.acc_seg: 88.0383
+2023-08-16 15:04:52,559 - mmdet - INFO - Iter [5580/40000]	lr: 5.163e-05, eta: 1 day, 23:08:40, time: 4.941, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1803, decode.acc_seg: 89.7353, rpn.loss_rpn_cls: 0.0698, rpn.loss_rpn_bbox: 0.1407, roi.loss_cls: 0.3071, roi.acc: 88.6670, roi.loss_bbox: 0.4618, roi.loss_mask: 0.3248, src.loss_imnet_feat_dist: 0.1577, mix.decode.loss_seg: 0.2033, mix.decode.acc_seg: 86.9750
+2023-08-16 15:06:30,839 - mmdet - INFO - Iter [5600/40000]	lr: 5.160e-05, eta: 1 day, 23:06:59, time: 4.914, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1589, decode.acc_seg: 90.3758, rpn.loss_rpn_cls: 0.0584, rpn.loss_rpn_bbox: 0.1509, roi.loss_cls: 0.3173, roi.acc: 88.0713, roi.loss_bbox: 0.4555, roi.loss_mask: 0.3170, src.loss_imnet_feat_dist: 0.1683, mix.decode.loss_seg: 0.2098, mix.decode.acc_seg: 87.6310
+2023-08-16 15:08:09,143 - mmdet - INFO - Iter [5620/40000]	lr: 5.157e-05, eta: 1 day, 23:05:18, time: 4.915, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1821, decode.acc_seg: 89.8711, rpn.loss_rpn_cls: 0.0736, rpn.loss_rpn_bbox: 0.1559, roi.loss_cls: 0.3301, roi.acc: 87.9346, roi.loss_bbox: 0.4597, roi.loss_mask: 0.3319, src.loss_imnet_feat_dist: 0.1563, mix.decode.loss_seg: 0.1835, mix.decode.acc_seg: 88.1000
+2023-08-16 15:09:47,877 - mmdet - INFO - Iter [5640/40000]	lr: 5.154e-05, eta: 1 day, 23:03:40, time: 4.937, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1762, decode.acc_seg: 87.7208, rpn.loss_rpn_cls: 0.0573, rpn.loss_rpn_bbox: 0.1614, roi.loss_cls: 0.3398, roi.acc: 87.7197, roi.loss_bbox: 0.4726, roi.loss_mask: 0.3312, src.loss_imnet_feat_dist: 0.1522, mix.decode.loss_seg: 0.2096, mix.decode.acc_seg: 86.5683
+2023-08-16 15:11:26,141 - mmdet - INFO - Iter [5660/40000]	lr: 5.151e-05, eta: 1 day, 23:02:00, time: 4.913, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1703, decode.acc_seg: 88.4173, rpn.loss_rpn_cls: 0.0734, rpn.loss_rpn_bbox: 0.1488, roi.loss_cls: 0.3028, roi.acc: 88.4473, roi.loss_bbox: 0.4687, roi.loss_mask: 0.3183, src.loss_imnet_feat_dist: 0.1490, mix.decode.loss_seg: 0.1968, mix.decode.acc_seg: 86.2195
+2023-08-16 15:13:04,106 - mmdet - INFO - Iter [5680/40000]	lr: 5.148e-05, eta: 1 day, 23:00:17, time: 4.898, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1597, decode.acc_seg: 89.3307, rpn.loss_rpn_cls: 0.0588, rpn.loss_rpn_bbox: 0.1396, roi.loss_cls: 0.3104, roi.acc: 88.3105, roi.loss_bbox: 0.4438, roi.loss_mask: 0.3168, src.loss_imnet_feat_dist: 0.1541, mix.decode.loss_seg: 0.1745, mix.decode.acc_seg: 88.3374
+2023-08-16 15:14:42,817 - mmdet - INFO - Iter [5700/40000]	lr: 5.145e-05, eta: 1 day, 22:58:39, time: 4.936, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1818, decode.acc_seg: 88.8194, rpn.loss_rpn_cls: 0.0665, rpn.loss_rpn_bbox: 0.1602, roi.loss_cls: 0.3329, roi.acc: 87.9443, roi.loss_bbox: 0.4762, roi.loss_mask: 0.3140, src.loss_imnet_feat_dist: 0.1626, mix.decode.loss_seg: 0.2220, mix.decode.acc_seg: 86.7600
+2023-08-16 15:16:20,571 - mmdet - INFO - Iter [5720/40000]	lr: 5.142e-05, eta: 1 day, 22:56:55, time: 4.888, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2404, decode.acc_seg: 88.3691, rpn.loss_rpn_cls: 0.0735, rpn.loss_rpn_bbox: 0.1493, roi.loss_cls: 0.3308, roi.acc: 87.8906, roi.loss_bbox: 0.4754, roi.loss_mask: 0.3229, src.loss_imnet_feat_dist: 0.1593, mix.decode.loss_seg: 0.3118, mix.decode.acc_seg: 84.0845
+2023-08-16 15:17:59,325 - mmdet - INFO - Iter [5740/40000]	lr: 5.139e-05, eta: 1 day, 22:55:18, time: 4.938, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1728, decode.acc_seg: 89.2382, rpn.loss_rpn_cls: 0.0573, rpn.loss_rpn_bbox: 0.1298, roi.loss_cls: 0.2951, roi.acc: 88.8965, roi.loss_bbox: 0.4470, roi.loss_mask: 0.3163, src.loss_imnet_feat_dist: 0.1552, mix.decode.loss_seg: 0.1871, mix.decode.acc_seg: 88.5178
+2023-08-16 15:19:37,174 - mmdet - INFO - Iter [5760/40000]	lr: 5.136e-05, eta: 1 day, 22:53:35, time: 4.892, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1728, decode.acc_seg: 88.8931, rpn.loss_rpn_cls: 0.0584, rpn.loss_rpn_bbox: 0.1546, roi.loss_cls: 0.3269, roi.acc: 87.9639, roi.loss_bbox: 0.4690, roi.loss_mask: 0.3200, src.loss_imnet_feat_dist: 0.1548, mix.decode.loss_seg: 0.2010, mix.decode.acc_seg: 87.8343
+2023-08-16 15:21:15,490 - mmdet - INFO - Iter [5780/40000]	lr: 5.133e-05, eta: 1 day, 22:51:54, time: 4.916, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1666, decode.acc_seg: 88.6175, rpn.loss_rpn_cls: 0.0637, rpn.loss_rpn_bbox: 0.1596, roi.loss_cls: 0.3164, roi.acc: 88.0762, roi.loss_bbox: 0.4688, roi.loss_mask: 0.3212, src.loss_imnet_feat_dist: 0.1582, mix.decode.loss_seg: 0.1844, mix.decode.acc_seg: 88.1550
+2023-08-16 15:22:54,321 - mmdet - INFO - Iter [5800/40000]	lr: 5.130e-05, eta: 1 day, 22:50:17, time: 4.942, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1794, decode.acc_seg: 86.8571, rpn.loss_rpn_cls: 0.0633, rpn.loss_rpn_bbox: 0.1652, roi.loss_cls: 0.3124, roi.acc: 88.1348, roi.loss_bbox: 0.4602, roi.loss_mask: 0.3147, src.loss_imnet_feat_dist: 0.1521, mix.decode.loss_seg: 0.2461, mix.decode.acc_seg: 84.1622
+2023-08-16 15:24:32,649 - mmdet - INFO - Iter [5820/40000]	lr: 5.127e-05, eta: 1 day, 22:48:37, time: 4.916, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1570, decode.acc_seg: 89.5046, rpn.loss_rpn_cls: 0.0625, rpn.loss_rpn_bbox: 0.1562, roi.loss_cls: 0.3251, roi.acc: 87.5928, roi.loss_bbox: 0.4616, roi.loss_mask: 0.3299, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.1889, mix.decode.acc_seg: 87.8163
+2023-08-16 15:26:10,750 - mmdet - INFO - Iter [5840/40000]	lr: 5.124e-05, eta: 1 day, 22:46:55, time: 4.905, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1654, decode.acc_seg: 90.0672, rpn.loss_rpn_cls: 0.0609, rpn.loss_rpn_bbox: 0.1404, roi.loss_cls: 0.2994, roi.acc: 88.8672, roi.loss_bbox: 0.4818, roi.loss_mask: 0.3149, src.loss_imnet_feat_dist: 0.1499, mix.decode.loss_seg: 0.1934, mix.decode.acc_seg: 87.7537
+2023-08-16 15:27:49,914 - mmdet - INFO - Iter [5860/40000]	lr: 5.121e-05, eta: 1 day, 22:45:20, time: 4.958, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1656, decode.acc_seg: 89.2875, rpn.loss_rpn_cls: 0.0608, rpn.loss_rpn_bbox: 0.1441, roi.loss_cls: 0.3102, roi.acc: 88.5693, roi.loss_bbox: 0.4520, roi.loss_mask: 0.3225, src.loss_imnet_feat_dist: 0.1546, mix.decode.loss_seg: 0.1781, mix.decode.acc_seg: 87.5230
+2023-08-16 15:29:27,891 - mmdet - INFO - Iter [5880/40000]	lr: 5.118e-05, eta: 1 day, 22:43:38, time: 4.899, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1546, decode.acc_seg: 89.2477, rpn.loss_rpn_cls: 0.0523, rpn.loss_rpn_bbox: 0.1455, roi.loss_cls: 0.3237, roi.acc: 87.8955, roi.loss_bbox: 0.4473, roi.loss_mask: 0.3141, src.loss_imnet_feat_dist: 0.1514, mix.decode.loss_seg: 0.2152, mix.decode.acc_seg: 85.1749
+2023-08-16 15:31:06,953 - mmdet - INFO - Iter [5900/40000]	lr: 5.115e-05, eta: 1 day, 22:42:02, time: 4.953, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1988, decode.acc_seg: 89.2034, rpn.loss_rpn_cls: 0.0625, rpn.loss_rpn_bbox: 0.1539, roi.loss_cls: 0.3254, roi.acc: 87.7979, roi.loss_bbox: 0.4592, roi.loss_mask: 0.3308, src.loss_imnet_feat_dist: 0.1503, mix.decode.loss_seg: 0.2267, mix.decode.acc_seg: 88.5763
+2023-08-16 15:32:45,066 - mmdet - INFO - Iter [5920/40000]	lr: 5.112e-05, eta: 1 day, 22:40:20, time: 4.906, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1796, decode.acc_seg: 90.4613, rpn.loss_rpn_cls: 0.0520, rpn.loss_rpn_bbox: 0.1406, roi.loss_cls: 0.2957, roi.acc: 88.8379, roi.loss_bbox: 0.4454, roi.loss_mask: 0.3232, src.loss_imnet_feat_dist: 0.1522, mix.decode.loss_seg: 0.1846, mix.decode.acc_seg: 88.8152
+2023-08-16 15:34:22,992 - mmdet - INFO - Iter [5940/40000]	lr: 5.109e-05, eta: 1 day, 22:38:38, time: 4.896, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1674, decode.acc_seg: 88.5901, rpn.loss_rpn_cls: 0.0680, rpn.loss_rpn_bbox: 0.1567, roi.loss_cls: 0.3136, roi.acc: 88.1934, roi.loss_bbox: 0.4643, roi.loss_mask: 0.3257, src.loss_imnet_feat_dist: 0.1497, mix.decode.loss_seg: 0.2175, mix.decode.acc_seg: 84.8480
+2023-08-16 15:36:01,771 - mmdet - INFO - Iter [5960/40000]	lr: 5.106e-05, eta: 1 day, 22:37:00, time: 4.939, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1719, decode.acc_seg: 90.5412, rpn.loss_rpn_cls: 0.0601, rpn.loss_rpn_bbox: 0.1532, roi.loss_cls: 0.3222, roi.acc: 88.2471, roi.loss_bbox: 0.4640, roi.loss_mask: 0.3290, src.loss_imnet_feat_dist: 0.1446, mix.decode.loss_seg: 0.2142, mix.decode.acc_seg: 88.1985
+2023-08-16 15:37:39,881 - mmdet - INFO - Iter [5980/40000]	lr: 5.103e-05, eta: 1 day, 22:35:19, time: 4.905, data_time: 0.015, memory: 9593, decode.loss_seg: 0.1893, decode.acc_seg: 89.0528, rpn.loss_rpn_cls: 0.0684, rpn.loss_rpn_bbox: 0.1609, roi.loss_cls: 0.3179, roi.acc: 87.7783, roi.loss_bbox: 0.4875, roi.loss_mask: 0.3466, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.2037, mix.decode.acc_seg: 87.1578
+2023-08-16 15:39:20,385 - mmdet - INFO - Exp name: 230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449
+2023-08-16 15:39:20,386 - mmdet - INFO - Iter [6000/40000]	lr: 5.100e-05, eta: 1 day, 22:33:51, time: 5.025, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2369, decode.acc_seg: 87.8239, rpn.loss_rpn_cls: 0.0655, rpn.loss_rpn_bbox: 0.1440, roi.loss_cls: 0.3210, roi.acc: 87.9639, roi.loss_bbox: 0.4725, roi.loss_mask: 0.3314, src.loss_imnet_feat_dist: 0.1510, mix.decode.loss_seg: 0.2596, mix.decode.acc_seg: 86.4435
+2023-08-16 15:41:04,712 - mmdet - INFO - Iter [6020/40000]	lr: 5.097e-05, eta: 1 day, 22:32:45, time: 5.216, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1971, decode.acc_seg: 85.7893, rpn.loss_rpn_cls: 0.0667, rpn.loss_rpn_bbox: 0.1408, roi.loss_cls: 0.3002, roi.acc: 88.8037, roi.loss_bbox: 0.4440, roi.loss_mask: 0.3177, src.loss_imnet_feat_dist: 0.1482, mix.decode.loss_seg: 0.2150, mix.decode.acc_seg: 84.8778
+2023-08-16 15:42:45,690 - mmdet - INFO - Iter [6040/40000]	lr: 5.094e-05, eta: 1 day, 22:31:19, time: 5.049, data_time: 0.016, memory: 9593, decode.loss_seg: 0.2351, decode.acc_seg: 87.7464, rpn.loss_rpn_cls: 0.0654, rpn.loss_rpn_bbox: 0.1472, roi.loss_cls: 0.3179, roi.acc: 88.0176, roi.loss_bbox: 0.4659, roi.loss_mask: 0.3276, src.loss_imnet_feat_dist: 0.1687, mix.decode.loss_seg: 0.2074, mix.decode.acc_seg: 87.0948
+2023-08-16 15:44:27,638 - mmdet - INFO - Iter [6060/40000]	lr: 5.091e-05, eta: 1 day, 22:29:59, time: 5.097, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1759, decode.acc_seg: 89.3022, rpn.loss_rpn_cls: 0.0557, rpn.loss_rpn_bbox: 0.1577, roi.loss_cls: 0.3244, roi.acc: 88.0029, roi.loss_bbox: 0.4818, roi.loss_mask: 0.3415, src.loss_imnet_feat_dist: 0.1583, mix.decode.loss_seg: 0.2017, mix.decode.acc_seg: 88.2431
+2023-08-16 15:46:08,929 - mmdet - INFO - Iter [6080/40000]	lr: 5.088e-05, eta: 1 day, 22:28:35, time: 5.065, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1806, decode.acc_seg: 87.9652, rpn.loss_rpn_cls: 0.0602, rpn.loss_rpn_bbox: 0.1478, roi.loss_cls: 0.2993, roi.acc: 88.5303, roi.loss_bbox: 0.4412, roi.loss_mask: 0.3171, src.loss_imnet_feat_dist: 0.1434, mix.decode.loss_seg: 0.2251, mix.decode.acc_seg: 86.3100
+2023-08-16 15:47:49,505 - mmdet - INFO - Iter [6100/40000]	lr: 5.085e-05, eta: 1 day, 22:27:07, time: 5.029, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1660, decode.acc_seg: 88.9648, rpn.loss_rpn_cls: 0.0540, rpn.loss_rpn_bbox: 0.1421, roi.loss_cls: 0.3196, roi.acc: 88.0664, roi.loss_bbox: 0.4738, roi.loss_mask: 0.3243, src.loss_imnet_feat_dist: 0.1515, mix.decode.loss_seg: 0.2003, mix.decode.acc_seg: 86.0785
+2023-08-16 15:49:31,718 - mmdet - INFO - Iter [6120/40000]	lr: 5.082e-05, eta: 1 day, 22:25:48, time: 5.111, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1776, decode.acc_seg: 88.3851, rpn.loss_rpn_cls: 0.0521, rpn.loss_rpn_bbox: 0.1415, roi.loss_cls: 0.3008, roi.acc: 88.6719, roi.loss_bbox: 0.4397, roi.loss_mask: 0.3278, src.loss_imnet_feat_dist: 0.1523, mix.decode.loss_seg: 0.2162, mix.decode.acc_seg: 86.2065
+2023-08-16 15:51:17,250 - mmdet - INFO - Iter [6140/40000]	lr: 5.079e-05, eta: 1 day, 22:24:47, time: 5.276, data_time: 0.017, memory: 9593, decode.loss_seg: 0.1586, decode.acc_seg: 89.4902, rpn.loss_rpn_cls: 0.0590, rpn.loss_rpn_bbox: 0.1408, roi.loss_cls: 0.3003, roi.acc: 88.6133, roi.loss_bbox: 0.4494, roi.loss_mask: 0.3150, src.loss_imnet_feat_dist: 0.1540, mix.decode.loss_seg: 0.1815, mix.decode.acc_seg: 87.1538
+2023-08-16 15:53:06,554 - mmdet - INFO - Iter [6160/40000]	lr: 5.076e-05, eta: 1 day, 22:24:07, time: 5.465, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1911, decode.acc_seg: 89.1157, rpn.loss_rpn_cls: 0.0719, rpn.loss_rpn_bbox: 0.1396, roi.loss_cls: 0.3119, roi.acc: 88.4570, roi.loss_bbox: 0.4384, roi.loss_mask: 0.3297, src.loss_imnet_feat_dist: 0.1621, mix.decode.loss_seg: 0.1996, mix.decode.acc_seg: 86.6367
+2023-08-16 15:54:56,189 - mmdet - INFO - Iter [6180/40000]	lr: 5.073e-05, eta: 1 day, 22:23:28, time: 5.482, data_time: 0.018, memory: 9593, decode.loss_seg: 0.1709, decode.acc_seg: 89.1311, rpn.loss_rpn_cls: 0.0683, rpn.loss_rpn_bbox: 0.1519, roi.loss_cls: 0.2923, roi.acc: 88.9160, roi.loss_bbox: 0.4440, roi.loss_mask: 0.3197, src.loss_imnet_feat_dist: 0.1622, mix.decode.loss_seg: 0.1795, mix.decode.acc_seg: 86.7489
+2023-08-16 15:56:44,850 - mmdet - INFO - Iter [6200/40000]	lr: 5.070e-05, eta: 1 day, 22:22:43, time: 5.433, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1708, decode.acc_seg: 89.1063, rpn.loss_rpn_cls: 0.0752, rpn.loss_rpn_bbox: 0.1578, roi.loss_cls: 0.3137, roi.acc: 88.0127, roi.loss_bbox: 0.4492, roi.loss_mask: 0.3267, src.loss_imnet_feat_dist: 0.1547, mix.decode.loss_seg: 0.2257, mix.decode.acc_seg: 85.0930
+2023-08-16 15:58:33,508 - mmdet - INFO - Iter [6220/40000]	lr: 5.067e-05, eta: 1 day, 22:21:58, time: 5.433, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1525, decode.acc_seg: 90.4982, rpn.loss_rpn_cls: 0.0635, rpn.loss_rpn_bbox: 0.1574, roi.loss_cls: 0.3200, roi.acc: 87.9639, roi.loss_bbox: 0.4713, roi.loss_mask: 0.3343, src.loss_imnet_feat_dist: 0.1548, mix.decode.loss_seg: 0.1854, mix.decode.acc_seg: 87.5767
+2023-08-16 16:00:22,429 - mmdet - INFO - Iter [6240/40000]	lr: 5.064e-05, eta: 1 day, 22:21:14, time: 5.446, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1744, decode.acc_seg: 88.7173, rpn.loss_rpn_cls: 0.0560, rpn.loss_rpn_bbox: 0.1359, roi.loss_cls: 0.3196, roi.acc: 88.3447, roi.loss_bbox: 0.4745, roi.loss_mask: 0.3255, src.loss_imnet_feat_dist: 0.1491, mix.decode.loss_seg: 0.1949, mix.decode.acc_seg: 89.1529
+2023-08-16 16:02:11,531 - mmdet - INFO - Iter [6260/40000]	lr: 5.061e-05, eta: 1 day, 22:20:30, time: 5.455, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1603, decode.acc_seg: 89.2376, rpn.loss_rpn_cls: 0.0503, rpn.loss_rpn_bbox: 0.1436, roi.loss_cls: 0.2869, roi.acc: 88.8770, roi.loss_bbox: 0.4610, roi.loss_mask: 0.3059, src.loss_imnet_feat_dist: 0.1557, mix.decode.loss_seg: 0.1908, mix.decode.acc_seg: 86.9380
+2023-08-16 16:04:01,476 - mmdet - INFO - Iter [6280/40000]	lr: 5.058e-05, eta: 1 day, 22:19:50, time: 5.497, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1475, decode.acc_seg: 90.1521, rpn.loss_rpn_cls: 0.0473, rpn.loss_rpn_bbox: 0.1342, roi.loss_cls: 0.2921, roi.acc: 88.9502, roi.loss_bbox: 0.4390, roi.loss_mask: 0.3209, src.loss_imnet_feat_dist: 0.1427, mix.decode.loss_seg: 0.2017, mix.decode.acc_seg: 88.5610
+2023-08-16 16:05:49,361 - mmdet - INFO - Iter [6300/40000]	lr: 5.055e-05, eta: 1 day, 22:18:59, time: 5.394, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1405, decode.acc_seg: 90.3005, rpn.loss_rpn_cls: 0.0439, rpn.loss_rpn_bbox: 0.1398, roi.loss_cls: 0.3060, roi.acc: 88.2422, roi.loss_bbox: 0.4563, roi.loss_mask: 0.3277, src.loss_imnet_feat_dist: 0.1533, mix.decode.loss_seg: 0.1650, mix.decode.acc_seg: 89.1659
+2023-08-16 16:07:37,505 - mmdet - INFO - Iter [6320/40000]	lr: 5.052e-05, eta: 1 day, 22:18:09, time: 5.407, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1479, decode.acc_seg: 89.9233, rpn.loss_rpn_cls: 0.0481, rpn.loss_rpn_bbox: 0.1210, roi.loss_cls: 0.2749, roi.acc: 89.3408, roi.loss_bbox: 0.4232, roi.loss_mask: 0.3148, src.loss_imnet_feat_dist: 0.1515, mix.decode.loss_seg: 0.1640, mix.decode.acc_seg: 89.3125
+2023-08-16 16:09:27,710 - mmdet - INFO - Iter [6340/40000]	lr: 5.049e-05, eta: 1 day, 22:17:30, time: 5.510, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1872, decode.acc_seg: 88.1731, rpn.loss_rpn_cls: 0.0677, rpn.loss_rpn_bbox: 0.1559, roi.loss_cls: 0.3321, roi.acc: 88.0176, roi.loss_bbox: 0.4733, roi.loss_mask: 0.3339, src.loss_imnet_feat_dist: 0.1551, mix.decode.loss_seg: 0.2135, mix.decode.acc_seg: 86.8215
+2023-08-16 16:11:16,345 - mmdet - INFO - Iter [6360/40000]	lr: 5.046e-05, eta: 1 day, 22:16:42, time: 5.432, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1519, decode.acc_seg: 89.3026, rpn.loss_rpn_cls: 0.0528, rpn.loss_rpn_bbox: 0.1430, roi.loss_cls: 0.2971, roi.acc: 88.5107, roi.loss_bbox: 0.4428, roi.loss_mask: 0.3142, src.loss_imnet_feat_dist: 0.1579, mix.decode.loss_seg: 0.1985, mix.decode.acc_seg: 85.9743
+2023-08-16 16:13:05,499 - mmdet - INFO - Iter [6380/40000]	lr: 5.043e-05, eta: 1 day, 22:15:56, time: 5.458, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1728, decode.acc_seg: 88.5665, rpn.loss_rpn_cls: 0.0608, rpn.loss_rpn_bbox: 0.1441, roi.loss_cls: 0.3201, roi.acc: 88.1348, roi.loss_bbox: 0.4439, roi.loss_mask: 0.3382, src.loss_imnet_feat_dist: 0.1613, mix.decode.loss_seg: 0.1795, mix.decode.acc_seg: 88.6912
+2023-08-16 16:14:55,648 - mmdet - INFO - Iter [6400/40000]	lr: 5.040e-05, eta: 1 day, 22:15:15, time: 5.507, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1527, decode.acc_seg: 89.7893, rpn.loss_rpn_cls: 0.0455, rpn.loss_rpn_bbox: 0.1447, roi.loss_cls: 0.3099, roi.acc: 88.2275, roi.loss_bbox: 0.4582, roi.loss_mask: 0.3166, src.loss_imnet_feat_dist: 0.1488, mix.decode.loss_seg: 0.2530, mix.decode.acc_seg: 86.8960
+2023-08-16 16:16:44,259 - mmdet - INFO - Iter [6420/40000]	lr: 5.037e-05, eta: 1 day, 22:14:26, time: 5.431, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1604, decode.acc_seg: 89.8427, rpn.loss_rpn_cls: 0.0716, rpn.loss_rpn_bbox: 0.1582, roi.loss_cls: 0.3138, roi.acc: 88.3252, roi.loss_bbox: 0.4715, roi.loss_mask: 0.3275, src.loss_imnet_feat_dist: 0.1547, mix.decode.loss_seg: 0.2229, mix.decode.acc_seg: 87.5886
+2023-08-16 16:18:32,934 - mmdet - INFO - Iter [6440/40000]	lr: 5.034e-05, eta: 1 day, 22:13:36, time: 5.434, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1573, decode.acc_seg: 88.7290, rpn.loss_rpn_cls: 0.0541, rpn.loss_rpn_bbox: 0.1396, roi.loss_cls: 0.2958, roi.acc: 88.7695, roi.loss_bbox: 0.4530, roi.loss_mask: 0.3244, src.loss_imnet_feat_dist: 0.1622, mix.decode.loss_seg: 0.1756, mix.decode.acc_seg: 87.7865
+2023-08-16 16:20:22,866 - mmdet - INFO - Iter [6460/40000]	lr: 5.031e-05, eta: 1 day, 22:12:53, time: 5.497, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1715, decode.acc_seg: 89.6436, rpn.loss_rpn_cls: 0.0519, rpn.loss_rpn_bbox: 0.1490, roi.loss_cls: 0.3112, roi.acc: 88.6084, roi.loss_bbox: 0.4505, roi.loss_mask: 0.3452, src.loss_imnet_feat_dist: 0.1574, mix.decode.loss_seg: 0.2035, mix.decode.acc_seg: 88.9196
+2023-08-16 16:22:12,412 - mmdet - INFO - Iter [6480/40000]	lr: 5.028e-05, eta: 1 day, 22:12:07, time: 5.477, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1666, decode.acc_seg: 89.8043, rpn.loss_rpn_cls: 0.0726, rpn.loss_rpn_bbox: 0.1401, roi.loss_cls: 0.2944, roi.acc: 89.1162, roi.loss_bbox: 0.4519, roi.loss_mask: 0.3182, src.loss_imnet_feat_dist: 0.1480, mix.decode.loss_seg: 0.1948, mix.decode.acc_seg: 87.8035
+2023-08-16 16:24:02,550 - mmdet - INFO - Iter [6500/40000]	lr: 5.025e-05, eta: 1 day, 22:11:24, time: 5.507, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1463, decode.acc_seg: 89.6301, rpn.loss_rpn_cls: 0.0489, rpn.loss_rpn_bbox: 0.1236, roi.loss_cls: 0.2718, roi.acc: 89.8877, roi.loss_bbox: 0.4318, roi.loss_mask: 0.3022, src.loss_imnet_feat_dist: 0.1568, mix.decode.loss_seg: 0.1558, mix.decode.acc_seg: 88.8359
+2023-08-16 16:25:51,830 - mmdet - INFO - Iter [6520/40000]	lr: 5.022e-05, eta: 1 day, 22:10:36, time: 5.464, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1460, decode.acc_seg: 89.8649, rpn.loss_rpn_cls: 0.0509, rpn.loss_rpn_bbox: 0.1290, roi.loss_cls: 0.2809, roi.acc: 89.4141, roi.loss_bbox: 0.4280, roi.loss_mask: 0.3152, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.1693, mix.decode.acc_seg: 88.5618
+2023-08-16 16:27:40,159 - mmdet - INFO - Iter [6540/40000]	lr: 5.019e-05, eta: 1 day, 22:09:43, time: 5.416, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1583, decode.acc_seg: 90.0474, rpn.loss_rpn_cls: 0.0638, rpn.loss_rpn_bbox: 0.1484, roi.loss_cls: 0.3228, roi.acc: 87.8809, roi.loss_bbox: 0.4658, roi.loss_mask: 0.3272, src.loss_imnet_feat_dist: 0.1476, mix.decode.loss_seg: 0.1841, mix.decode.acc_seg: 88.2541
+2023-08-16 16:29:29,818 - mmdet - INFO - Iter [6560/40000]	lr: 5.016e-05, eta: 1 day, 22:08:56, time: 5.483, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1577, decode.acc_seg: 88.5292, rpn.loss_rpn_cls: 0.0609, rpn.loss_rpn_bbox: 0.1394, roi.loss_cls: 0.2908, roi.acc: 89.0869, roi.loss_bbox: 0.4450, roi.loss_mask: 0.3020, src.loss_imnet_feat_dist: 0.1507, mix.decode.loss_seg: 0.1961, mix.decode.acc_seg: 88.0967
+2023-08-16 16:31:20,324 - mmdet - INFO - Iter [6580/40000]	lr: 5.013e-05, eta: 1 day, 22:08:14, time: 5.525, data_time: 0.020, memory: 9593, decode.loss_seg: 0.1587, decode.acc_seg: 87.9197, rpn.loss_rpn_cls: 0.0563, rpn.loss_rpn_bbox: 0.1531, roi.loss_cls: 0.3045, roi.acc: 88.2324, roi.loss_bbox: 0.4522, roi.loss_mask: 0.3081, src.loss_imnet_feat_dist: 0.1495, mix.decode.loss_seg: 0.1862, mix.decode.acc_seg: 86.1301
+2023-08-16 16:33:10,223 - mmdet - INFO - Iter [6600/40000]	lr: 5.010e-05, eta: 1 day, 22:07:27, time: 5.495, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1602, decode.acc_seg: 90.2849, rpn.loss_rpn_cls: 0.0570, rpn.loss_rpn_bbox: 0.1633, roi.loss_cls: 0.3277, roi.acc: 87.9492, roi.loss_bbox: 0.4704, roi.loss_mask: 0.3335, src.loss_imnet_feat_dist: 0.1497, mix.decode.loss_seg: 0.1863, mix.decode.acc_seg: 88.9823
+2023-08-16 16:35:00,567 - mmdet - INFO - Iter [6620/40000]	lr: 5.007e-05, eta: 1 day, 22:06:43, time: 5.517, data_time: 0.019, memory: 9593, decode.loss_seg: 0.2006, decode.acc_seg: 88.8045, rpn.loss_rpn_cls: 0.0572, rpn.loss_rpn_bbox: 0.1402, roi.loss_cls: 0.3075, roi.acc: 88.5400, roi.loss_bbox: 0.4654, roi.loss_mask: 0.3266, src.loss_imnet_feat_dist: 0.1631, mix.decode.loss_seg: 0.2026, mix.decode.acc_seg: 88.2932
+2023-08-16 16:36:49,197 - mmdet - INFO - Iter [6640/40000]	lr: 5.004e-05, eta: 1 day, 22:05:49, time: 5.432, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1585, decode.acc_seg: 89.6810, rpn.loss_rpn_cls: 0.0540, rpn.loss_rpn_bbox: 0.1351, roi.loss_cls: 0.2928, roi.acc: 88.8379, roi.loss_bbox: 0.4292, roi.loss_mask: 0.3100, src.loss_imnet_feat_dist: 0.1408, mix.decode.loss_seg: 0.2010, mix.decode.acc_seg: 87.0374
+2023-08-16 16:38:38,775 - mmdet - INFO - Iter [6660/40000]	lr: 5.001e-05, eta: 1 day, 22:05:00, time: 5.479, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1467, decode.acc_seg: 89.9908, rpn.loss_rpn_cls: 0.0497, rpn.loss_rpn_bbox: 0.1368, roi.loss_cls: 0.3032, roi.acc: 88.6816, roi.loss_bbox: 0.4532, roi.loss_mask: 0.3130, src.loss_imnet_feat_dist: 0.1577, mix.decode.loss_seg: 0.1665, mix.decode.acc_seg: 88.1192
+2023-08-16 16:40:27,775 - mmdet - INFO - Iter [6680/40000]	lr: 4.998e-05, eta: 1 day, 22:04:08, time: 5.450, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1392, decode.acc_seg: 90.0131, rpn.loss_rpn_cls: 0.0636, rpn.loss_rpn_bbox: 0.1465, roi.loss_cls: 0.3060, roi.acc: 88.4473, roi.loss_bbox: 0.4534, roi.loss_mask: 0.3150, src.loss_imnet_feat_dist: 0.1566, mix.decode.loss_seg: 0.1829, mix.decode.acc_seg: 88.4441
+2023-08-16 16:42:16,222 - mmdet - INFO - Iter [6700/40000]	lr: 4.995e-05, eta: 1 day, 22:03:13, time: 5.422, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1677, decode.acc_seg: 89.0043, rpn.loss_rpn_cls: 0.0658, rpn.loss_rpn_bbox: 0.1494, roi.loss_cls: 0.3040, roi.acc: 88.8818, roi.loss_bbox: 0.4500, roi.loss_mask: 0.3145, src.loss_imnet_feat_dist: 0.1493, mix.decode.loss_seg: 0.1872, mix.decode.acc_seg: 87.4671
+2023-08-16 16:44:05,820 - mmdet - INFO - Iter [6720/40000]	lr: 4.992e-05, eta: 1 day, 22:02:23, time: 5.480, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1739, decode.acc_seg: 88.9922, rpn.loss_rpn_cls: 0.0609, rpn.loss_rpn_bbox: 0.1538, roi.loss_cls: 0.3059, roi.acc: 88.5840, roi.loss_bbox: 0.4462, roi.loss_mask: 0.3077, src.loss_imnet_feat_dist: 0.1462, mix.decode.loss_seg: 0.2164, mix.decode.acc_seg: 86.9378
+2023-08-16 16:45:54,123 - mmdet - INFO - Iter [6740/40000]	lr: 4.989e-05, eta: 1 day, 22:01:26, time: 5.415, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1606, decode.acc_seg: 89.9211, rpn.loss_rpn_cls: 0.0601, rpn.loss_rpn_bbox: 0.1489, roi.loss_cls: 0.3181, roi.acc: 88.0176, roi.loss_bbox: 0.4722, roi.loss_mask: 0.3203, src.loss_imnet_feat_dist: 0.1564, mix.decode.loss_seg: 0.1926, mix.decode.acc_seg: 88.5008
+2023-08-16 16:47:43,273 - mmdet - INFO - Iter [6760/40000]	lr: 4.986e-05, eta: 1 day, 22:00:33, time: 5.458, data_time: 0.019, memory: 9593, decode.loss_seg: 0.2530, decode.acc_seg: 89.0330, rpn.loss_rpn_cls: 0.0530, rpn.loss_rpn_bbox: 0.1536, roi.loss_cls: 0.3153, roi.acc: 88.2275, roi.loss_bbox: 0.4518, roi.loss_mask: 0.3264, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.2518, mix.decode.acc_seg: 88.7150
+2023-08-16 16:49:33,213 - mmdet - INFO - Iter [6780/40000]	lr: 4.983e-05, eta: 1 day, 21:59:44, time: 5.497, data_time: 0.019, memory: 9593, decode.loss_seg: 0.2065, decode.acc_seg: 87.9333, rpn.loss_rpn_cls: 0.0713, rpn.loss_rpn_bbox: 0.1505, roi.loss_cls: 0.3274, roi.acc: 87.9883, roi.loss_bbox: 0.4695, roi.loss_mask: 0.3195, src.loss_imnet_feat_dist: 0.1565, mix.decode.loss_seg: 0.2627, mix.decode.acc_seg: 85.5681
+2023-08-16 16:51:22,345 - mmdet - INFO - Iter [6800/40000]	lr: 4.980e-05, eta: 1 day, 21:58:51, time: 5.457, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1900, decode.acc_seg: 88.7064, rpn.loss_rpn_cls: 0.0703, rpn.loss_rpn_bbox: 0.1610, roi.loss_cls: 0.3081, roi.acc: 88.3936, roi.loss_bbox: 0.4452, roi.loss_mask: 0.3084, src.loss_imnet_feat_dist: 0.1543, mix.decode.loss_seg: 0.2288, mix.decode.acc_seg: 86.1150
+2023-08-16 16:53:10,719 - mmdet - INFO - Iter [6820/40000]	lr: 4.977e-05, eta: 1 day, 21:57:53, time: 5.419, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1872, decode.acc_seg: 88.8253, rpn.loss_rpn_cls: 0.0569, rpn.loss_rpn_bbox: 0.1436, roi.loss_cls: 0.3029, roi.acc: 88.7207, roi.loss_bbox: 0.4487, roi.loss_mask: 0.3213, src.loss_imnet_feat_dist: 0.1489, mix.decode.loss_seg: 0.1989, mix.decode.acc_seg: 85.6240
+2023-08-16 16:55:00,305 - mmdet - INFO - Iter [6840/40000]	lr: 4.974e-05, eta: 1 day, 21:57:01, time: 5.479, data_time: 0.019, memory: 9593, decode.loss_seg: 0.2083, decode.acc_seg: 88.0751, rpn.loss_rpn_cls: 0.0711, rpn.loss_rpn_bbox: 0.1378, roi.loss_cls: 0.3133, roi.acc: 88.4570, roi.loss_bbox: 0.4406, roi.loss_mask: 0.3117, src.loss_imnet_feat_dist: 0.1535, mix.decode.loss_seg: 0.2214, mix.decode.acc_seg: 86.7687
+2023-08-16 16:56:48,920 - mmdet - INFO - Iter [6860/40000]	lr: 4.971e-05, eta: 1 day, 21:56:04, time: 5.431, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1497, decode.acc_seg: 89.9130, rpn.loss_rpn_cls: 0.0545, rpn.loss_rpn_bbox: 0.1240, roi.loss_cls: 0.2996, roi.acc: 88.8770, roi.loss_bbox: 0.4464, roi.loss_mask: 0.3081, src.loss_imnet_feat_dist: 0.1612, mix.decode.loss_seg: 0.1772, mix.decode.acc_seg: 87.6727
+2023-08-16 16:58:37,424 - mmdet - INFO - Iter [6880/40000]	lr: 4.968e-05, eta: 1 day, 21:55:06, time: 5.425, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1538, decode.acc_seg: 90.5398, rpn.loss_rpn_cls: 0.0467, rpn.loss_rpn_bbox: 0.1337, roi.loss_cls: 0.2964, roi.acc: 88.8965, roi.loss_bbox: 0.4461, roi.loss_mask: 0.3073, src.loss_imnet_feat_dist: 0.1602, mix.decode.loss_seg: 0.1848, mix.decode.acc_seg: 89.0211
+2023-08-16 17:00:27,254 - mmdet - INFO - Iter [6900/40000]	lr: 4.965e-05, eta: 1 day, 21:54:14, time: 5.492, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1469, decode.acc_seg: 88.5806, rpn.loss_rpn_cls: 0.0520, rpn.loss_rpn_bbox: 0.1396, roi.loss_cls: 0.2899, roi.acc: 88.9209, roi.loss_bbox: 0.4528, roi.loss_mask: 0.3051, src.loss_imnet_feat_dist: 0.1521, mix.decode.loss_seg: 0.1606, mix.decode.acc_seg: 88.4030
+2023-08-16 17:02:16,548 - mmdet - INFO - Iter [6920/40000]	lr: 4.962e-05, eta: 1 day, 21:53:19, time: 5.465, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1687, decode.acc_seg: 87.8789, rpn.loss_rpn_cls: 0.0710, rpn.loss_rpn_bbox: 0.1454, roi.loss_cls: 0.3074, roi.acc: 88.6328, roi.loss_bbox: 0.4578, roi.loss_mask: 0.3262, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.1785, mix.decode.acc_seg: 87.5956
+2023-08-16 17:04:05,673 - mmdet - INFO - Iter [6940/40000]	lr: 4.959e-05, eta: 1 day, 21:52:24, time: 5.456, data_time: 0.019, memory: 9593, decode.loss_seg: 0.2044, decode.acc_seg: 88.2625, rpn.loss_rpn_cls: 0.0636, rpn.loss_rpn_bbox: 0.1331, roi.loss_cls: 0.2835, roi.acc: 89.4629, roi.loss_bbox: 0.4164, roi.loss_mask: 0.3084, src.loss_imnet_feat_dist: 0.1471, mix.decode.loss_seg: 0.2410, mix.decode.acc_seg: 87.6439
+2023-08-16 17:05:56,050 - mmdet - INFO - Iter [6960/40000]	lr: 4.956e-05, eta: 1 day, 21:51:33, time: 5.519, data_time: 0.019, memory: 9593, decode.loss_seg: 0.2060, decode.acc_seg: 88.5890, rpn.loss_rpn_cls: 0.0859, rpn.loss_rpn_bbox: 0.1602, roi.loss_cls: 0.3089, roi.acc: 88.4619, roi.loss_bbox: 0.4586, roi.loss_mask: 0.3259, src.loss_imnet_feat_dist: 0.1666, mix.decode.loss_seg: 0.2539, mix.decode.acc_seg: 85.2504
+2023-08-16 17:07:45,685 - mmdet - INFO - Iter [6980/40000]	lr: 4.953e-05, eta: 1 day, 21:50:39, time: 5.482, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1625, decode.acc_seg: 90.4531, rpn.loss_rpn_cls: 0.0567, rpn.loss_rpn_bbox: 0.1397, roi.loss_cls: 0.2859, roi.acc: 89.0576, roi.loss_bbox: 0.4181, roi.loss_mask: 0.3003, src.loss_imnet_feat_dist: 0.1466, mix.decode.loss_seg: 0.2104, mix.decode.acc_seg: 87.4611
+2023-08-16 17:09:35,598 - mmdet - INFO - Exp name: 230816_0725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_76449
+2023-08-16 17:09:35,598 - mmdet - INFO - Iter [7000/40000]	lr: 4.950e-05, eta: 1 day, 21:49:46, time: 5.496, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1567, decode.acc_seg: 90.3103, rpn.loss_rpn_cls: 0.0583, rpn.loss_rpn_bbox: 0.1400, roi.loss_cls: 0.3002, roi.acc: 88.7744, roi.loss_bbox: 0.4601, roi.loss_mask: 0.3078, src.loss_imnet_feat_dist: 0.1501, mix.decode.loss_seg: 0.2104, mix.decode.acc_seg: 88.4456
+2023-08-16 17:11:26,467 - mmdet - INFO - Iter [7020/40000]	lr: 4.947e-05, eta: 1 day, 21:48:57, time: 5.543, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1846, decode.acc_seg: 88.3478, rpn.loss_rpn_cls: 0.0851, rpn.loss_rpn_bbox: 0.1543, roi.loss_cls: 0.3103, roi.acc: 88.4131, roi.loss_bbox: 0.4510, roi.loss_mask: 0.3252, src.loss_imnet_feat_dist: 0.1553, mix.decode.loss_seg: 0.2165, mix.decode.acc_seg: 86.3098
+2023-08-16 17:13:15,697 - mmdet - INFO - Iter [7040/40000]	lr: 4.944e-05, eta: 1 day, 21:48:01, time: 5.462, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1710, decode.acc_seg: 90.3280, rpn.loss_rpn_cls: 0.0750, rpn.loss_rpn_bbox: 0.1503, roi.loss_cls: 0.3154, roi.acc: 87.9834, roi.loss_bbox: 0.4477, roi.loss_mask: 0.3283, src.loss_imnet_feat_dist: 0.1540, mix.decode.loss_seg: 0.1929, mix.decode.acc_seg: 87.9327
+2023-08-16 17:15:05,508 - mmdet - INFO - Iter [7060/40000]	lr: 4.941e-05, eta: 1 day, 21:47:06, time: 5.491, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1703, decode.acc_seg: 90.0820, rpn.loss_rpn_cls: 0.0532, rpn.loss_rpn_bbox: 0.1325, roi.loss_cls: 0.3024, roi.acc: 88.5400, roi.loss_bbox: 0.4412, roi.loss_mask: 0.3035, src.loss_imnet_feat_dist: 0.1719, mix.decode.loss_seg: 0.2683, mix.decode.acc_seg: 83.3274
+2023-08-16 17:16:54,360 - mmdet - INFO - Iter [7080/40000]	lr: 4.938e-05, eta: 1 day, 21:46:07, time: 5.443, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1566, decode.acc_seg: 89.1572, rpn.loss_rpn_cls: 0.0534, rpn.loss_rpn_bbox: 0.1553, roi.loss_cls: 0.3012, roi.acc: 88.4766, roi.loss_bbox: 0.4382, roi.loss_mask: 0.3200, src.loss_imnet_feat_dist: 0.1695, mix.decode.loss_seg: 0.1950, mix.decode.acc_seg: 88.0965
+2023-08-16 17:18:43,573 - mmdet - INFO - Iter [7100/40000]	lr: 4.935e-05, eta: 1 day, 21:45:09, time: 5.461, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1568, decode.acc_seg: 90.0181, rpn.loss_rpn_cls: 0.0625, rpn.loss_rpn_bbox: 0.1400, roi.loss_cls: 0.2981, roi.acc: 88.3008, roi.loss_bbox: 0.4434, roi.loss_mask: 0.2994, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.1704, mix.decode.acc_seg: 88.8097
+2023-08-16 17:20:33,209 - mmdet - INFO - Iter [7120/40000]	lr: 4.932e-05, eta: 1 day, 21:44:13, time: 5.482, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1568, decode.acc_seg: 87.9889, rpn.loss_rpn_cls: 0.0499, rpn.loss_rpn_bbox: 0.1348, roi.loss_cls: 0.3001, roi.acc: 88.6816, roi.loss_bbox: 0.4587, roi.loss_mask: 0.3124, src.loss_imnet_feat_dist: 0.1523, mix.decode.loss_seg: 0.1946, mix.decode.acc_seg: 86.3747
+2023-08-16 17:22:21,431 - mmdet - INFO - Iter [7140/40000]	lr: 4.929e-05, eta: 1 day, 21:43:10, time: 5.411, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1530, decode.acc_seg: 89.2024, rpn.loss_rpn_cls: 0.0665, rpn.loss_rpn_bbox: 0.1523, roi.loss_cls: 0.3143, roi.acc: 88.2324, roi.loss_bbox: 0.4534, roi.loss_mask: 0.3315, src.loss_imnet_feat_dist: 0.1507, mix.decode.loss_seg: 0.1751, mix.decode.acc_seg: 88.9946
+2023-08-16 17:24:10,311 - mmdet - INFO - Iter [7160/40000]	lr: 4.926e-05, eta: 1 day, 21:42:09, time: 5.444, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1420, decode.acc_seg: 90.6467, rpn.loss_rpn_cls: 0.0477, rpn.loss_rpn_bbox: 0.1320, roi.loss_cls: 0.2917, roi.acc: 88.5596, roi.loss_bbox: 0.4350, roi.loss_mask: 0.3081, src.loss_imnet_feat_dist: 0.1480, mix.decode.loss_seg: 0.1709, mix.decode.acc_seg: 88.9259
+2023-08-16 17:26:00,946 - mmdet - INFO - Iter [7180/40000]	lr: 4.923e-05, eta: 1 day, 21:41:17, time: 5.532, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1424, decode.acc_seg: 90.0550, rpn.loss_rpn_cls: 0.0615, rpn.loss_rpn_bbox: 0.1374, roi.loss_cls: 0.2802, roi.acc: 89.3506, roi.loss_bbox: 0.4234, roi.loss_mask: 0.3319, src.loss_imnet_feat_dist: 0.1556, mix.decode.loss_seg: 0.1631, mix.decode.acc_seg: 89.6449
+2023-08-16 17:27:49,317 - mmdet - INFO - Iter [7200/40000]	lr: 4.920e-05, eta: 1 day, 21:40:14, time: 5.419, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1513, decode.acc_seg: 89.8597, rpn.loss_rpn_cls: 0.0617, rpn.loss_rpn_bbox: 0.1557, roi.loss_cls: 0.3139, roi.acc: 87.8467, roi.loss_bbox: 0.4694, roi.loss_mask: 0.3219, src.loss_imnet_feat_dist: 0.1567, mix.decode.loss_seg: 0.1648, mix.decode.acc_seg: 88.6143
+2023-08-16 17:29:39,179 - mmdet - INFO - Iter [7220/40000]	lr: 4.917e-05, eta: 1 day, 21:39:17, time: 5.493, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1521, decode.acc_seg: 89.3123, rpn.loss_rpn_cls: 0.0583, rpn.loss_rpn_bbox: 0.1521, roi.loss_cls: 0.3075, roi.acc: 88.5352, roi.loss_bbox: 0.4739, roi.loss_mask: 0.3314, src.loss_imnet_feat_dist: 0.1651, mix.decode.loss_seg: 0.1579, mix.decode.acc_seg: 88.5337
+2023-08-16 17:31:29,244 - mmdet - INFO - Iter [7240/40000]	lr: 4.914e-05, eta: 1 day, 21:38:21, time: 5.503, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1502, decode.acc_seg: 88.6018, rpn.loss_rpn_cls: 0.0636, rpn.loss_rpn_bbox: 0.1575, roi.loss_cls: 0.3152, roi.acc: 88.3789, roi.loss_bbox: 0.4431, roi.loss_mask: 0.3183, src.loss_imnet_feat_dist: 0.1552, mix.decode.loss_seg: 0.1797, mix.decode.acc_seg: 87.8839
+2023-08-16 17:33:17,984 - mmdet - INFO - Iter [7260/40000]	lr: 4.911e-05, eta: 1 day, 21:37:19, time: 5.437, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1618, decode.acc_seg: 89.2231, rpn.loss_rpn_cls: 0.0553, rpn.loss_rpn_bbox: 0.1503, roi.loss_cls: 0.3017, roi.acc: 88.4863, roi.loss_bbox: 0.4585, roi.loss_mask: 0.3014, src.loss_imnet_feat_dist: 0.1446, mix.decode.loss_seg: 0.1903, mix.decode.acc_seg: 88.8824
+2023-08-16 17:35:08,164 - mmdet - INFO - Iter [7280/40000]	lr: 4.908e-05, eta: 1 day, 21:36:23, time: 5.509, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1426, decode.acc_seg: 90.4495, rpn.loss_rpn_cls: 0.0630, rpn.loss_rpn_bbox: 0.1549, roi.loss_cls: 0.2977, roi.acc: 88.6670, roi.loss_bbox: 0.4370, roi.loss_mask: 0.3123, src.loss_imnet_feat_dist: 0.1546, mix.decode.loss_seg: 0.2199, mix.decode.acc_seg: 87.2413
+2023-08-16 17:36:56,093 - mmdet - INFO - Iter [7300/40000]	lr: 4.905e-05, eta: 1 day, 21:35:16, time: 5.396, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1509, decode.acc_seg: 90.8101, rpn.loss_rpn_cls: 0.0486, rpn.loss_rpn_bbox: 0.1428, roi.loss_cls: 0.2919, roi.acc: 88.8525, roi.loss_bbox: 0.4404, roi.loss_mask: 0.3059, src.loss_imnet_feat_dist: 0.1517, mix.decode.loss_seg: 0.1751, mix.decode.acc_seg: 89.5871
+2023-08-16 17:38:45,052 - mmdet - INFO - Iter [7320/40000]	lr: 4.902e-05, eta: 1 day, 21:34:14, time: 5.448, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1413, decode.acc_seg: 90.4844, rpn.loss_rpn_cls: 0.0458, rpn.loss_rpn_bbox: 0.1446, roi.loss_cls: 0.2861, roi.acc: 89.0674, roi.loss_bbox: 0.4442, roi.loss_mask: 0.3072, src.loss_imnet_feat_dist: 0.1525, mix.decode.loss_seg: 0.1556, mix.decode.acc_seg: 90.4903
+2023-08-16 17:40:35,193 - mmdet - INFO - Iter [7340/40000]	lr: 4.899e-05, eta: 1 day, 21:33:17, time: 5.507, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1451, decode.acc_seg: 89.7539, rpn.loss_rpn_cls: 0.0499, rpn.loss_rpn_bbox: 0.1580, roi.loss_cls: 0.2841, roi.acc: 89.2383, roi.loss_bbox: 0.4332, roi.loss_mask: 0.3039, src.loss_imnet_feat_dist: 0.1628, mix.decode.loss_seg: 0.1728, mix.decode.acc_seg: 89.0391
+2023-08-16 17:42:24,453 - mmdet - INFO - Iter [7360/40000]	lr: 4.896e-05, eta: 1 day, 21:32:16, time: 5.463, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1482, decode.acc_seg: 90.1467, rpn.loss_rpn_cls: 0.0480, rpn.loss_rpn_bbox: 0.1249, roi.loss_cls: 0.2808, roi.acc: 89.1699, roi.loss_bbox: 0.4393, roi.loss_mask: 0.3107, src.loss_imnet_feat_dist: 0.1446, mix.decode.loss_seg: 0.1721, mix.decode.acc_seg: 88.4805
+2023-08-16 17:44:13,169 - mmdet - INFO - Iter [7380/40000]	lr: 4.893e-05, eta: 1 day, 21:31:12, time: 5.436, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1464, decode.acc_seg: 88.2289, rpn.loss_rpn_cls: 0.0439, rpn.loss_rpn_bbox: 0.1318, roi.loss_cls: 0.2962, roi.acc: 88.5596, roi.loss_bbox: 0.4360, roi.loss_mask: 0.3038, src.loss_imnet_feat_dist: 0.1589, mix.decode.loss_seg: 0.1992, mix.decode.acc_seg: 87.7173
+2023-08-16 17:46:03,147 - mmdet - INFO - Iter [7400/40000]	lr: 4.890e-05, eta: 1 day, 21:30:13, time: 5.499, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1576, decode.acc_seg: 88.5772, rpn.loss_rpn_cls: 0.0538, rpn.loss_rpn_bbox: 0.1424, roi.loss_cls: 0.2918, roi.acc: 88.8672, roi.loss_bbox: 0.4360, roi.loss_mask: 0.3094, src.loss_imnet_feat_dist: 0.1560, mix.decode.loss_seg: 0.1693, mix.decode.acc_seg: 88.1580
+2023-08-16 17:47:51,658 - mmdet - INFO - Iter [7420/40000]	lr: 4.887e-05, eta: 1 day, 21:29:08, time: 5.426, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1514, decode.acc_seg: 90.3576, rpn.loss_rpn_cls: 0.0557, rpn.loss_rpn_bbox: 0.1241, roi.loss_cls: 0.2820, roi.acc: 89.2725, roi.loss_bbox: 0.4225, roi.loss_mask: 0.3014, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.1663, mix.decode.acc_seg: 89.6718
+2023-08-16 17:49:41,450 - mmdet - INFO - Iter [7440/40000]	lr: 4.884e-05, eta: 1 day, 21:28:08, time: 5.490, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1623, decode.acc_seg: 90.6165, rpn.loss_rpn_cls: 0.0522, rpn.loss_rpn_bbox: 0.1428, roi.loss_cls: 0.2891, roi.acc: 89.2627, roi.loss_bbox: 0.4458, roi.loss_mask: 0.3041, src.loss_imnet_feat_dist: 0.1632, mix.decode.loss_seg: 0.1492, mix.decode.acc_seg: 89.9282
+2023-08-16 17:51:30,245 - mmdet - INFO - Iter [7460/40000]	lr: 4.881e-05, eta: 1 day, 21:27:04, time: 5.440, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1475, decode.acc_seg: 88.5137, rpn.loss_rpn_cls: 0.0465, rpn.loss_rpn_bbox: 0.1343, roi.loss_cls: 0.2827, roi.acc: 88.9648, roi.loss_bbox: 0.4359, roi.loss_mask: 0.3055, src.loss_imnet_feat_dist: 0.1520, mix.decode.loss_seg: 0.1614, mix.decode.acc_seg: 87.4102
+2023-08-16 17:53:19,004 - mmdet - INFO - Iter [7480/40000]	lr: 4.878e-05, eta: 1 day, 21:25:59, time: 5.438, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1530, decode.acc_seg: 91.2003, rpn.loss_rpn_cls: 0.0707, rpn.loss_rpn_bbox: 0.1501, roi.loss_cls: 0.2962, roi.acc: 88.6768, roi.loss_bbox: 0.4314, roi.loss_mask: 0.3099, src.loss_imnet_feat_dist: 0.1606, mix.decode.loss_seg: 0.1576, mix.decode.acc_seg: 89.9516
+2023-08-16 17:55:09,176 - mmdet - INFO - Iter [7500/40000]	lr: 4.875e-05, eta: 1 day, 21:25:00, time: 5.509, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1332, decode.acc_seg: 89.1877, rpn.loss_rpn_cls: 0.0473, rpn.loss_rpn_bbox: 0.1357, roi.loss_cls: 0.2770, roi.acc: 89.7314, roi.loss_bbox: 0.4174, roi.loss_mask: 0.2963, src.loss_imnet_feat_dist: 0.1476, mix.decode.loss_seg: 0.1788, mix.decode.acc_seg: 87.7881
+2023-08-16 17:56:57,917 - mmdet - INFO - Iter [7520/40000]	lr: 4.872e-05, eta: 1 day, 21:23:54, time: 5.437, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1469, decode.acc_seg: 89.9991, rpn.loss_rpn_cls: 0.0536, rpn.loss_rpn_bbox: 0.1413, roi.loss_cls: 0.2880, roi.acc: 88.8379, roi.loss_bbox: 0.4295, roi.loss_mask: 0.3023, src.loss_imnet_feat_dist: 0.1517, mix.decode.loss_seg: 0.1695, mix.decode.acc_seg: 88.7277
+2023-08-16 17:58:47,130 - mmdet - INFO - Iter [7540/40000]	lr: 4.869e-05, eta: 1 day, 21:22:50, time: 5.461, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1504, decode.acc_seg: 89.3442, rpn.loss_rpn_cls: 0.0507, rpn.loss_rpn_bbox: 0.1452, roi.loss_cls: 0.2939, roi.acc: 88.9551, roi.loss_bbox: 0.4323, roi.loss_mask: 0.3153, src.loss_imnet_feat_dist: 0.1541, mix.decode.loss_seg: 0.1831, mix.decode.acc_seg: 89.2510
+2023-08-16 18:00:36,100 - mmdet - INFO - Iter [7560/40000]	lr: 4.866e-05, eta: 1 day, 21:21:45, time: 5.449, data_time: 0.018, memory: 9593, decode.loss_seg: 0.1438, decode.acc_seg: 89.9398, rpn.loss_rpn_cls: 0.0499, rpn.loss_rpn_bbox: 0.1461, roi.loss_cls: 0.3095, roi.acc: 88.2617, roi.loss_bbox: 0.4739, roi.loss_mask: 0.3145, src.loss_imnet_feat_dist: 0.1607, mix.decode.loss_seg: 0.1762, mix.decode.acc_seg: 88.6215
+2023-08-16 18:02:24,754 - mmdet - INFO - Iter [7580/40000]	lr: 4.863e-05, eta: 1 day, 21:20:39, time: 5.433, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1402, decode.acc_seg: 90.9591, rpn.loss_rpn_cls: 0.0560, rpn.loss_rpn_bbox: 0.1448, roi.loss_cls: 0.3099, roi.acc: 88.3350, roi.loss_bbox: 0.4650, roi.loss_mask: 0.3213, src.loss_imnet_feat_dist: 0.1562, mix.decode.loss_seg: 0.1650, mix.decode.acc_seg: 89.8169
+2023-08-16 18:04:13,116 - mmdet - INFO - Iter [7600/40000]	lr: 4.860e-05, eta: 1 day, 21:19:31, time: 5.418, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1778, decode.acc_seg: 89.5709, rpn.loss_rpn_cls: 0.0663, rpn.loss_rpn_bbox: 0.1559, roi.loss_cls: 0.3204, roi.acc: 88.3252, roi.loss_bbox: 0.4750, roi.loss_mask: 0.3320, src.loss_imnet_feat_dist: 0.1502, mix.decode.loss_seg: 0.1824, mix.decode.acc_seg: 88.2173
+2023-08-16 18:06:03,254 - mmdet - INFO - Iter [7620/40000]	lr: 4.857e-05, eta: 1 day, 21:18:30, time: 5.507, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1556, decode.acc_seg: 90.1987, rpn.loss_rpn_cls: 0.0613, rpn.loss_rpn_bbox: 0.1374, roi.loss_cls: 0.2923, roi.acc: 88.8525, roi.loss_bbox: 0.4582, roi.loss_mask: 0.3065, src.loss_imnet_feat_dist: 0.1596, mix.decode.loss_seg: 0.1863, mix.decode.acc_seg: 88.9050
+2023-08-16 18:07:52,527 - mmdet - INFO - Iter [7640/40000]	lr: 4.854e-05, eta: 1 day, 21:17:25, time: 5.464, data_time: 0.020, memory: 9593, decode.loss_seg: 0.1564, decode.acc_seg: 90.0547, rpn.loss_rpn_cls: 0.0738, rpn.loss_rpn_bbox: 0.1550, roi.loss_cls: 0.3024, roi.acc: 88.5791, roi.loss_bbox: 0.4551, roi.loss_mask: 0.3035, src.loss_imnet_feat_dist: 0.1572, mix.decode.loss_seg: 0.1759, mix.decode.acc_seg: 89.2186
+2023-08-16 18:09:43,274 - mmdet - INFO - Iter [7660/40000]	lr: 4.851e-05, eta: 1 day, 21:16:27, time: 5.537, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1516, decode.acc_seg: 89.7392, rpn.loss_rpn_cls: 0.0609, rpn.loss_rpn_bbox: 0.1437, roi.loss_cls: 0.2841, roi.acc: 88.9502, roi.loss_bbox: 0.4414, roi.loss_mask: 0.3260, src.loss_imnet_feat_dist: 0.1658, mix.decode.loss_seg: 0.1587, mix.decode.acc_seg: 87.9684
+2023-08-16 18:11:32,801 - mmdet - INFO - Iter [7680/40000]	lr: 4.848e-05, eta: 1 day, 21:15:23, time: 5.476, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1771, decode.acc_seg: 88.4246, rpn.loss_rpn_cls: 0.0596, rpn.loss_rpn_bbox: 0.1578, roi.loss_cls: 0.3265, roi.acc: 88.2666, roi.loss_bbox: 0.4395, roi.loss_mask: 0.3336, src.loss_imnet_feat_dist: 0.1610, mix.decode.loss_seg: 0.2089, mix.decode.acc_seg: 86.4787
+2023-08-16 18:13:21,517 - mmdet - INFO - Iter [7700/40000]	lr: 4.845e-05, eta: 1 day, 21:14:15, time: 5.436, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1344, decode.acc_seg: 88.7485, rpn.loss_rpn_cls: 0.0484, rpn.loss_rpn_bbox: 0.1411, roi.loss_cls: 0.2834, roi.acc: 89.2285, roi.loss_bbox: 0.4294, roi.loss_mask: 0.3120, src.loss_imnet_feat_dist: 0.1511, mix.decode.loss_seg: 0.1556, mix.decode.acc_seg: 87.3425
+2023-08-16 18:15:11,636 - mmdet - INFO - Iter [7720/40000]	lr: 4.842e-05, eta: 1 day, 21:13:13, time: 5.506, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1555, decode.acc_seg: 91.0268, rpn.loss_rpn_cls: 0.0604, rpn.loss_rpn_bbox: 0.1524, roi.loss_cls: 0.3156, roi.acc: 88.6230, roi.loss_bbox: 0.4482, roi.loss_mask: 0.3122, src.loss_imnet_feat_dist: 0.1602, mix.decode.loss_seg: 0.1963, mix.decode.acc_seg: 89.2195
+2023-08-16 18:17:01,205 - mmdet - INFO - Iter [7740/40000]	lr: 4.839e-05, eta: 1 day, 21:12:08, time: 5.478, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1728, decode.acc_seg: 89.3617, rpn.loss_rpn_cls: 0.0572, rpn.loss_rpn_bbox: 0.1211, roi.loss_cls: 0.2785, roi.acc: 89.6387, roi.loss_bbox: 0.4304, roi.loss_mask: 0.3087, src.loss_imnet_feat_dist: 0.1548, mix.decode.loss_seg: 0.2237, mix.decode.acc_seg: 89.4372
+2023-08-16 18:18:50,776 - mmdet - INFO - Iter [7760/40000]	lr: 4.836e-05, eta: 1 day, 21:11:04, time: 5.479, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1703, decode.acc_seg: 89.3026, rpn.loss_rpn_cls: 0.0541, rpn.loss_rpn_bbox: 0.1388, roi.loss_cls: 0.2881, roi.acc: 89.2432, roi.loss_bbox: 0.4412, roi.loss_mask: 0.3039, src.loss_imnet_feat_dist: 0.1571, mix.decode.loss_seg: 0.2269, mix.decode.acc_seg: 87.6361
+2023-08-16 18:20:41,231 - mmdet - INFO - Iter [7780/40000]	lr: 4.833e-05, eta: 1 day, 21:10:02, time: 5.523, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1729, decode.acc_seg: 87.0141, rpn.loss_rpn_cls: 0.0622, rpn.loss_rpn_bbox: 0.1657, roi.loss_cls: 0.3157, roi.acc: 88.1299, roi.loss_bbox: 0.4647, roi.loss_mask: 0.3289, src.loss_imnet_feat_dist: 0.1624, mix.decode.loss_seg: 0.1928, mix.decode.acc_seg: 87.3474
+2023-08-16 18:22:30,590 - mmdet - INFO - Iter [7800/40000]	lr: 4.830e-05, eta: 1 day, 21:08:56, time: 5.468, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1502, decode.acc_seg: 90.4290, rpn.loss_rpn_cls: 0.0517, rpn.loss_rpn_bbox: 0.1346, roi.loss_cls: 0.2797, roi.acc: 89.4873, roi.loss_bbox: 0.4298, roi.loss_mask: 0.3121, src.loss_imnet_feat_dist: 0.1500, mix.decode.loss_seg: 0.2456, mix.decode.acc_seg: 86.9171
+2023-08-16 18:24:19,303 - mmdet - INFO - Iter [7820/40000]	lr: 4.827e-05, eta: 1 day, 21:07:47, time: 5.436, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1556, decode.acc_seg: 90.1087, rpn.loss_rpn_cls: 0.0500, rpn.loss_rpn_bbox: 0.1421, roi.loss_cls: 0.2940, roi.acc: 88.6084, roi.loss_bbox: 0.4477, roi.loss_mask: 0.3060, src.loss_imnet_feat_dist: 0.1623, mix.decode.loss_seg: 0.1933, mix.decode.acc_seg: 88.5387
+2023-08-16 18:26:09,515 - mmdet - INFO - Iter [7840/40000]	lr: 4.824e-05, eta: 1 day, 21:06:44, time: 5.511, data_time: 0.019, memory: 9593, decode.loss_seg: 0.1873, decode.acc_seg: 89.0967, rpn.loss_rpn_cls: 0.0634, rpn.loss_rpn_bbox: 0.1427, roi.loss_cls: 0.2929, roi.acc: 88.8818, roi.loss_bbox: 0.4378, roi.loss_mask: 0.3331, src.loss_imnet_feat_dist: 0.1534, mix.decode.loss_seg: 0.2222, mix.decode.acc_seg: 87.0060
+2023-08-16 18:27:58,664 - mmdet - INFO - Iter [7860/40000]	lr: 4.821e-05, eta: 1 day, 21:05:36, time: 5.457, data_time: 0.019, memory: 9593, decode.loss_seg: 0.2128, decode.acc_seg: 87.6629, rpn.loss_rpn_cls: 0.0525, rpn.loss_rpn_bbox: 0.1425, roi.loss_cls: 0.2952, roi.acc: 88.7744, roi.loss_bbox: 0.4368, roi.loss_mask: 0.3059, src.loss_imnet_feat_dist: 0.1576, mix.decode.loss_seg: 0.2590, mix.decode.acc_seg: 85.8959
+2023-08-16 18:29:46,594 - mmdet - INFO - Iter [7880/40000]	lr: 4.818e-05, eta: 1 day, 21:04:23, time: 5.397, data_time: 0.018, memory: 9593, decode.loss_seg: 0.1950, decode.acc_seg: 87.8237, rpn.loss_rpn_cls: 0.0635, rpn.loss_rpn_bbox: 0.1646, roi.loss_cls: 0.3355, roi.acc: 87.6074, roi.loss_bbox: 0.4634, roi.loss_mask: 0.3226, src.loss_imnet_feat_dist: 0.1588, mix.decode.loss_seg: 0.2354, mix.decode.acc_seg: 85.7666
+2023-08-16 18:46:14,681 - mmdet - INFO - Iter [7900/40000]	lr: 4.815e-05, eta: 1 day, 22:02:47, time: 49.404, data_time: 0.016, memory: 9593, decode.loss_seg: 0.1504, decode.acc_seg: 89.4377, rpn.loss_rpn_cls: 0.0522, rpn.loss_rpn_bbox: 0.1451, roi.loss_cls: 0.3217, roi.acc: 88.1787, roi.loss_bbox: 0.4602, roi.loss_mask: 0.3262, src.loss_imnet_feat_dist: 0.1493, mix.decode.loss_seg: 0.1946, mix.decode.acc_seg: 87.3687
+Traceback (most recent call last):
+  File "run_experiments.py", line 127, in <module>
+    train_mmdet.main([config_files[i]])
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/tools/train_mmdet.py", line 127, in main
+    train_detector(model, datasets, cfg, distributed=distributed, validate=(not cfg.only_train), timestamp=timestamp,  meta=meta,)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/apis/train.py", line 211, in train_detector
+    runner.run(data_loaders, cfg.workflow)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 144, in run
+    iter_runner(iter_loaders[i], **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 61, in train
+    data_batch = next(data_loader)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 34, in __next__
+    data = next(self.iter_loader)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 435, in __next__
+    data = self._next_data()
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1085, in _next_data
+    return self._process_data(data)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1111, in _process_data
+    data.reraise()
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/_utils.py", line 428, in reraise
+    raise self.exc_type(msg)
+PermissionError: Caught PermissionError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/_utils/worker.py", line 198, in _worker_loop
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/uda_dataset.py", line 127, in __getitem__
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/uda_dataset.py", line 90, in get_rare_class_sample
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/custom.py", line 196, in __getitem__
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/custom.py", line 213, in prepare_train_img
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/pipelines/compose.py", line 42, in __call__
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/pipelines/loading.py", line 62, in __call__
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/fileio/file_client.py", line 1014, in get
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/fileio/file_client.py", line 535, in get
+PermissionError: [Errno 13] Permission denied: 'data/synthia/RGB/0002243.png'
+
