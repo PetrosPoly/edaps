@@ -91,9 +91,13 @@ class GenPanopLabelsForMaskFormer(object):
         max_inst_per_class = np.zeros(len(self.thing_list))
         class_id_tracker = {}
         nonclass_id_tracker = {} # Petros :: added to check the number of the labels that do not form a class
+       # labels_indicies = []
+        pan_label = []
+        unique_labels_list = []
+        indices_list = []
         for cid in self.thing_list:
             class_id_tracker[cid] = 1
-            nonclass_id_tracker[cid] = 1
+            nonclass_id_tracker[cid] = 1 # Petros :: added to check the number of the labels that do not form a class
         gt_masks = []
         gt_labels = []
         gt_bboxes = []
@@ -117,7 +121,28 @@ class GenPanopLabelsForMaskFormer(object):
                         # gt_masks_all.append(mask.astype(np.uint8))
                         if cat_id in self.thing_list:
                             box = get_bbox_coord(mask)
+                            
+                            # for contrastive loss added by Petros 17 Oct. 2023
+                            subregion_labels = np.full_like(panoptic, fill_value=-100, dtype=np.uint8)
+                            contrast_label = np.zeros_like(panoptic, dtype=np.uint8)
+                            subboxes = [None, None, None, None]
                             if isValidBox(box):
+                                # build the subregion label
+                                subboxes[0], subboxes[1], subboxes[2], subboxes[3] = divide_box(box)
+                                for i, subbox in enumerate(subboxes):
+                                    x1, y1, x2, y2 = subbox
+                                    subregion_labels[y1:y2+1, x1:x2+1] = i
+                                # build the contrastive labels and extract the uniques and index
+                                contrast_label = panoptic * 10 + subregion_labels
+                                contrast_label_flatten_tensor = torch.from_numpy(contrast_label.flatten())
+                                unique_labels, indicies = torch.unique(contrast_label_flatten_tensor,sorted = True, return_inverse=True)
+                                pan_label.append(seg["id"])
+                                unique_labels_list.append(unique_labels.numpy().astype('long'))
+                                indices_list.append(indicies.numpy().astype('long'))
+                                
+                        
+                            # for contrastive loss added by Petros 17 Oct. 2023
+                            
                                 gt_masks.append(mask.astype(np.uint8))
                                 gt_labels.append(self._map_instance_class_ids(cat_id))
                                 gt_bboxes.append(box)
@@ -126,7 +151,36 @@ class GenPanopLabelsForMaskFormer(object):
                 else:
                     if cat_id in self.thing_list:
                         box = get_bbox_coord(mask)
+                        
+                        # for contrastive loss added by Petros 17 Oct. 2023
+                        subregion_labels = np.full_like(panoptic, fill_value=-100, dtype=np.uint8)
+                        contrast_label = np.zeros_like(panoptic, dtype=np.uint8)
+                        subboxes = [None, None, None, None]
                         if isValidBox(box):
+                            # build the subregion label
+                            subboxes[0], subboxes[1], subboxes[2], subboxes[3] = divide_box(box)
+                            for i, subbox in enumerate(subboxes):
+                                x1, y1, x2, y2 = subbox
+                                subregion_labels[y1:y2+1, x1:x2+1] = i
+                            # build the contrastive labels and extract the uniques and index
+                            contrast_label = panoptic * 10 + subregion_labels
+                            contrast_label_flatten_tensor = torch.from_numpy(contrast_label.flatten())
+                            unique_labels, indicies = torch.unique(contrast_label_flatten_tensor,sorted = True, return_inverse=True)
+                            pan_label.append(seg["id"])
+                            unique_labels_list.append(unique_labels.numpy().astype('long'))
+                            indices_list.append(indicies.numpy().astype('long'))
+                            
+                            # bring the elements in the list in the same shape 
+                            largest_shape = max(unique_labels_list, key=lambda x:len(x)).shape[0]
+                            unique_labels_list = [np.pad(arr, (0, largest_shape - arr.shape[0]), mode = 'constant') for arr in unique_labels_list]
+                            
+                            # dict = {}
+                            # dict['pan_label'] = seg["id"]
+                            # dict['unique_labels'] = unique_labels.numpy().astype('long')    
+                            # dict['indicies'] = indicies.numpy().astype('long')   
+                            # labels_indicies.append(dict)
+                        # for contrastive loss added by Petros 17 Oct. 2023
+                            
                             gt_masks.append(mask.astype(np.uint8))
                             gt_labels.append(self._map_instance_class_ids(cat_id))
                             gt_bboxes.append(box)
@@ -135,6 +189,13 @@ class GenPanopLabelsForMaskFormer(object):
         for cid in list(class_id_tracker.keys()):
             max_inst_per_class[self._map_instance_class_ids(cid)] = class_id_tracker[cid]
         gt_masks = BitmapMasks(gt_masks, height, width)
+        largest_shape = max(unique_labels_list, key=lambda x:len(x)).shape[0]
+        unique_labels_list = [np.pad(arr, (0, largest_shape - arr.shape[0]), mode = 'constant') for arr in unique_labels_list]
+                            
+        results['pan_label'] = np.asarray(pan_label)
+        results['unique_labels'] = np.asarray(unique_labels_list)
+        results['indices_list'] = np.asarray(indices_list)
+        
         results['gt_masks'] = gt_masks
         results['gt_semantic_seg'] = semantic.astype('long')
         results['gt_panoptic_only_thing_classes'] = panoptic_only_thing_classes.astype('long')

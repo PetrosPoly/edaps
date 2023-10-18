@@ -104,41 +104,22 @@ class MaskRCNNPanoptic(TwoStageDetector):
       x_flat = x.view(2, 256, -1).permute(0,2,1).contiguous()
       return x_flat
     
-    def pool_features(self, extracted_features, gt_panoptic_thing_classes):
+    def pool_features(self, extracted_features, gt_panoptic_thing_classes, unique_labels, indicies):
         panoptic = gt_panoptic_thing_classes.numpy()   
         selected_labels = [] 
         selected_features = []
         for pan_label in np.unique(panoptic):
             if pan_label == 0:
                 continue  # Skip label 0
-            mask = (panoptic == pan_label)
-            box = get_bbox_coord(mask)
             
-            # for contrastive average pooling features start # 
-            subregion_labels = np.full_like(panoptic, fill_value=-100, dtype=np.uint8)
-            contrast_label = np.zeros_like(panoptic, dtype=np.uint8)
-            subboxes = [None, None, None, None]
-            if isValidBox(box):
-                
-                # build the subregion label
-                subboxes[0], subboxes[1], subboxes[2], subboxes[3] = divide_box(box)
-                for i, subbox in enumerate(subboxes):
-                    x1, y1, x2, y2 = subbox
-                    subregion_labels[y1:y2+1, x1:x2+1] = i
-                    
-                # build the contrastive labels and extract the uniques and index
-                contrast_label = panoptic * 10 + subregion_labels
-                contrast_label_flatten_tensor = torch.from_numpy(contrast_label.flatten())
-                unique_values, indicies = torch.unique(contrast_label_flatten_tensor,sorted = True, return_inverse=True)
-                
-                # extract the mean values based on the indicies 
-                mean_features = scatter_mean(extracted_features, indicies, dim=0)
-                
-                # Loop through each unique label and feature
-                for label, feature in zip(unique_values, mean_features):
-                    if str(label.item()).startswith(str(pan_label)): # Check if string representation of label starts with '24000'
-                        selected_labels.append(label.item() // 10)
-                        selected_features.append(feature)  
+            # extract the mean values based on the indicies 
+            mean_features = scatter_mean(extracted_features, indicies, dim=0)
+            
+            # Loop through each unique label and feature
+            for label, feature in zip(unique_labels, mean_features):
+                if str(label.item()).startswith(str(pan_label)): # Check if string representation of label starts with '24000'
+                    selected_labels.append(label.item() // 10)
+                    selected_features.append(feature)  
             # for contrastive average pooling features finish #
         
         # Convert list to torch.tensors to be used as input for the loss 
@@ -186,7 +167,11 @@ class MaskRCNNPanoptic(TwoStageDetector):
                       gt_labels=None,
                       gt_bboxes_ignore=None,
                       gt_masks=None,
-                      gt_panoptic_only_thing_classes = None, # added by Petros for contrastive
+                      gt_panoptic_only_thing_classes = None, # added by Petros for contrastive 
+                    #   pan_label = None,
+                    #   unique_labels = None, 
+                    #   indices_list = None, 
+                     # contrast = None,
                       proposals=None,
                       box_domain_indicator=None,
                       pseudo_wght_val=None,
