@@ -123,6 +123,7 @@ class GenPanopLabelsForMaskFormer(object):
                             box = get_bbox_coord(mask)
                             
                             # for contrastive loss added by Petros 17 Oct. 2023
+                            
                             subregion_labels = np.full_like(panoptic, fill_value=-100, dtype=np.uint8)
                             contrast_label = np.zeros_like(panoptic, dtype=np.uint8)
                             subboxes = [None, None, None, None]
@@ -140,7 +141,6 @@ class GenPanopLabelsForMaskFormer(object):
                                 unique_labels_list.append(unique_labels.numpy().astype('long'))
                                 indices_list.append(indicies.numpy().astype('long'))
                                 
-                        
                             # for contrastive loss added by Petros 17 Oct. 2023
                             
                                 gt_masks.append(mask.astype(np.uint8))
@@ -174,11 +174,6 @@ class GenPanopLabelsForMaskFormer(object):
                             largest_shape = max(unique_labels_list, key=lambda x:len(x)).shape[0]
                             unique_labels_list = [np.pad(arr, (0, largest_shape - arr.shape[0]), mode = 'constant') for arr in unique_labels_list]
                             
-                            # dict = {}
-                            # dict['pan_label'] = seg["id"]
-                            # dict['unique_labels'] = unique_labels.numpy().astype('long')    
-                            # dict['indicies'] = indicies.numpy().astype('long')   
-                            # labels_indicies.append(dict)
                         # for contrastive loss added by Petros 17 Oct. 2023
                             
                             gt_masks.append(mask.astype(np.uint8))

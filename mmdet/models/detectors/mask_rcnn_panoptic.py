@@ -13,10 +13,8 @@ import torch.nn.functional as F
 
 # # added by Petros for the contrastive loss 
 from pytorch_metric_learning.losses import NTXentLoss
-import numpy as np
-from mmseg.datasets.pipelines.gen_panoptic_labels_for_maskformer import isValidBox, get_bbox_coord, divide_box
 from mmcv.runner import force_fp32
-from w_Petros.feature_extraction_avg_pooling.extact_features_avg_pooling import scatter_mean
+from mmseg.utils.scatter_mean import scatter_mean
 # # added by Petros for the contrastive loss
 
 @DETECTORS.register_module()
@@ -104,23 +102,36 @@ class MaskRCNNPanoptic(TwoStageDetector):
       x_flat = x.view(2, 256, -1).permute(0,2,1).contiguous()
       return x_flat
     
-    def pool_features(self, extracted_features, gt_panoptic_thing_classes, unique_labels, indicies):
-        panoptic = gt_panoptic_thing_classes.numpy()   
+    def pool_features(self, extracted_features, pan_labels, unique_labels, indices):
         selected_labels = [] 
         selected_features = []
-        for pan_label in np.unique(panoptic):
+        for i, pan_label in enumerate(pan_labels):
             if pan_label == 0:
                 continue  # Skip label 0
             
-            # extract the mean values based on the indicies 
-            mean_features = scatter_mean(extracted_features, indicies, dim=0)
+            # remove the padding of zeros in the unique values arrays
+            non_zero_indices = unique_labels[i].nonzero(as_tuple=True)[0]
+            end_index_before_zero = non_zero_indices[-1].item()
+            unique_labels_ = unique_labels[i][0:end_index_before_zero+1]
             
+            # extract the mean values based on the indicies 
+            mean_features = scatter_mean(extracted_features, indices[i], dim=0)
+            
+            # find the indices from the unique_labels which divided // 10 is equal to panoptic 
+            mask_ = (unique_labels_ // 10 == pan_label.item())
+            mask_indices = mask_.nonzero(as_tuple=True)[0]
+            
+            # Loop according to these indices 
+            for idx in mask_indices:
+                selected_labels.append(unique_labels_[idx].item() // 10)
+                selected_features.append(mean_features[idx])
+                
             # Loop through each unique label and feature
-            for label, feature in zip(unique_labels, mean_features):
-                if str(label.item()).startswith(str(pan_label)): # Check if string representation of label starts with '24000'
-                    selected_labels.append(label.item() // 10)
-                    selected_features.append(feature)  
-            # for contrastive average pooling features finish #
+            # for label, feature in zip(unique_labels, mean_features):
+            #     if str(label.item()).startswith(str(pan_label)): # Check if string representation of label starts with '24000'
+            #         selected_labels.append(label.item() // 10)
+            #         selected_features.append(feature)  
+            # # for contrastive average pooling features finish #
         
         # Convert list to torch.tensors to be used as input for the loss 
         selected_labels  = torch.tensor(selected_labels)
@@ -168,9 +179,9 @@ class MaskRCNNPanoptic(TwoStageDetector):
                       gt_bboxes_ignore=None,
                       gt_masks=None,
                       gt_panoptic_only_thing_classes = None, # added by Petros for contrastive 
-                    #   pan_label = None,
-                    #   unique_labels = None, 
-                    #   indices_list = None, 
+                      pan_label = None,
+                      unique_labels = None, 
+                      indices_list = None, 
                      # contrast = None,
                       proposals=None,
                       box_domain_indicator=None,
@@ -198,8 +209,8 @@ class MaskRCNNPanoptic(TwoStageDetector):
             # img_infos = load_annotations_
             for tensor in x_n:
                 x_flat = self.constrastive_features(tensor, img)
-                for x_, panoptic in zip(x_flat, gt_panoptic_only_thing_classes.squeeze(axis=1)):         # # gt_panoptic_thing_classes.shape = (2, 1, 512, 512) & squeeze to remove the dimension (2,512,512)
-                    labels, features = self.pool_features(x_, panoptic)                                 
+                for i, x_ in enumerate(x_flat):         # # gt_panoptic_thing_classes.shape = (2, 1, 512, 512) & squeeze to remove the dimension (2,512,512)
+                    labels, features = self.pool_features(x_, pan_label[i], unique_labels[i], indices_list[i])                                 
                     contrastive_loss += self.loss_constrastive(features, labels) / tensor.shape[0]
             contrastive_loss = contrastive_loss / len(x_n)
             losses.update({'contrastive loss': contrastive_loss})

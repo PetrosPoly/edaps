@@ -155,10 +155,10 @@ class DACS(UDADecorator):
                       target_img, target_img_metas,
                       gt_panoptic_only_thing_classes,
                       max_inst_per_class,
-                      #contrast, 
-                    #   pan_label, 
-                    #   unique_labels, 
-                    #   indices_list, 
+                      pan_label, 
+                      unique_labels, 
+                      indices_list, 
+                        #contrast, 
                       ):        # daformer args
         # [  'gt_masks', 'target_img_metas', 'target_img']
         log_vars = {}
@@ -195,9 +195,9 @@ class DACS(UDADecorator):
                                                       gt_labels=gt_labels,
                                                       gt_masks=gt_masks,
                                                       gt_panoptic_only_thing_classes = gt_panoptic_only_thing_classes, # added by Petros for contrastive
-                                                    #   pan_label = pan_label,
-                                                    #   unique_labels = unique_labels, 
-                                                    #   indices_list = indices_list, 
+                                                      pan_label = pan_label,
+                                                      unique_labels = unique_labels, 
+                                                      indices_list = indices_list, 
                                                       # contrast = contrast, # added for contrastive loss
                                                       )
 
