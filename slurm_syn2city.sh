@@ -1,8 +1,9 @@
 #!/bin/bash
 
 #SBATCH  --output=sbatch_log/%j.out
-#SBATCH  --gres=gpu:geforce_rtx_2080_ti:1
-#SBATCH  --mem=30G
+#SBATCH  --gres=gpu:geforce_rtx_2080_ti:2
+#SBATCH  --mem=50G
+#SBATCH  --batch_size=2
 
 cd /scratch_net/biwidl202/ppolydorou/project_edaps/edaps
 source /scratch_net/biwidl202/ppolydorou/conda/etc/profile.d/conda.sh

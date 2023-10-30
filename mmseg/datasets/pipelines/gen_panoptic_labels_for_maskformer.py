@@ -184,9 +184,10 @@ class GenPanopLabelsForMaskFormer(object):
         for cid in list(class_id_tracker.keys()):
             max_inst_per_class[self._map_instance_class_ids(cid)] = class_id_tracker[cid]
         gt_masks = BitmapMasks(gt_masks, height, width)
-        largest_shape = max(unique_labels_list, key=lambda x:len(x)).shape[0]
-        unique_labels_list = [np.pad(arr, (0, largest_shape - arr.shape[0]), mode = 'constant') for arr in unique_labels_list]
-                            
+        if unique_labels_list:
+            largest_shape = max(unique_labels_list, key=lambda x:len(x)).shape[0]
+            unique_labels_list = [np.pad(arr, (0, largest_shape - arr.shape[0]), mode = 'constant') for arr in unique_labels_list]                   
+        
         results['pan_label'] = np.asarray(pan_label)
         results['unique_labels'] = np.asarray(unique_labels_list)
         results['indices_list'] = np.asarray(indices_list)

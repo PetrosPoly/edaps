@@ -43,7 +43,7 @@ uda = dict(
 )
 
 data = dict(
-	    samples_per_gpu=2, # batchsize (2 source  + 2 target images)
+	    samples_per_gpu=1, # batchsize (2 source  + 2 target images) # Change this one (initially: samples_per_gpu=2)
         workers_per_gpu=4,
         train=dict(
                 rare_class_sampling=dict(

@@ -201,22 +201,27 @@ class MaskRCNNPanoptic(TwoStageDetector):
         if gt_semantic_seg is not None:
             loss_decode = self._decode_head_forward_train(x, img_metas, gt_semantic_seg, seg_weight)
             losses.update(loss_decode)
-        if gt_bboxes:
-            
-            # # added by Petros for contrastive loss on 12 October 2023  # # 
-            
+        if gt_bboxes:     
+        # # added by Petros for contrastive loss on 12 October 2023  # #  
             contrastive_loss = 0
             # img_infos = load_annotations_
             for tensor in x_n:
                 x_flat = self.constrastive_features(tensor, img)
                 for i, x_ in enumerate(x_flat):         # # gt_panoptic_thing_classes.shape = (2, 1, 512, 512) & squeeze to remove the dimension (2,512,512)
-                    labels, features = self.pool_features(x_, pan_label[i], unique_labels[i], indices_list[i])                                 
-                    contrastive_loss += self.loss_constrastive(features, labels) / tensor.shape[0]
+                    if pan_label[i].shape == (0,):
+                        print("No contrastive loss computation for this cropped image")
+                        print("panoptic_labels", pan_label[i])
+                        print("unique_labels", unique_labels[i])
+                        print("indices_list", indices_list[i])
+                        continue
+                    else:
+                        print("Contrastive loss computation for this cropped image")
+                        print("panoptic_labels", pan_label[i])
+                        labels, features = self.pool_features(x_, pan_label[i], unique_labels[i], indices_list[i])                                 
+                        contrastive_loss += self.loss_constrastive(features, labels) / tensor.shape[0]
             contrastive_loss = contrastive_loss / len(x_n)
             losses.update({'contrastive loss': contrastive_loss})
-            
-            # # added by Petros for contrastive loss on 12 October 2023 # # 
-            
+        # # added by Petros for contrastive loss on 12 October 2023 # # 
             batch_size = len(gt_labels)
             set_loss_to_zero = False
             for i in range(batch_size):
