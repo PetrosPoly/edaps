@@ -144,7 +144,7 @@ class DACS(UDADecorator):
 
     def train_step(self, data_batch, optimizer, **kwargs):
         optimizer.zero_grad()
-        log_vars = self(**data_batch) # elf(**data_batch) is a Python syntax that involves using the double asterisks (**) to unpack a dictionary and pass its key-value pairs as keyword arguments to a function or method.
+        log_vars = self(**data_batch)
         optimizer.step()
         log_vars.pop('loss', None)  # remove the unnecessary 'loss'
         outputs = dict(log_vars=log_vars, num_samples=len(data_batch['img_metas']))
@@ -190,7 +190,6 @@ class DACS(UDADecorator):
                                                       gt_bboxes=gt_bboxes,
                                                       gt_labels=gt_labels,
                                                       gt_masks=gt_masks,
-                                                      gt_panoptic_only_thing_classes = gt_panoptic_only_thing_classes, # added by Petros for contrastive
                                                       )
 
         src_feat = clean_losses.pop('features')

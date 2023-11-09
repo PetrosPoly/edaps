@@ -308,7 +308,7 @@ def generate_experiment_cfgs(id, machine_name):
     # -------------------------------------------------------------------------
     debug = False
     machine = machine_name
-    iters = 40000
+    iters = 100 # 40000 # Petros change
     interval = iters
     interval_debug = 3
     uda = 'dacs'
@@ -409,7 +409,7 @@ def generate_experiment_cfgs(id, machine_name):
     # EDAPS (M-Dec-TD) : SYNTHIA → Cityscapes (Table 1)
     # -------------------------------------------------------------------------
     if id == 1:
-        seeds = [0] # seeds = [0,1,2] / modified by Petros
+        seeds = [0] # seeds = [0,1,2]  # Petros to run training for 1 seed 
         for seed in seeds:
             cfg = config_from_vars()
             cfgs.append(cfg)
