@@ -34,41 +34,21 @@ def rsync(src, dst):
     print(rsync_cmd)
     run_command(rsync_cmd)
 
-""" 
-def run_command(command):
-    # 1st line takes one argument, command, which is expected to be a string representing a command that you want to run in the system shell.
-    # 2nd line creates a new process (Popen) to run the specified command. command is the command to be executed. It's passed as a string.
-    # stdout=subprocess.PIPE redirects the standard output of the command to a pipe so that it can be captured.
-    # stderr=subprocess.STDOUT redirects the standard error (if any) to the same pipe as the standard output.
-    # Line starts a loop that reads the output of the executed command line by line.
-    # This line prints the constructed rsync command before it is executed.
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-    for line in iter(p.stdout.readline, b''):
-        print(line.decode('utf-8'), end='')
-
-def rsync(src, dst):
-    # This line calls the run_command function with the constructed rsync command as an argument, which then executes the rsync command and captures its output.
-    rsync_cmd = f'rsync -a {src} {dst}'
-    print(rsync_cmd)
-    run_command(rsync_cmd)
-"""
-
 if __name__ == '__main__':
 
     config_file = None
     expId = None
-    #machine_name = None
     machine_name = 'local'
     JOB_DIR = 'jobs'
     WORKDIR = 'work_dirs'
     GEN_CONFIG_DIR = 'configs/generated'
 
-    parser = argparse.ArgumentParser() # creates an ArgumentParser object, which will be used to define and parse command-line arguments.
-    group = parser.add_mutually_exclusive_group(required=True)  # creates a mutually exclusive group of arguments. In this group, you can specify that the user can only provide one of the options, but not both. The required=True argument means that the user must provide one of the mutually exclusive options.
-    group.add_argument('--exp', type=int, default=expId, help='Experiment id as defined in experiment.py') # adds an argument to the mutually exclusive group. It specifies that the user can provide the --exp option, which should be an integer. If the user doesn't provide this option, it will default to the value of expId. The help parameter provides a description of what this argument does.
-    group.add_argument('--config', default=config_file, help='Path to config file', ) 
+    parser = argparse.ArgumentParser()
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--exp', type=int, default=expId, help='Experiment id as defined in experiment.py')
+    group.add_argument('--config', default=config_file, help='Path to config file', )
     parser.add_argument('--machine', type=str, default=machine_name, help='Name of the machine')
-    parser.add_argument('--exp_root', type=str, default=None, help='Root folder to save all EDAPS experimental results') # parses the command-line arguments provided by the user based on the definitions you provided above. The parsed arguments are stored in the args object
+    parser.add_argument('--exp_root', type=str, default=None, help='Root folder to save all EDAPS experimental results')
     parser.add_argument('--exp_sub', type=str, default=None, help='sub folder to save experimental results benong to a spefic experiment Id')
     args = parser.parse_args()
     assert (args.config is None) != (args.exp is None), 'Either config or exp has to be defined.'
@@ -79,7 +59,7 @@ if __name__ == '__main__':
         print(f'training with predefined config : {args.config}')
         cfg = Config.fromfile(args.config)
         # Specify Name and Work Directory
-        exp_name = f'{args.machine}-exp{cfg["exp"]:05d}' # local-exp00001 , 1 from given confiquration file
+        exp_name = f'{args.machine}-exp{cfg["exp"]:05d}'
         unique_name = f'{datetime.now().strftime("%y%m%d_%H%M")}_{cfg["name"]}_{str(uuid.uuid4())[:5]}'
         # setting paths for panoptic evaluation
         panop_eval_folder = os.path.join(cfg['exp_root'], cfg['exp_sub'], WORKDIR, exp_name, unique_name, 'panoptic_eval')
