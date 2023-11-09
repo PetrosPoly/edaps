@@ -306,9 +306,9 @@ def generate_experiment_cfgs(id, machine_name):
     # -------------------------------------------------------------------------
     # Set some defaults
     # -------------------------------------------------------------------------
-    debug = False
+    debug = True
     machine = machine_name
-    iters = 100 # 40000 # Petros change
+    iters = 40000 # Petros change
     interval = iters
     interval_debug = 3
     uda = 'dacs'

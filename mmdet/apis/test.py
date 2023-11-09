@@ -206,6 +206,7 @@ def single_gpu_test_uda(model,
                     score_thr=show_score_thr)
         results.extend(result)
         for _ in range(batch_size):
+            print()
             prog_bar.update()
     return results
 
