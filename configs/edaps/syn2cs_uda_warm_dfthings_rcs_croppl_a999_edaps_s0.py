@@ -43,7 +43,7 @@ uda = dict(
 )
 
 data = dict(
-	    samples_per_gpu=1, # batchsize (2 source  + 2 target images) # Change this one (initially: samples_per_gpu=2)
+	    samples_per_gpu=2, 
         workers_per_gpu=4,
         train=dict(
                 rare_class_sampling=dict(
@@ -105,7 +105,7 @@ evaluation = dict(
 
 runner = dict(
     type="IterBasedRunner",
-    max_iters= 500 #40000
+    max_iters= 40000
 )
 
 checkpoint_config = dict(

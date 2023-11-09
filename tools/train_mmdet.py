@@ -117,10 +117,10 @@ def main(args):
     model.init_weights()
     logger.info('DEBUG - PETROS 14-08-2023 - MODEL IS READY') # added by Petros
     datasets = [build_dataset(cfg.data.train)]   # Petros :: this is an UDAdataset that is being returned but inside are being built the synthiaDataset and Cityscape dataset. 
-    if len(cfg.workflow) == 2:
-        val_dataset = copy.deepcopy(cfg.data.val)
-        val_dataset.pipeline = cfg.data.train.pipeline
-        datasets.append(build_dataset(val_dataset))
+    # if len(cfg.workflow) == 2:
+    #     val_dataset = copy.deepcopy(cfg.data.val)
+    #     val_dataset.pipeline = cfg.data.train.pipeline  # Petros
+    #     datasets.append(build_dataset(val_dataset))
     if cfg.checkpoint_config is not None:
         cfg.checkpoint_config.meta = dict(mmdet_version=__version__ + get_git_hash()[:7], CLASSES=datasets[0].CLASSES)
     model.CLASSES = datasets[0].CLASSES

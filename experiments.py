@@ -306,18 +306,18 @@ def generate_experiment_cfgs(id, machine_name):
     # -------------------------------------------------------------------------
     # Set some defaults
     # -------------------------------------------------------------------------
-    debug = False
+    debug = False # true change some values and check which values will 
     machine = machine_name
-    iters = 40000
+    iters = 100 # 40000  # Petros:: changed to 500
     interval = iters
-    interval_debug = 3
+    interval_debug =  3 # I can change that to 40 debug true, debug to false 
     uda = 'dacs'
     data_root = 'data/cityscapes'
     # ----------------------------------------
     # --- Set the debug time configs ---
     # ----------------------------------------
     n_gpus = 1 if debug else 1
-    batch_size = 1 if debug else 1  # samples_per_gpu # # Petros change batch_size = 1 (batch_size = 1 if debug else 2)
+    batch_size = 1 if debug else 2  # samples_per_gpu # # Petros change batch_size = 1 (batch_size = 1 if debug else 2)
     workers_per_gpu = 0 if debug else 4 # if 'dacs' in uda else 2
     eval_interval = interval_debug if debug else interval
     checkpoint_interval = interval_debug if debug else interval
@@ -565,7 +565,7 @@ def generate_experiment_cfgs(id, machine_name):
         seed = 0
         batch_size = 1
         workers_per_gpu = 0
-        checkpoint_path = 'path/to/the/latest/checkpoint'
+        checkpoint_path = 'edaps_experiments/exp-00006/checkpoints/edaps_synthia_to_cityscapes'
         cfg = config_from_vars()
         cfg['checkpoint_path'] = checkpoint_path
         cfgs.append(cfg)

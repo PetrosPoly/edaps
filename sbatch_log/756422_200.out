@@ -1,13 +1,42 @@
+Running on node: bmicgpu02
+In directory:    /scratch_net/biwidl202/ppolydorou/project_edaps/edaps
+Starting on:     Wed Nov  1 17:28:47 CET 2023
+SLURM_JOB_ID:    756422
+CUDA_VISIBLE_DEVICES: 0,1
+Wed Nov  1 17:28:47 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.141.03   Driver Version: 470.141.03   CUDA Version: 11.4     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA TITAN Xp     On   | 00000000:83:00.0 Off |                  N/A |
+| 23%   29C    P8     8W / 250W |      1MiB / 12196MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   1  NVIDIA TITAN Xp     On   | 00000000:84:00.0 Off |                  N/A |
+| 23%   31C    P8     9W / 250W |      1MiB / 12196MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:38: UserWarning: Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
   warnings.warn(
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:48: UserWarning: Setting MKL_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
   warnings.warn(
-2023-07-28 17:05:12,289 - mmdet - INFO - Environment info:
+2023-11-01 17:29:13,720 - mmdet - INFO - Environment info:
 ------------------------------------------------------------
 sys.platform: linux
 Python: 3.8.5 (default, Sep  4 2020, 07:30:14) [GCC 7.3.0]
 CUDA available: True
-GPU 0: NVIDIA GeForce GTX 1080 Ti
+GPU 0,1: NVIDIA TITAN Xp
 CUDA_HOME: /usr
 NVCC: Cuda compilation tools, release 11.2, V11.2.152
 GCC: gcc (Debian 8.3.0-6) 8.3.0
@@ -31,11 +60,11 @@ OpenCV: 4.8.0
 MMCV: 1.6.1
 MMCV Compiler: GCC 7.3
 MMCV CUDA Compiler: 11.0
-MMDetection: 2.25.1+2a2044c
+MMDetection: 2.25.1+d4240ed
 ------------------------------------------------------------
 
-2023-07-28 17:05:14,202 - mmdet - INFO - Distributed training: False
-2023-07-28 17:05:16,116 - mmdet - INFO - Config:
+2023-11-01 17:29:15,151 - mmdet - INFO - Distributed training: False
+2023-11-01 17:29:16,669 - mmdet - INFO - Config:
 checkpoint_config = dict(interval=40000, by_epoch=False, max_keep_ckpts=1)
 log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
@@ -173,7 +202,7 @@ model = dict(
             pos_weight=-1,
             debug=False),
         work_dir=
-        'edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1705_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_2c0dd'
+        'edaps_experiments/exp-00001/work_dirs/local-exp00001/231101_1729_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_60d85'
     ),
     test_cfg=dict(
         mode='whole',
@@ -191,13 +220,13 @@ dataset_type = 'CityscapesDataset'
 data_root = 'data/cityscapes/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-crop_size = (512, 512)
+crop_size = (256, 256)
 num_classes = 19
 synthia_train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadPanopticAnnotations'),
     dict(type='Resize', img_scale=(1280, 760)),
-    dict(type='RandomCrop', crop_size=(512, 512), cat_max_ratio=0.75),
+    dict(type='RandomCrop', crop_size=(256, 256), cat_max_ratio=0.75),
     dict(type='RandomFlip', prob=0.5),
     dict(
         type='GenPanopLabelsForMaskFormer',
@@ -215,13 +244,14 @@ synthia_train_pipeline = [
         type='Collect',
         keys=[
             'img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg',
-            'gt_panoptic_only_thing_classes', 'max_inst_per_class'
+            'gt_panoptic_only_thing_classes', 'max_inst_per_class',
+            'panoptic_labels_list', 'unique_labels_list', 'indices_list'
         ])
 ]
 cityscapes_train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', img_scale=(1024, 512)),
-    dict(type='RandomCrop', crop_size=(512, 512)),
+    dict(type='RandomCrop', crop_size=(256, 256)),
     dict(type='RandomFlip', prob=0.5),
     dict(
         type='Normalize',
@@ -250,7 +280,7 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=1,
     workers_per_gpu=4,
     train=dict(
         type='UDADataset',
@@ -266,7 +296,7 @@ data = dict(
                 dict(type='Resize', img_scale=(1280, 760)),
                 dict(
                     type='RandomCrop',
-                    crop_size=(512, 512),
+                    crop_size=(256, 256),
                     cat_max_ratio=0.75),
                 dict(type='RandomFlip', prob=0.5),
                 dict(
@@ -286,7 +316,8 @@ data = dict(
                     keys=[
                         'img', 'gt_bboxes', 'gt_labels', 'gt_masks',
                         'gt_semantic_seg', 'gt_panoptic_only_thing_classes',
-                        'max_inst_per_class'
+                        'max_inst_per_class', 'panoptic_labels_list',
+                        'unique_labels_list', 'indices_list'
                     ])
             ]),
         target=dict(
@@ -298,7 +329,7 @@ data = dict(
             pipeline=[
                 dict(type='LoadImageFromFile'),
                 dict(type='Resize', img_scale=(1024, 512)),
-                dict(type='RandomCrop', crop_size=(512, 512)),
+                dict(type='RandomCrop', crop_size=(256, 256)),
                 dict(type='RandomFlip', prob=0.5),
                 dict(
                     type='Normalize',
@@ -445,15 +476,15 @@ evaluation = dict(
     visuals_pan_eval=False,
     evalScale='2048x1024',
     panop_eval_folder=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1705_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_2c0dd/panoptic_eval',
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231101_1729_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_60d85/panoptic_eval',
     panop_eval_temp_folder=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1705_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_2c0dd/panoptic_eval/panop_eval_28-07-2023_17-05-12-081486',
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231101_1729_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_60d85/panoptic_eval/panop_eval_01-11-2023_17-29-13-571145',
     debug=False,
     out_dir=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1705_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_2c0dd/panoptic_eval/panop_eval_28-07-2023_17-05-12-081486/visuals'
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231101_1729_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_60d85/panoptic_eval/panop_eval_01-11-2023_17-29-13-571145/visuals'
 )
-runner = dict(type='IterBasedRunner', max_iters=40000)
-name = '230728_1705_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_2c0dd'
+runner = dict(type='IterBasedRunner', max_iters=200)
+name = '231101_1729_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_60d85'
 exp = 1
 exp_root = 'edaps_experiments'
 exp_sub = 'exp-00001'
@@ -463,35 +494,150 @@ name_encoder = ('mitb5', )
 name_decoder = ('maskrcnn', )
 name_uda = ('dacs_rcs0.01_cpl', )
 name_opt = ('adamw_6e-05_pmTrue_poly10warm_1x1_40k', )
-work_dir = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1705_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_2c0dd'
-git_rev = '2a2044c49e116d4693884d4a9a6e08b824a9b128'
+work_dir = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231101_1729_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_60d85'
+git_rev = 'd4240edba6884ac9d6961c90f575ffe95a645a13'
 auto_resume = False
 gpu_ids = [0]
 
-2023-07-28 17:05:16,116 - mmdet - INFO - Set random seed to 0, deterministic: False
+2023-11-01 17:29:16,669 - mmdet - INFO - Set random seed to 0, deterministic: False
+2023-11-01 17:29:16,669 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - BEFORE MODEL BUILD
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/two_stage.py:29: UserWarning: DeprecationWarning: pretrained is deprecated, please use "init_cfg" instead
   warnings.warn('DeprecationWarning: pretrained is deprecated, '
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/backbones/mix_transformer.py:215: UserWarning: DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead
   warnings.warn('DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead')
-2023-07-28 17:05:20,917 - mmdet - INFO - Load mit checkpoint.
-2023-07-28 17:05:20,917 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-01 17:29:20,416 - mmdet - INFO - Load mit checkpoint.
+2023-11-01 17:29:20,417 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-01 17:29:23,862 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-01 17:29:23,889 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-01 17:29:23,896 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-01 17:29:24,020 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-01 17:29:24,089 - mmdet - INFO - Load mit checkpoint.
+2023-11-01 17:29:24,089 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-01 17:29:24,448 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-01 17:29:24,469 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-01 17:29:24,477 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-01 17:29:24,604 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-01 17:29:24,672 - mmdet - INFO - Load mit checkpoint.
+2023-11-01 17:29:24,672 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-01 17:29:25,065 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-01 17:29:25,087 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-01 17:29:25,095 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-01 17:29:25,222 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-01 17:29:25,328 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - MODEL IS READY
+2023-11-01 17:29:25,329 - mmseg - INFO - Loaded annotations from : data/synthia/panoptic-labels-crowdth-0-for-daformer/synthia_panoptic.json
+2023-11-01 17:29:35,410 - mmseg - INFO - Loaded 9400 images from data/synthia/RGB
+2023-11-01 17:29:35,414 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_train_trainId.json
+2023-11-01 17:29:35,892 - mmseg - INFO - Loaded 2975 images from data/cityscapes/leftImg8bit/train
+2023-11-01 17:29:35,986 - mmseg - INFO - RCS Classes: [6, 7, 17, 18, 4, 3, 12, 5, 15, 13, 11, 10, 8, 0, 1, 2]
+2023-11-01 17:29:35,987 - mmseg - INFO - RCS ClassProb: [1.55649453e-01 1.45927146e-01 1.30805254e-01 1.29144296e-01
+ 1.22819245e-01 1.22646019e-01 9.97279957e-02 5.53424992e-02
+ 3.33626680e-02 2.43163528e-03 2.00466975e-03 1.35448776e-04
+ 3.78220921e-06 8.31826052e-10 3.41141226e-10 1.11511794e-14]
+2023-11-01 17:29:48,920 - mmdet - INFO - Automatic scaling of learning rate (LR) has been disabled.
+2023-11-01 17:29:59,019 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_val.json
+2023-11-01 17:29:59,110 - mmseg - INFO - Loaded 500 images from data/cityscapes/leftImg8bit/val
+2023-11-01 17:29:59,111 - mmdet - INFO - Start running, host: ppolydorou@bmicgpu02, work_dir: /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/231101_1729_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_60d85
+2023-11-01 17:29:59,111 - mmdet - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) PolyLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) PolyLrUpdaterHook                  
+(NORMAL      ) NumClassCheckHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) PolyLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHookUDA                        
+ -------------------- 
+after_train_iter:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) NumClassCheckHook                  
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2023-11-01 17:29:59,112 - mmdet - INFO - workflow: [('train', 1)], max: 200 iters
+2023-11-01 17:29:59,112 - mmdet - INFO - Checkpoints will be saved to /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/231101_1729_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_60d85 by HardDiskBackend.
+2023-11-01 17:29:59,112 - mmdet - INFO - The best checkpoint will be saved to edaps_experiments/exp-00001/work_dirs/local-exp00001/231101_1729_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_60d85/panoptic_eval/panop_eval_01-11-2023_17-29-13-571145/visuals/231101_1729_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_60d85 by HardDiskBackend
 training with predefined config : configs/edaps/syn2cs_uda_warm_dfthings_rcs_croppl_a999_edaps_s0.py
 Run job syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0
+DEBUG - PETROS 20-08-2023 - data root is : data/synthia/
+DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:<class 'dict'>
+DEBUG - PETROS 20-08-2023 - data root is : data/cityscapes/
+DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:<class 'dict'>
+DEBUG - PETROS 20-08-2023 - data root is : data/cityscapes
+DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:<class 'dict'>
+DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Number of gpus for training is: 1
+DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Samples per gpu is: 1
+DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Batch_size: 1
+2023-11-01 17:31:50,856 - mmdet - INFO - Iter [20/200]	lr: 6.879e-07, eta: 0:16:25, time: 5.476, data_time: 0.074, memory: 7342, decode.loss_seg: 2.7776, decode.acc_seg: 4.8903, contrastive loss: 2.4724, rpn.loss_rpn_cls: 0.6835, rpn.loss_rpn_bbox: 0.1491, roi.loss_cls: 2.2078, roi.acc: 12.0271, roi.loss_bbox: 0.1400, roi.loss_mask: 2.3951, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.2624, mix.decode.acc_seg: 12.2013
+2023-11-01 17:33:26,852 - mmdet - INFO - Iter [40/200]	lr: 1.256e-06, eta: 0:13:42, time: 4.800, data_time: 0.015, memory: 7342, decode.loss_seg: 2.7787, decode.acc_seg: 8.5755, contrastive loss: 1.8245, rpn.loss_rpn_cls: 0.6738, rpn.loss_rpn_bbox: 0.1326, roi.loss_cls: 1.3947, roi.acc: 81.2695, roi.loss_bbox: 0.0893, roi.loss_mask: 1.9154, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.4934, mix.decode.acc_seg: 14.1862
+2023-11-01 17:35:12,247 - mmdet - INFO - Iter [60/200]	lr: 1.664e-06, eta: 0:12:05, time: 5.270, data_time: 0.015, memory: 8117, decode.loss_seg: 2.7646, decode.acc_seg: 12.8072, contrastive loss: 2.5401, rpn.loss_rpn_cls: 0.6643, rpn.loss_rpn_bbox: 0.1583, roi.loss_cls: 0.7933, roi.acc: 93.1152, roi.loss_bbox: 0.1243, roi.loss_mask: 1.4270, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.4049, mix.decode.acc_seg: 16.6435
+2023-11-01 17:36:50,048 - mmdet - INFO - Iter [80/200]	lr: 1.912e-06, eta: 0:10:13, time: 4.890, data_time: 0.015, memory: 8117, decode.loss_seg: 2.7748, decode.acc_seg: 18.9098, contrastive loss: 1.8130, rpn.loss_rpn_cls: 0.6422, rpn.loss_rpn_bbox: 0.1272, roi.loss_cls: 0.4906, roi.acc: 94.5605, roi.loss_bbox: 0.1171, roi.loss_mask: 1.2706, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.6723, mix.decode.acc_seg: 19.6483
+2023-11-01 17:38:23,845 - mmdet - INFO - Iter [100/200]	lr: 2.000e-06, eta: 0:08:22, time: 4.690, data_time: 0.015, memory: 8117, decode.loss_seg: 2.6995, decode.acc_seg: 20.1537, contrastive loss: 2.0560, rpn.loss_rpn_cls: 0.6179, rpn.loss_rpn_bbox: 0.1127, roi.loss_cls: 0.4112, roi.acc: 93.2617, roi.loss_bbox: 0.1646, roi.loss_mask: 1.2478, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.4253, mix.decode.acc_seg: 18.4003
 Traceback (most recent call last):
-  File "run_experiments.py", line 127, in <module>
+  File "run_experiments.py", line 146, in <module>
     train_mmdet.main([config_files[i]])
-  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/tools/train_mmdet.py", line 116, in main
-    model.init_weights()
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/base_module.py", line 117, in init_weights
-    m.init_weights()
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/base_module.py", line 117, in init_weights
-    m.init_weights()
-  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/backbones/mix_transformer.py", line 347, in init_weights
-    checkpoint = _load_checkpoint(self.pretrained, logger=logger, map_location='cpu')
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/checkpoint.py", line 561, in _load_checkpoint
-    return CheckpointLoader.load_checkpoint(filename, map_location, logger)
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/checkpoint.py", line 303, in load_checkpoint
-    return checkpoint_loader(filename, map_location)  # type: ignore
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/checkpoint.py", line 322, in load_from_local
-    raise FileNotFoundError(f'{filename} can not be found.')
-FileNotFoundError: pretrained/mit_b5.pth can not be found.
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/tools/train_mmdet.py", line 127, in main
+    train_detector(model, datasets, cfg, distributed=distributed, validate=(not cfg.only_train), timestamp=timestamp,  meta=meta,)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/apis/train.py", line 213, in train_detector
+    runner.run(data_loaders, cfg.workflow)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 144, in run
+    iter_runner(iter_loaders[i], **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 64, in train
+    outputs = self.model.train_step(data_batch, self.optimizer, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/parallel/data_parallel.py", line 77, in train_step
+    return self.module.train_step(*inputs[0], **kwargs[0])
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/uda/dacs.py", line 147, in train_step
+    log_vars = self(**data_batch) # elf(**data_batch) is a Python syntax that involves using the double asterisks (**) to unpack a dictionary and pass its key-value pairs as keyword arguments to a function or method.
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/fp16_utils.py", line 116, in new_func
+    return old_func(*args, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/base.py", line 172, in forward
+    return self.forward_train(img, img_metas, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/uda/dacs.py", line 190, in forward_train
+    clean_losses = self.get_model().forward_train(img,
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/mask_rcnn_panoptic.py", line 209, in forward_train
+    contrastive_loss += self.loss_constrastive(features, labels) / tensor.shape[0]
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/mask_rcnn_panoptic.py", line 137, in loss_constrastive
+    loss = self.loss_constrastive_ntx(features, labels)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/pytorch_metric_learning/losses/base_metric_loss_function.py", line 34, in forward
+    loss_dict = self.compute_loss(
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/pytorch_metric_learning/losses/generic_pair_loss.py", line 21, in compute_loss
+    return self.loss_method(mat, indices_tuple)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/pytorch_metric_learning/losses/generic_pair_loss.py", line 40, in pair_based_loss
+    return self._compute_loss(pos_pair, neg_pair, indices_tuple)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/pytorch_metric_learning/losses/ntxent_loss.py", line 28, in _compute_loss
+    neg_pairs[n_per_p == 0] = c_f.neg_inf(dtype)
+RuntimeError: CUDA out of memory. Tried to allocate 1.88 GiB (GPU 0; 11.91 GiB total capacity; 7.37 GiB already allocated; 1.35 GiB free; 9.87 GiB reserved in total by PyTorch)

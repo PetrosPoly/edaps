@@ -1,8 +1,33 @@
+Running on node: biwirender11
+In directory:    /scratch_net/biwidl202/ppolydorou/project_edaps/edaps
+Starting on:     Tue Nov  7 20:07:59 CET 2023
+SLURM_JOB_ID:    758408
+CUDA_VISIBLE_DEVICES: 0
+Tue Nov  7 20:07:59 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.141.03   Driver Version: 470.141.03   CUDA Version: 11.4     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA GeForce ...  On   | 00000000:88:00.0 Off |                  N/A |
+| 22%   31C    P8    15W / 250W |      1MiB / 12212MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:38: UserWarning: Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
   warnings.warn(
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:48: UserWarning: Setting MKL_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
   warnings.warn(
-2023-07-28 17:06:50,288 - mmdet - INFO - Environment info:
+2023-11-07 20:08:06,719 - mmdet - INFO - Environment info:
 ------------------------------------------------------------
 sys.platform: linux
 Python: 3.8.5 (default, Sep  4 2020, 07:30:14) [GCC 7.3.0]
@@ -31,13 +56,13 @@ OpenCV: 4.8.0
 MMCV: 1.6.1
 MMCV Compiler: GCC 7.3
 MMCV CUDA Compiler: 11.0
-MMDetection: 2.25.1+2a2044c
+MMDetection: 2.25.1+d4240ed
 ------------------------------------------------------------
 
-2023-07-28 17:06:51,860 - mmdet - INFO - Distributed training: False
-2023-07-28 17:06:53,475 - mmdet - INFO - Config:
-checkpoint_config = dict(interval=40000, by_epoch=False, max_keep_ckpts=1)
-log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
+2023-11-07 20:08:08,249 - mmdet - INFO - Distributed training: False
+2023-11-07 20:08:09,830 - mmdet - INFO - Config:
+checkpoint_config = dict(interval=100, by_epoch=False, max_keep_ckpts=1)
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
@@ -173,7 +198,7 @@ model = dict(
             pos_weight=-1,
             debug=False),
         work_dir=
-        'edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1706_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_e756c'
+        'edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171'
     ),
     test_cfg=dict(
         mode='whole',
@@ -191,13 +216,13 @@ dataset_type = 'CityscapesDataset'
 data_root = 'data/cityscapes/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-crop_size = (512, 512)
+crop_size = (256, 256)
 num_classes = 19
 synthia_train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadPanopticAnnotations'),
     dict(type='Resize', img_scale=(1280, 760)),
-    dict(type='RandomCrop', crop_size=(512, 512), cat_max_ratio=0.75),
+    dict(type='RandomCrop', crop_size=(256, 256), cat_max_ratio=0.75),
     dict(type='RandomFlip', prob=0.5),
     dict(
         type='GenPanopLabelsForMaskFormer',
@@ -215,13 +240,14 @@ synthia_train_pipeline = [
         type='Collect',
         keys=[
             'img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg',
-            'gt_panoptic_only_thing_classes', 'max_inst_per_class'
+            'gt_panoptic_only_thing_classes', 'max_inst_per_class',
+            'panoptic_labels_list', 'unique_labels_list', 'indices_list'
         ])
 ]
 cityscapes_train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', img_scale=(1024, 512)),
-    dict(type='RandomCrop', crop_size=(512, 512)),
+    dict(type='RandomCrop', crop_size=(256, 256)),
     dict(type='RandomFlip', prob=0.5),
     dict(
         type='Normalize',
@@ -250,7 +276,7 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=1,
     workers_per_gpu=4,
     train=dict(
         type='UDADataset',
@@ -266,7 +292,7 @@ data = dict(
                 dict(type='Resize', img_scale=(1280, 760)),
                 dict(
                     type='RandomCrop',
-                    crop_size=(512, 512),
+                    crop_size=(256, 256),
                     cat_max_ratio=0.75),
                 dict(type='RandomFlip', prob=0.5),
                 dict(
@@ -286,7 +312,8 @@ data = dict(
                     keys=[
                         'img', 'gt_bboxes', 'gt_labels', 'gt_masks',
                         'gt_semantic_seg', 'gt_panoptic_only_thing_classes',
-                        'max_inst_per_class'
+                        'max_inst_per_class', 'panoptic_labels_list',
+                        'unique_labels_list', 'indices_list'
                     ])
             ]),
         target=dict(
@@ -298,7 +325,7 @@ data = dict(
             pipeline=[
                 dict(type='LoadImageFromFile'),
                 dict(type='Resize', img_scale=(1024, 512)),
-                dict(type='RandomCrop', crop_size=(512, 512)),
+                dict(type='RandomCrop', crop_size=(256, 256)),
                 dict(type='RandomFlip', prob=0.5),
                 dict(
                     type='Normalize',
@@ -371,7 +398,7 @@ uda = dict(
     blur=True,
     color_jitter_strength=0.2,
     color_jitter_probability=0.2,
-    debug_img_interval=1000,
+    debug_img_interval=5000,
     print_grad_magnitude=False,
     share_src_backward=True,
     disable_mix_masks=False)
@@ -399,11 +426,10 @@ lr_config = dict(
 debug = False
 n_gpus = 1
 gpu_mtotal = 23000
-total_train_time = '21:00:00'
+total_train_time = '24:00:00'
 n_cpus = 16
 mem_per_cpu = 16000
 machine = 'local'
-euler_template_fname = 'euler_template_slurm_syn2city.sh'
 only_eval = False
 only_train = False
 activate_auto_scale_lr = False
@@ -412,9 +438,14 @@ print_layer_wise_lr = False
 file_sys = 'Slurm'
 launcher = None
 generate_only_visuals_without_eval = False
+dump_predictions_to_disk = False
+evaluate_from_saved_png_predictions = False
+panop_eval_temp_folder_previous = None
+exp_sub = 'exp-00001'
+exp_root = 'edaps_experiments'
 seed = 0
 evaluation = dict(
-    interval=40000,
+    interval=100,
     metric=['mIoU', 'mPQ', 'mAP'],
     eval_type='maskrcnn_panoptic',
     dataset_name='cityscapes',
@@ -443,68 +474,70 @@ evaluation = dict(
         upsnet_mask_pruning=False,
         generate_thing_cls_panoptic_from_instance_pred=False),
     visuals_pan_eval=False,
-    evalScale='2048x1024',
+    evalScale=None,
+    evaluate_from_saved_numpy_predictions=False,
+    evaluate_from_saved_png_predictions=False,
     panop_eval_folder=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1706_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_e756c/panoptic_eval',
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171/panoptic_eval',
     panop_eval_temp_folder=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1706_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_e756c/panoptic_eval/panop_eval_28-07-2023_17-06-50-171058',
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171/panoptic_eval/panop_eval_07-11-2023_20-08-06-604039',
     debug=False,
     out_dir=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1706_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_e756c/panoptic_eval/panop_eval_28-07-2023_17-06-50-171058/visuals'
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171/panoptic_eval/panop_eval_07-11-2023_20-08-06-604039/visuals'
 )
-runner = dict(type='IterBasedRunner', max_iters=40000)
-name = '230728_1706_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_e756c'
+runner = dict(type='IterBasedRunner', max_iters=100)
+name = '231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171'
 exp = 1
-exp_root = 'edaps_experiments'
-exp_sub = 'exp-00001'
-name_dataset = ('synthia2cityscapes', )
-name_architecture = ('maskrcnn_mitb5', )
-name_encoder = ('mitb5', )
-name_decoder = ('maskrcnn', )
-name_uda = ('dacs_rcs0.01_cpl', )
-name_opt = ('adamw_6e-05_pmTrue_poly10warm_1x1_40k', )
-work_dir = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1706_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_e756c'
-git_rev = '2a2044c49e116d4693884d4a9a6e08b824a9b128'
+name_dataset = 'synthia2cityscapes'
+name_architecture = 'maskrcnn_mitb5'
+name_encoder = 'mitb5'
+name_decoder = 'maskrcnn'
+name_uda = 'dacs_rcs0.01_cpl'
+name_opt = 'adamw_6e-05_pmTrue_poly10warm_1x1_0k'
+work_dir = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171'
+git_rev = 'd4240edba6884ac9d6961c90f575ffe95a645a13'
 auto_resume = False
 gpu_ids = [0]
 
-2023-07-28 17:06:53,475 - mmdet - INFO - Set random seed to 0, deterministic: False
+2023-11-07 20:08:09,830 - mmdet - INFO - Set random seed to 0, deterministic: False
+2023-11-07 20:08:09,830 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - BEFORE MODEL BUILD
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/two_stage.py:29: UserWarning: DeprecationWarning: pretrained is deprecated, please use "init_cfg" instead
   warnings.warn('DeprecationWarning: pretrained is deprecated, '
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/backbones/mix_transformer.py:215: UserWarning: DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead
   warnings.warn('DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead')
-2023-07-28 17:06:57,623 - mmdet - INFO - Load mit checkpoint.
-2023-07-28 17:06:57,623 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
-2023-07-28 17:07:01,348 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
-2023-07-28 17:07:01,376 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
-2023-07-28 17:07:01,383 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
-2023-07-28 17:07:01,519 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
-2023-07-28 17:07:01,588 - mmdet - INFO - Load mit checkpoint.
-2023-07-28 17:07:01,588 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
-2023-07-28 17:07:01,948 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
-2023-07-28 17:07:01,971 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
-2023-07-28 17:07:01,978 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
-2023-07-28 17:07:02,112 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
-2023-07-28 17:07:02,180 - mmdet - INFO - Load mit checkpoint.
-2023-07-28 17:07:02,181 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
-2023-07-28 17:07:02,564 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
-2023-07-28 17:07:02,589 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
-2023-07-28 17:07:02,596 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
-2023-07-28 17:07:02,732 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
-2023-07-28 17:07:02,846 - mmseg - INFO - Loaded annotations from : data/synthia/panoptic-labels-crowdth-0-for-daformer/synthia_panoptic.json
-2023-07-28 17:07:13,939 - mmseg - INFO - Loaded 9400 images from data/synthia/RGB
-2023-07-28 17:07:13,945 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_train_trainId.json
-2023-07-28 17:07:14,456 - mmseg - INFO - Loaded 2975 images from data/cityscapes/leftImg8bit/train
-2023-07-28 17:07:14,559 - mmseg - INFO - RCS Classes: [6, 7, 17, 18, 4, 3, 12, 5, 15, 13, 11, 10, 8, 0, 1, 2]
-2023-07-28 17:07:14,559 - mmseg - INFO - RCS ClassProb: [1.55649453e-01 1.45927146e-01 1.30805254e-01 1.29144296e-01
+2023-11-07 20:08:13,816 - mmdet - INFO - Load mit checkpoint.
+2023-11-07 20:08:13,817 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-07 20:08:16,951 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-07 20:08:16,978 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-07 20:08:16,985 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-07 20:08:17,119 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-07 20:08:17,192 - mmdet - INFO - Load mit checkpoint.
+2023-11-07 20:08:17,193 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-07 20:08:17,559 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-07 20:08:17,582 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-07 20:08:17,590 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-07 20:08:17,723 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-07 20:08:17,810 - mmdet - INFO - Load mit checkpoint.
+2023-11-07 20:08:17,810 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-07 20:08:18,174 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-07 20:08:18,196 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-07 20:08:18,204 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-07 20:08:18,337 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-07 20:08:18,451 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - MODEL IS READY
+2023-11-07 20:08:18,453 - mmseg - INFO - Loaded annotations from : data/synthia/panoptic-labels-crowdth-0-for-daformer/synthia_panoptic.json
+2023-11-07 20:08:28,190 - mmseg - INFO - Loaded 9400 images from data/synthia/RGB
+2023-11-07 20:08:28,194 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_train_trainId.json
+2023-11-07 20:08:28,653 - mmseg - INFO - Loaded 2975 images from data/cityscapes/leftImg8bit/train
+2023-11-07 20:08:28,752 - mmseg - INFO - RCS Classes: [6, 7, 17, 18, 4, 3, 12, 5, 15, 13, 11, 10, 8, 0, 1, 2]
+2023-11-07 20:08:28,753 - mmseg - INFO - RCS ClassProb: [1.55649453e-01 1.45927146e-01 1.30805254e-01 1.29144296e-01
  1.22819245e-01 1.22646019e-01 9.97279957e-02 5.53424992e-02
  3.33626680e-02 2.43163528e-03 2.00466975e-03 1.35448776e-04
  3.78220921e-06 8.31826052e-10 3.41141226e-10 1.11511794e-14]
-2023-07-28 17:07:29,049 - mmdet - INFO - Automatic scaling of learning rate (LR) has been disabled.
-2023-07-28 17:07:39,896 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_val.json
-2023-07-28 17:07:39,995 - mmseg - INFO - Loaded 500 images from data/cityscapes/leftImg8bit/val
-2023-07-28 17:07:39,996 - mmdet - INFO - Start running, host: ppolydorou@biwirender11, work_dir: /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1706_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_e756c
-2023-07-28 17:07:39,996 - mmdet - INFO - Hooks will be executed in the following order:
+2023-11-07 20:08:39,808 - mmdet - INFO - Automatic scaling of learning rate (LR) has been disabled.
+2023-11-07 20:08:50,687 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_val.json
+2023-11-07 20:08:50,772 - mmseg - INFO - Loaded 500 images from data/cityscapes/leftImg8bit/val
+2023-11-07 20:08:50,773 - mmdet - INFO - Start running, host: ppolydorou@biwirender11, work_dir: /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171
+2023-11-07 20:08:50,773 - mmdet - INFO - Hooks will be executed in the following order:
 before_run:
 (VERY_HIGH   ) PolyLrUpdaterHook                  
 (NORMAL      ) CheckpointHook                     
@@ -551,55 +584,145 @@ after_val_epoch:
 after_run:
 (VERY_LOW    ) TextLoggerHook                     
  -------------------- 
-2023-07-28 17:07:39,996 - mmdet - INFO - workflow: [('train', 1)], max: 40000 iters
-2023-07-28 17:07:39,998 - mmdet - INFO - Checkpoints will be saved to /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1706_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_e756c by HardDiskBackend.
-2023-07-28 17:07:39,998 - mmdet - INFO - The best checkpoint will be saved to edaps_experiments/exp-00001/work_dirs/local-exp00001/230728_1706_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_e756c/panoptic_eval/panop_eval_28-07-2023_17-06-50-171058/visuals/230728_1706_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_e756c by HardDiskBackend
-training with predefined config : configs/edaps/syn2cs_uda_warm_dfthings_rcs_croppl_a999_edaps_s0.py
-Run job syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0
-Traceback (most recent call last):
-  File "run_experiments.py", line 127, in <module>
+2023-11-07 20:08:50,773 - mmdet - INFO - workflow: [('train', 1)], max: 100 iters
+2023-11-07 20:08:50,774 - mmdet - INFO - Checkpoints will be saved to /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171 by HardDiskBackend.
+2023-11-07 20:08:50,774 - mmdet - INFO - The best checkpoint will be saved to edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171/panoptic_eval/panop_eval_07-11-2023_20-08-06-604039/visuals/231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171 by HardDiskBackend
+_base_/default_runtime_mmdet_mr.py
+_base_/models/maskrcnn_sepaspp_mitb5.py
+_base_/datasets/uda_synthia_to_cityscapes_maskrcnn_panoptic.py
+_base_/uda/dacs_a999_fdthings.py
+_base_/schedules/adamw.py
+_base_/schedules/poly10warm.py
+Run job 231107_2008_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_33171
+DEBUG - PETROS 20-08-2023 - data root is : data/synthia/
+DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:<class 'dict'>
+DEBUG - PETROS 20-08-2023 - data root is : data/cityscapes/
+DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:<class 'dict'>
+DEBUG - PETROS 20-08-2023 - data root is : data/cityscapes
+DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:<class 'dict'>
+DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Number of gpus for training is: 1
+DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Samples per gpu is: 1
+DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Batch_size: 1
+[W python_anomaly_mode.cpp:104] Warning: Error detected in NormBackward1. Traceback of forward call that caused the error:
+  File "run_experiments.py", line 146, in <module>
     train_mmdet.main([config_files[i]])
-  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/tools/train_mmdet.py", line 125, in main
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/tools/train_mmdet.py", line 127, in main
     train_detector(model, datasets, cfg, distributed=distributed, validate=(not cfg.only_train), timestamp=timestamp,  meta=meta,)
-  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/apis/train.py", line 211, in train_detector
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/apis/train.py", line 213, in train_detector
     runner.run(data_loaders, cfg.workflow)
   File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 144, in run
     iter_runner(iter_loaders[i], **kwargs)
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 61, in train
-    data_batch = next(data_loader)
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 34, in __next__
-    data = next(self.iter_loader)
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 435, in __next__
-    data = self._next_data()
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1085, in _next_data
-    return self._process_data(data)
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1111, in _process_data
-    data.reraise()
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/_utils.py", line 428, in reraise
-    raise self.exc_type(msg)
-FileNotFoundError: Caught FileNotFoundError in DataLoader worker process 0.
-Original Traceback (most recent call last):
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/_utils/worker.py", line 198, in _worker_loop
-    data = fetcher.fetch(index)
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
-    data = [self.dataset[idx] for idx in possibly_batched_index]
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
-    data = [self.dataset[idx] for idx in possibly_batched_index]
-  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/uda_dataset.py", line 127, in __getitem__
-    return self.get_rare_class_sample()
-  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/uda_dataset.py", line 90, in get_rare_class_sample
-    s1 = self.source[i1]
-  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/custom.py", line 196, in __getitem__
-    return self.prepare_train_img(idx)
-  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/custom.py", line 213, in prepare_train_img
-    return self.pipeline(results)
-  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/pipelines/compose.py", line 42, in __call__
-    data = t(data)
-  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/pipelines/loading.py", line 62, in __call__
-    img_bytes = self.file_client.get(filename)
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/fileio/file_client.py", line 1014, in get
-    return self.client.get(filepath)
-  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/fileio/file_client.py", line 535, in get
-    with open(filepath, 'rb') as f:
-FileNotFoundError: [Errno 2] No such file or directory: 'data/synthia/RGB/0007543.png'
-
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 64, in train
+    outputs = self.model.train_step(data_batch, self.optimizer, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/parallel/data_parallel.py", line 77, in train_step
+    return self.module.train_step(*inputs[0], **kwargs[0])
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/uda/dacs.py", line 147, in train_step
+    log_vars = self(**data_batch) # elf(**data_batch) is a Python syntax that involves using the double asterisks (**) to unpack a dictionary and pass its key-value pairs as keyword arguments to a function or method.
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/fp16_utils.py", line 116, in new_func
+    return old_func(*args, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/base.py", line 172, in forward
+    return self.forward_train(img, img_metas, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/uda/dacs.py", line 217, in forward_train
+    feat_loss, feat_log = self.calc_feat_dist(img, gt_semantic_seg, src_feat)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/uda/dacs.py", line 135, in calc_feat_dist
+    feat_dist = self.masked_feat_dist(feat[lay], feat_imnet[lay], fdist_mask)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/uda/dacs.py", line 115, in masked_feat_dist
+    pw_feat_dist = torch.norm(feat_diff, dim=1, p=2)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/functional.py", line 1337, in norm
+    return _VF.norm(input, p, _dim, keepdim=keepdim)  # type: ignore
+ (function _print_stack)
+01_len(labels.unique() 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique() 10
+06_number of instances 10
+01_len(labels.unique() 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique() 10
+06_number of instances 10
+01_len(labels.unique() 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique() 10
+06_number of instances 10
+01_len(labels.unique() 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique() 10
+06_number of instances 10
+01_len(labels.unique() 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique() 10
+06_number of instances 10
+01_len(labels.unique() 4
+04_length 15
+05_len(labels.unique() 4
+06_number of instances 4
+01_len(labels.unique() 4
+04_length 15
+05_len(labels.unique() 4
+06_number of instances 4
+01_len(labels.unique() 4
+04_length 15
+05_len(labels.unique() 4
+06_number of instances 4
+01_len(labels.unique() 4
+04_length 15
+05_len(labels.unique() 4
+06_number of instances 4
+01_len(labels.unique() 4
+04_length 15
+05_len(labels.unique() 4
+06_number of instances 4
+01_len(labels.unique() 5
+04_length 20
+05_len(labels.unique() 5
+06_number of instances 5
+01_len(labels.unique() 5
+04_length 20
+05_len(labels.unique() 5
+06_number of instances 5
+01_len(labels.unique() 5
+04_length 20
+05_len(labels.unique() 5
+06_number of instances 5
+01_len(labels.unique() 5
+04_length 20
+05_len(labels.unique() 5
+06_number of instances 5
+01_len(labels.unique() 5
+04_length 20
+05_len(labels.unique() 5
+06_number of instances 5
+Traceback (most recent call last):
+  File "run_experiments.py", line 146, in <module>
+    train_mmdet.main([config_files[i]])
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/tools/train_mmdet.py", line 127, in main
+    train_detector(model, datasets, cfg, distributed=distributed, validate=(not cfg.only_train), timestamp=timestamp,  meta=meta,)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/apis/train.py", line 213, in train_detector
+    runner.run(data_loaders, cfg.workflow)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 144, in run
+    iter_runner(iter_loaders[i], **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 64, in train
+    outputs = self.model.train_step(data_batch, self.optimizer, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/parallel/data_parallel.py", line 77, in train_step
+    return self.module.train_step(*inputs[0], **kwargs[0])
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/uda/dacs.py", line 147, in train_step
+    log_vars = self(**data_batch) # elf(**data_batch) is a Python syntax that involves using the double asterisks (**) to unpack a dictionary and pass its key-value pairs as keyword arguments to a function or method.
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/fp16_utils.py", line 116, in new_func
+    return old_func(*args, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/base.py", line 172, in forward
+    return self.forward_train(img, img_metas, **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/uda/dacs.py", line 232, in forward_train
+    clean_loss.backward()
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/tensor.py", line 221, in backward
+    torch.autograd.backward(self, gradient, retain_graph, create_graph)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/autograd/__init__.py", line 130, in backward
+    Variable._execution_engine.run_backward(
+RuntimeError: Function 'NormBackward1' returned nan values in its 0th output.

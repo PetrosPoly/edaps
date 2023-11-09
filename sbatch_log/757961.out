@@ -1,17 +1,38 @@
-Running on node: biwirender13
+Running on node: biwirender10
 In directory:    /scratch_net/biwidl202/ppolydorou/project_edaps/edaps
-Starting on:     Fri Aug 11 17:24:30 CEST 2023
-SLURM_JOB_ID:    729911
+Starting on:     Tue Nov  7 00:47:35 CET 2023
+SLURM_JOB_ID:    757961
+CUDA_VISIBLE_DEVICES: 0
+Tue Nov  7 00:47:35 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.141.03   Driver Version: 470.141.03   CUDA Version: 11.4     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA GeForce ...  On   | 00000000:87:00.0 Off |                  N/A |
+| 22%   34C    P8    15W / 250W |      1MiB / 12212MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:38: UserWarning: Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
   warnings.warn(
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:48: UserWarning: Setting MKL_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
   warnings.warn(
-2023-08-11 17:25:02,990 - mmdet - INFO - Environment info:
+2023-11-07 00:47:59,211 - mmdet - INFO - Environment info:
 ------------------------------------------------------------
 sys.platform: linux
 Python: 3.8.5 (default, Sep  4 2020, 07:30:14) [GCC 7.3.0]
 CUDA available: True
-GPU 0: NVIDIA TITAN Xp
+GPU 0: NVIDIA GeForce GTX TITAN X
 CUDA_HOME: /usr
 NVCC: Cuda compilation tools, release 11.2, V11.2.152
 GCC: gcc (Debian 8.3.0-6) 8.3.0
@@ -35,13 +56,13 @@ OpenCV: 4.8.0
 MMCV: 1.6.1
 MMCV Compiler: GCC 7.3
 MMCV CUDA Compiler: 11.0
-MMDetection: 2.25.1+2a2044c
+MMDetection: 2.25.1+d4240ed
 ------------------------------------------------------------
 
-2023-08-11 17:25:04,606 - mmdet - INFO - Distributed training: False
-2023-08-11 17:25:06,305 - mmdet - INFO - Config:
+2023-11-07 00:48:01,011 - mmdet - INFO - Distributed training: False
+2023-11-07 00:48:02,883 - mmdet - INFO - Config:
 checkpoint_config = dict(interval=40000, by_epoch=False, max_keep_ckpts=1)
-log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
@@ -177,7 +198,7 @@ model = dict(
             pos_weight=-1,
             debug=False),
         work_dir=
-        'edaps_experiments/exp-00001/work_dirs/local-exp00001/230811_1725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_ea32d'
+        'edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_0047_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_4c2e8'
     ),
     test_cfg=dict(
         mode='whole',
@@ -195,13 +216,13 @@ dataset_type = 'CityscapesDataset'
 data_root = 'data/cityscapes/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-crop_size = (512, 512)
+crop_size = (256, 256)
 num_classes = 19
 synthia_train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadPanopticAnnotations'),
     dict(type='Resize', img_scale=(1280, 760)),
-    dict(type='RandomCrop', crop_size=(512, 512), cat_max_ratio=0.75),
+    dict(type='RandomCrop', crop_size=(256, 256), cat_max_ratio=0.75),
     dict(type='RandomFlip', prob=0.5),
     dict(
         type='GenPanopLabelsForMaskFormer',
@@ -219,13 +240,14 @@ synthia_train_pipeline = [
         type='Collect',
         keys=[
             'img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg',
-            'gt_panoptic_only_thing_classes', 'max_inst_per_class'
+            'gt_panoptic_only_thing_classes', 'max_inst_per_class',
+            'panoptic_labels_list', 'unique_labels_list', 'indices_list'
         ])
 ]
 cityscapes_train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', img_scale=(1024, 512)),
-    dict(type='RandomCrop', crop_size=(512, 512)),
+    dict(type='RandomCrop', crop_size=(256, 256)),
     dict(type='RandomFlip', prob=0.5),
     dict(
         type='Normalize',
@@ -254,7 +276,7 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=2,
+    samples_per_gpu=1,
     workers_per_gpu=4,
     train=dict(
         type='UDADataset',
@@ -270,7 +292,7 @@ data = dict(
                 dict(type='Resize', img_scale=(1280, 760)),
                 dict(
                     type='RandomCrop',
-                    crop_size=(512, 512),
+                    crop_size=(256, 256),
                     cat_max_ratio=0.75),
                 dict(type='RandomFlip', prob=0.5),
                 dict(
@@ -290,7 +312,8 @@ data = dict(
                     keys=[
                         'img', 'gt_bboxes', 'gt_labels', 'gt_masks',
                         'gt_semantic_seg', 'gt_panoptic_only_thing_classes',
-                        'max_inst_per_class'
+                        'max_inst_per_class', 'panoptic_labels_list',
+                        'unique_labels_list', 'indices_list'
                     ])
             ]),
         target=dict(
@@ -302,7 +325,7 @@ data = dict(
             pipeline=[
                 dict(type='LoadImageFromFile'),
                 dict(type='Resize', img_scale=(1024, 512)),
-                dict(type='RandomCrop', crop_size=(512, 512)),
+                dict(type='RandomCrop', crop_size=(256, 256)),
                 dict(type='RandomFlip', prob=0.5),
                 dict(
                     type='Normalize',
@@ -375,7 +398,7 @@ uda = dict(
     blur=True,
     color_jitter_strength=0.2,
     color_jitter_probability=0.2,
-    debug_img_interval=1000,
+    debug_img_interval=5000,
     print_grad_magnitude=False,
     share_src_backward=True,
     disable_mix_masks=False)
@@ -403,11 +426,10 @@ lr_config = dict(
 debug = False
 n_gpus = 1
 gpu_mtotal = 23000
-total_train_time = '21:00:00'
+total_train_time = '24:00:00'
 n_cpus = 16
 mem_per_cpu = 16000
 machine = 'local'
-euler_template_fname = 'euler_template_slurm_syn2city.sh'
 only_eval = False
 only_train = False
 activate_auto_scale_lr = False
@@ -416,6 +438,11 @@ print_layer_wise_lr = False
 file_sys = 'Slurm'
 launcher = None
 generate_only_visuals_without_eval = False
+dump_predictions_to_disk = False
+evaluate_from_saved_png_predictions = False
+panop_eval_temp_folder_previous = None
+exp_sub = 'exp-00001'
+exp_root = 'edaps_experiments'
 seed = 0
 evaluation = dict(
     interval=40000,
@@ -447,30 +474,63 @@ evaluation = dict(
         upsnet_mask_pruning=False,
         generate_thing_cls_panoptic_from_instance_pred=False),
     visuals_pan_eval=False,
-    evalScale='2048x1024',
+    evalScale=None,
+    evaluate_from_saved_numpy_predictions=False,
+    evaluate_from_saved_png_predictions=False,
     panop_eval_folder=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230811_1725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_ea32d/panoptic_eval',
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_0047_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_4c2e8/panoptic_eval',
     panop_eval_temp_folder=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230811_1725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_ea32d/panoptic_eval/panop_eval_11-08-2023_17-25-02-841215',
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_0047_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_4c2e8/panoptic_eval/panop_eval_07-11-2023_00-47-59-076573',
     debug=False,
     out_dir=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/230811_1725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_ea32d/panoptic_eval/panop_eval_11-08-2023_17-25-02-841215/visuals'
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_0047_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_4c2e8/panoptic_eval/panop_eval_07-11-2023_00-47-59-076573/visuals'
 )
 runner = dict(type='IterBasedRunner', max_iters=40000)
-name = '230811_1725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_ea32d'
+name = '231107_0047_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_4c2e8'
 exp = 1
-exp_root = 'edaps_experiments'
-exp_sub = 'exp-00001'
-name_dataset = ('synthia2cityscapes', )
-name_architecture = ('maskrcnn_mitb5', )
-name_encoder = ('mitb5', )
-name_decoder = ('maskrcnn', )
-name_uda = ('dacs_rcs0.01_cpl', )
-name_opt = ('adamw_6e-05_pmTrue_poly10warm_1x1_40k', )
-work_dir = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/230811_1725_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_ea32d'
-git_rev = '2a2044c49e116d4693884d4a9a6e08b824a9b128'
+name_dataset = 'synthia2cityscapes'
+name_architecture = 'maskrcnn_mitb5'
+name_encoder = 'mitb5'
+name_decoder = 'maskrcnn'
+name_uda = 'dacs_rcs0.01_cpl'
+name_opt = 'adamw_6e-05_pmTrue_poly10warm_1x1_40k'
+work_dir = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231107_0047_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_4c2e8'
+git_rev = 'd4240edba6884ac9d6961c90f575ffe95a645a13'
 auto_resume = False
 gpu_ids = [0]
 
-2023-08-11 17:25:06,305 - mmdet - INFO - Set random seed to 0, deterministic: False
-slurmstepd: error: *** JOB 729911 ON biwirender13 CANCELLED AT 2023-08-11T17:25:08 ***
+2023-11-07 00:48:02,883 - mmdet - INFO - Set random seed to 0, deterministic: False
+2023-11-07 00:48:02,884 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - BEFORE MODEL BUILD
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/two_stage.py:29: UserWarning: DeprecationWarning: pretrained is deprecated, please use "init_cfg" instead
+  warnings.warn('DeprecationWarning: pretrained is deprecated, '
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/backbones/mix_transformer.py:215: UserWarning: DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead
+  warnings.warn('DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead')
+2023-11-07 00:48:07,633 - mmdet - INFO - Load mit checkpoint.
+2023-11-07 00:48:07,634 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-07 00:48:10,795 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-07 00:48:10,827 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-07 00:48:10,835 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-07 00:48:10,993 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-07 00:48:11,070 - mmdet - INFO - Load mit checkpoint.
+2023-11-07 00:48:11,070 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-07 00:48:11,527 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-07 00:48:11,553 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-07 00:48:11,561 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-07 00:48:11,715 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-07 00:48:11,791 - mmdet - INFO - Load mit checkpoint.
+2023-11-07 00:48:11,791 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-07 00:48:12,204 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-07 00:48:12,232 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-07 00:48:12,241 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-07 00:48:12,399 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-07 00:48:12,527 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - MODEL IS READY
+2023-11-07 00:48:12,528 - mmseg - INFO - Loaded annotations from : data/synthia/panoptic-labels-crowdth-0-for-daformer/synthia_panoptic.json
+2023-11-07 00:48:23,110 - mmseg - INFO - Loaded 9400 images from data/synthia/RGB
+2023-11-07 00:48:23,114 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_train_trainId.json
+2023-11-07 00:48:23,603 - mmseg - INFO - Loaded 2975 images from data/cityscapes/leftImg8bit/train
+2023-11-07 00:48:23,712 - mmseg - INFO - RCS Classes: [6, 7, 17, 18, 4, 3, 12, 5, 15, 13, 11, 10, 8, 0, 1, 2]
+2023-11-07 00:48:23,713 - mmseg - INFO - RCS ClassProb: [1.55649453e-01 1.45927146e-01 1.30805254e-01 1.29144296e-01
+ 1.22819245e-01 1.22646019e-01 9.97279957e-02 5.53424992e-02
+ 3.33626680e-02 2.43163528e-03 2.00466975e-03 1.35448776e-04
+ 3.78220921e-06 8.31826052e-10 3.41141226e-10 1.11511794e-14]
+slurmstepd: error: *** JOB 757961 ON biwirender10 CANCELLED AT 2023-11-07T00:48:25 ***

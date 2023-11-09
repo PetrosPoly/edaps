@@ -117,7 +117,7 @@ def train_detector(model, dataset, cfg, distributed=False, validate=False, times
     dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
     if 'runner' not in cfg: # added by Suman
         raise NotImplementedError('Please add runner in config, e.g., runner = dict(type=\'IterBasedRunner\', max_iters=40000)')
-    # `num_gpus` will be ignored if distributed
+    # `num_gpus` will be ignored if distributed #### Petros changed here number of samples per gpu = 1
     train_dataloader_default_args = dict(samples_per_gpu=2, workers_per_gpu=2, num_gpus=len(cfg.gpu_ids), dist=distributed, seed=cfg.seed, persistent_workers=False)
     # this overrides the configs in train_dataloader_default_args, e.g., if samples_per_gpu=1 in train_dataloader config. It overrides the samples_per_gpu=2 in train_dataloader_default_args
     train_loader_cfg = {**train_dataloader_default_args, **cfg.data.get('train_dataloader', {}) }
@@ -207,5 +207,8 @@ def train_detector(model, dataset, cfg, distributed=False, validate=False, times
 
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
-
+    print('DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Number of gpus for training is:', cfg._cfg_dict['n_gpus'])
+    print('DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Samples per gpu is:', cfg._cfg_dict['data']['train_dataloader']['samples_per_gpu'])
+    print('DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Workers per gpu is:', cfg._cfg_dict['data']['train_dataloader']['workers_per_gpu'])
+    print('DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Batch_size:', cfg._cfg_dict['data']['train_dataloader']['samples_per_gpu']*cfg._cfg_dict['n_gpus'])
     runner.run(data_loaders, cfg.workflow)

@@ -1,9 +1,10 @@
 #!/bin/bash
 
-#SBATCH  --output=sbatch_log/%j.out
-#SBATCH  --gres=gpu:titan_xp:1
-#SBATCH  --mem=30G
-#SBATCH  --constraint='geforce_rtx_2080_ti|titan_rtx' 
+#SBATCH --output=sbatch_log/%j.out
+#SBATCH --nodes=1
+#SBATCH --gres=gpu:1 # Requesting 1 gpu
+#SBATCH --constraint='geforce_gtx_titan_x|titan_xp'
+#SBATCH --mem=50G
 
 cd /scratch_net/biwidl202/ppolydorou/project_edaps/edaps
 source /scratch_net/biwidl202/ppolydorou/conda/etc/profile.d/conda.sh
@@ -15,5 +16,7 @@ echo "Running on node: $(hostname)"
 echo "In directory:    $(pwd)"
 echo "Starting on:     $(date)"
 echo "SLURM_JOB_ID:    ${SLURM_JOB_ID}"
+echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
 
-python run_experiments.py --config configs/edaps/syn2cs_uda_warm_dfthings_rcs_croppl_a999_edaps_s0_debug.py
+nvidia-smi
+python run_experiments.py --exp 1

@@ -112,22 +112,14 @@ class CustomDataset(Dataset):
             json_filename = ann_dir + f'_{self.diffusion_set}.json'
         print_log(f'Loaded annotations from : {json_filename}', logger=get_root_logger())
         dataset = json.load(open(json_filename))
-        print_log(f'DEBUG - PETROS 19-08-2023 - the type of the dataset variable:{type(dataset)}') # added by Petros'
+        print_log(f'DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:{type(dataset)}') # added by Petros'
         self.files = {}
-        first_iteration = True # variable added by Petros for debugging
-        s = 0 # count the number of iterations for synthia dataset loading
-        c = 0 # count the number of iterations for cityscape dataset loading
         for ano in dataset['annotations']:
             img_info = {}
             if 'synthia' in self.data_root:
-                s = s + 1 # added by Petros for debugging
                 ano_fname = ano['file_name']   # comment by Petros - check the filename the file data/synthia/panoptic-labels-crowdth-0-for-daformer and you will understand
-                if first_iteration:
-                    print_log((f'DEBUG - PETROS 19-08-2023 - Annotation filename is the following :{ano_fname}'))
-                    first_iteration = False
                 seg_fname = ano['image_id'] + self.seg_map_suffix
             elif 'cityscapes' in self.data_root:
-                c = c + 1 # added by Petros for debugging
                 ano_fname = ano['image_id']
                 str1 = ano_fname.split('_')[0] + '/' + ano_fname
                 ano_fname = str1 + '_leftImg8bit.png'

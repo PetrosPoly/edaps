@@ -1,0 +1,30 @@
+Running on node: bmicgpu02
+In directory:    /scratch_net/biwidl202/ppolydorou/project_edaps/edaps
+Starting on:     Fri Nov  3 13:43:26 CET 2023
+SLURM_JOB_ID:    756889
+CUDA_VISIBLE_DEVICES: 0,1
+Fri Nov  3 13:43:26 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.141.03   Driver Version: 470.141.03   CUDA Version: 11.4     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA TITAN Xp     On   | 00000000:83:00.0 Off |                  N/A |
+| 23%   32C    P8     8W / 250W |      1MiB / 12196MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+|   1  NVIDIA TITAN Xp     On   | 00000000:84:00.0 Off |                  N/A |
+| 23%   34C    P8     9W / 250W |      1MiB / 12196MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+slurmstepd: error: *** JOB 756889 ON bmicgpu02 CANCELLED AT 2023-11-03T13:43:45 ***

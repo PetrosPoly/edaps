@@ -155,8 +155,8 @@ class DACS(UDADecorator):
                       target_img, target_img_metas,
                       gt_panoptic_only_thing_classes,
                       max_inst_per_class,
-                      pan_label, 
-                      unique_labels, 
+                      panoptic_labels_list, 
+                      unique_labels_list, 
                       indices_list, 
                         #contrast, 
                       ):        # daformer args
@@ -195,8 +195,8 @@ class DACS(UDADecorator):
                                                       gt_labels=gt_labels,
                                                       gt_masks=gt_masks,
                                                       gt_panoptic_only_thing_classes = gt_panoptic_only_thing_classes, # added by Petros for contrastive
-                                                      pan_label = pan_label,
-                                                      unique_labels = unique_labels, 
+                                                      panoptic_labels_list = panoptic_labels_list,
+                                                      unique_labels_list = unique_labels_list, 
                                                       indices_list = indices_list, 
                                                       # contrast = contrast, # added for contrastive loss
                                                       )

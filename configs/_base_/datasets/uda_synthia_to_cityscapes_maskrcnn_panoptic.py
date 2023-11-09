@@ -22,7 +22,7 @@ synthia_train_pipeline = [
                                  ),
                             dict(type='Normalize', **img_norm_cfg),
                             dict(type='DefaultFormatBundleMmdet'),
-                            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg', 'gt_panoptic_only_thing_classes', 'max_inst_per_class','pan_label','unique_labels','indices_list']),
+                            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg', 'gt_panoptic_only_thing_classes', 'max_inst_per_class','panoptic_labels_list','unique_labels_list','indices_list']),
                         ]
 
 cityscapes_train_pipeline = [
@@ -52,7 +52,7 @@ test_pipeline = [
                 ]
 
 data = dict(
-            samples_per_gpu=2,
+            samples_per_gpu=2, 
             workers_per_gpu=4,
             train=dict(
                         type='UDADataset', # class name comment added by Petros

@@ -446,7 +446,7 @@ def evaluateMatches(matches, args, logger):
 
     # AP
     overlaps  = args.overlaps
-    # region size
+    # #region size
     minRegionSizes = args.minRegionSizes
     # distance thresholds
     distThs   = args.distanceThs

@@ -97,9 +97,27 @@ class MaskRCNNPanoptic(TwoStageDetector):
     
     # # added by Petros for contrastive loss on 12 October 2023
     
+    def random_selected_instances(self, selected_labels, selected_features, max_instances = 10):
+        # Retrieve the unique values 
+        unique_labels = torch.unique(selected_labels, sorted = True)
+        num_instances = len(unique_labels)
+        
+        # Random permutation of the indices
+        random_indices = torch.randperm(num_instances)[:max_instances]
+        
+        # Random selection of panoptic labels that I will keep
+        random_labels = unique_labels[random_indices]
+        
+        # Keep from the initial tensor only the labels that selected above
+        indices = torch.hstack([torch.nonzero(selected_labels == label).flatten() for label in random_labels])
+        selected_labels = selected_labels[indices]
+        selected_features = selected_features[indices]
+        
+        return selected_labels, selected_features
+    
     def constrastive_features(self, tensor, img):
       x = resize(input=tensor, size=img.shape[2:], mode='bilinear', align_corners=self.align_corners)
-      x_flat = x.view(2, 256, -1).permute(0,2,1).contiguous()
+      x_flat = x.view(x.shape[0], x.shape[1], -1).permute(0,2,1).contiguous()
       return x_flat
     
     def pool_features(self, extracted_features, pan_labels, unique_labels, indices):
@@ -120,26 +138,20 @@ class MaskRCNNPanoptic(TwoStageDetector):
             # find the indices from the unique_labels which divided // 10 is equal to panoptic 
             mask_ = (unique_labels_ // 10 == pan_label.item())
             mask_indices = mask_.nonzero(as_tuple=True)[0]
-            
+
             # Loop according to these indices 
             for idx in mask_indices:
                 selected_labels.append(unique_labels_[idx].item() // 10)
                 selected_features.append(mean_features[idx])
-                
-            # Loop through each unique label and feature
-            # for label, feature in zip(unique_labels, mean_features):
-            #     if str(label.item()).startswith(str(pan_label)): # Check if string representation of label starts with '24000'
-            #         selected_labels.append(label.item() // 10)
-            #         selected_features.append(feature)  
-            # # for contrastive average pooling features finish #
-        
+ 
         # Convert list to torch.tensors to be used as input for the loss 
         selected_labels  = torch.tensor(selected_labels)
         selected_features = torch.stack(selected_features)
-                   
+        
         return  selected_labels, selected_features
     
-    #@force_fp32(apply_to=('features', 'labels'))
+   
+    @force_fp32(apply_to=('features', 'labels'))
     def loss_constrastive(self, features, labels):
         loss = self.loss_constrastive_ntx(features, labels)
         return loss
@@ -179,10 +191,9 @@ class MaskRCNNPanoptic(TwoStageDetector):
                       gt_bboxes_ignore=None,
                       gt_masks=None,
                       gt_panoptic_only_thing_classes = None, # added by Petros for contrastive 
-                      pan_label = None,
-                      unique_labels = None, 
-                      indices_list = None, 
-                     # contrast = None,
+                      panoptic_labels_list = None,           # added by Petros for contrastive 
+                      unique_labels_list = None,             # added by Petros for contrastive 
+                      indices_list = None,                   # added by Petros for contrastive
                       proposals=None,
                       box_domain_indicator=None,
                       pseudo_wght_val=None,
@@ -201,27 +212,41 @@ class MaskRCNNPanoptic(TwoStageDetector):
         if gt_semantic_seg is not None:
             loss_decode = self._decode_head_forward_train(x, img_metas, gt_semantic_seg, seg_weight)
             losses.update(loss_decode)
-        if gt_bboxes:     
+       
         # # added by Petros for contrastive loss on 12 October 2023  # #  
-            contrastive_loss = 0
-            # img_infos = load_annotations_
-            for tensor in x_n:
-                x_flat = self.constrastive_features(tensor, img)
-                for i, x_ in enumerate(x_flat):         # # gt_panoptic_thing_classes.shape = (2, 1, 512, 512) & squeeze to remove the dimension (2,512,512)
-                    if pan_label[i].shape == (0,):
-                        print("No contrastive loss computation for this cropped image")
-                        print("panoptic_labels", pan_label[i])
-                        print("unique_labels", unique_labels[i])
-                        print("indices_list", indices_list[i])
-                        continue
-                    else:
-                        print("Contrastive loss computation for this cropped image")
-                        print("panoptic_labels", pan_label[i])
-                        labels, features = self.pool_features(x_, pan_label[i], unique_labels[i], indices_list[i])                                 
-                        contrastive_loss += self.loss_constrastive(features, labels) / tensor.shape[0]
-            contrastive_loss = contrastive_loss / len(x_n)
-            losses.update({'contrastive loss': contrastive_loss})
+        if not True:  # added to avoid the constrastive loss calculation 
+        # if panoptic_labels_list:
+            for panoptic_labels, unique_labels, indices in zip(panoptic_labels_list, unique_labels_list, indices_list):
+                if panoptic_labels.numel() != 0:  # check if tensor is not empty contrastive loss will be computed
+                    contrastive_loss = 0
+                    # img_infos = load_annotations_
+                    for tensor in x_n:
+                        x_flat = self.constrastive_features(tensor, img)
+                        for i, x_ in enumerate(x_flat):        # x_flat a
+                                # print("Contrastive loss computation for this cropped image")
+                                # print("panoptic_labels", panoptic_labels)
+                                labels, features = self.pool_features(x_, panoptic_labels, unique_labels, indices)  
+                                  # check if number of instances more than 80 select only 100 and minimum number of positive pairs should be 2
+                                print('01_len(labels.unique())', len(labels.unique()))
+                                if len(labels.unique()) > 10:
+                                    print('02_random selection has been called')
+                                    labels, features = self.random_selected_instances(labels, features)
+                               # print('03_labels', labels)
+                                print('04_length', len(labels))
+                                print('05_len(labels.unique())', len(labels.unique()))
+                                print('06_number of instances', torch.unique(labels, sorted = True , return_inverse = True)[1].max().item()+1)     # +1 because indices start from zero                       
+                                print('')
+                                contrastive_loss += self.loss_constrastive(features, labels) / tensor.shape[0]
+                    contrastive_loss = contrastive_loss / len(x_n)
+                    losses.update({'contrastive loss': contrastive_loss})
+                # else:
+                    # print("No contrastive loss computation for this cropped image")
+                    # print("panoptic_labels", panoptic_labels)
+                    # print("unique_labels", unique_labels)
+                    # print("indices_list", indices)
         # # added by Petros for contrastive loss on 12 October 2023 # # 
+        
+        if gt_bboxes:   
             batch_size = len(gt_labels)
             set_loss_to_zero = False
             for i in range(batch_size):
