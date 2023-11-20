@@ -67,10 +67,13 @@ class LoadImageFromFile(object):
             img = img.astype(np.float32)
 
         results['filename'] = filename
+        print('20.11.2023 - PETROS DEBUG - RESULTS["FILENAME"]', results['filename'])    # Petros prints added for debugging 
         results['ori_filename'] = results['img_info']['filename']
         results['img'] = img
         results['img_shape'] = img.shape
+        print('20.11.2023 - PETROS DEBUG - RESULTS["IMG_SHAPE"]', results['filename'])
         results['ori_shape'] = img.shape
+
 
         # Set initial values for default meta_keys
         results['pad_shape'] = img.shape

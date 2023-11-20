@@ -1,0 +1,6167 @@
+Running on node: biwirender13
+In directory: /scratch_net/biwidl202/ppolydorou/project_edaps/edaps
+Starting on: Wed Nov 15 01:01:49 CET 2023
+SLURM_JOB_ID: 762293
+CUDA_VISIBLE_DEVICES: 0
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:38: UserWarning: Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
+  warnings.warn(
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:48: UserWarning: Setting MKL_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
+  warnings.warn(
+2023-11-15 01:02:26,351 - mmdet - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.5 (default, Sep  4 2020, 07:30:14) [GCC 7.3.0]
+CUDA available: True
+GPU 0: NVIDIA TITAN Xp
+CUDA_HOME: /usr
+NVCC: Cuda compilation tools, release 11.2, V11.2.152
+GCC: gcc (Debian 8.3.0-6) 8.3.0
+PyTorch: 1.7.1
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2021.4-Product Build 20210904 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v1.6.0 (Git Hash 5ef631a030a6f73131c77892041042805a06064f)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.0
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS=MKL, BUILD_TYPE=Release, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DUSE_VULKAN_WRAPPER -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, USE_CUDA=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.8.2
+OpenCV: 4.8.0
+MMCV: 1.6.1
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.0
+MMDetection: 2.25.1+dcf9092
+------------------------------------------------------------
+
+2023-11-15 01:02:27,986 - mmdet - INFO - Distributed training: False
+2023-11-15 01:02:29,654 - mmdet - INFO - Config:
+checkpoint_config = dict(interval=50, by_epoch=False, max_keep_ckpts=1)
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
+custom_hooks = [dict(type='NumClassCheckHook')]
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+opencv_num_threads = 0
+mp_start_method = 'fork'
+num_instance_classes = 8
+norm_cfg = dict(type='BN', requires_grad=True)
+find_unused_parameters = True
+maskrcnn_losses_weights = 1.0
+model = dict(
+    type='MaskRCNNPanoptic',
+    pretrained='pretrained/mit_b5.pth',
+    backbone=dict(type='mit_b5', style='pytorch'),
+    use_neck_feat_for_decode_head=False,
+    decode_head=dict(
+        type='DAFormerHead',
+        in_channels=[64, 128, 320, 512],
+        in_index=[0, 1, 2, 3],
+        channels=256,
+        dropout_ratio=0.1,
+        num_classes=19,
+        norm_cfg=dict(type='BN', requires_grad=True),
+        align_corners=False,
+        decoder_params=dict(
+            embed_dims=256,
+            embed_cfg=dict(type='mlp', act_cfg=None, norm_cfg=None),
+            embed_neck_cfg=dict(type='mlp', act_cfg=None, norm_cfg=None),
+            fusion_cfg=dict(
+                type='aspp',
+                sep=True,
+                dilations=(1, 6, 12, 18),
+                pool=False,
+                act_cfg=dict(type='ReLU'),
+                norm_cfg=dict(type='BN', requires_grad=True))),
+        loss_decode=dict(
+            type='CrossEntropyLossMmseg', use_sigmoid=False, loss_weight=1.0)),
+    neck=dict(
+        type='FPN',
+        in_channels=[64, 128, 320, 512],
+        out_channels=256,
+        num_outs=5),
+    rpn_head=dict(
+        type='RPNHead',
+        in_channels=256,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
+    roi_head=dict(
+        type='StandardRoIHead',
+        bbox_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        bbox_head=dict(
+            type='Shared2FCBBoxHead',
+            in_channels=256,
+            fc_out_channels=1024,
+            roi_feat_size=7,
+            num_classes=8,
+            bbox_coder=dict(
+                type='DeltaXYWHBBoxCoder',
+                target_means=[0.0, 0.0, 0.0, 0.0],
+                target_stds=[0.1, 0.1, 0.2, 0.2]),
+            reg_class_agnostic=False,
+            loss_cls=dict(
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+            loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
+        mask_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=14, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        mask_head=dict(
+            type='FCNMaskHead',
+            num_convs=4,
+            in_channels=256,
+            conv_out_channels=256,
+            num_classes=8,
+            loss_mask=dict(
+                type='CrossEntropyLoss', use_mask=True, loss_weight=1.0))),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=-1,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.5,
+                neg_iou_thr=0.5,
+                min_pos_iou=0.5,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=512,
+                pos_fraction=0.25,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=True),
+            mask_size=28,
+            pos_weight=-1,
+            debug=False),
+        work_dir=
+        'edaps_experiments/exp-00001/work_dirs/local-exp00001/231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff'
+    ),
+    test_cfg=dict(
+        mode='whole',
+        rpn=dict(
+            nms_pre=1000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            score_thr=0.05,
+            nms=dict(type='nms', iou_threshold=0.5),
+            max_per_img=100,
+            mask_thr_binary=0.5)))
+dataset_type = 'CityscapesDataset'
+data_root = 'data/cityscapes/'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+crop_size = (256, 256)
+num_classes = 19
+synthia_train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadPanopticAnnotations'),
+    dict(type='Resize', img_scale=(1280, 760)),
+    dict(type='RandomCrop', crop_size=(256, 256), cat_max_ratio=0.75),
+    dict(type='RandomFlip', prob=0.5),
+    dict(
+        type='GenPanopLabelsForMaskFormer',
+        sigma=8,
+        mode='train',
+        num_classes=19,
+        gen_instance_classids_from_zero=True),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='DefaultFormatBundleMmdet'),
+    dict(
+        type='Collect',
+        keys=[
+            'img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg',
+            'gt_panoptic_only_thing_classes', 'max_inst_per_class',
+            'panoptic_labels_list', 'unique_labels_list', 'indices_list'
+        ])
+]
+cityscapes_train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', img_scale=(1024, 512)),
+    dict(type='RandomCrop', crop_size=(256, 256)),
+    dict(type='RandomFlip', prob=0.5),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='DefaultFormatBundleMmdet'),
+    dict(type='Collect', keys=['img'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(2048, 1024),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=2,
+    workers_per_gpu=4,
+    train=dict(
+        type='UDADataset',
+        source=dict(
+            type='SynthiaDataset',
+            data_root='data/synthia/',
+            img_dir='RGB',
+            depth_dir='',
+            ann_dir='panoptic-labels-crowdth-0-for-daformer/synthia_panoptic',
+            pipeline=[
+                dict(type='LoadImageFromFile'),
+                dict(type='LoadPanopticAnnotations'),
+                dict(type='Resize', img_scale=(1280, 760)),
+                dict(
+                    type='RandomCrop',
+                    crop_size=(256, 256),
+                    cat_max_ratio=0.75),
+                dict(type='RandomFlip', prob=0.5),
+                dict(
+                    type='GenPanopLabelsForMaskFormer',
+                    sigma=8,
+                    mode='train',
+                    num_classes=19,
+                    gen_instance_classids_from_zero=True),
+                dict(
+                    type='Normalize',
+                    mean=[123.675, 116.28, 103.53],
+                    std=[58.395, 57.12, 57.375],
+                    to_rgb=True),
+                dict(type='DefaultFormatBundleMmdet'),
+                dict(
+                    type='Collect',
+                    keys=[
+                        'img', 'gt_bboxes', 'gt_labels', 'gt_masks',
+                        'gt_semantic_seg', 'gt_panoptic_only_thing_classes',
+                        'max_inst_per_class', 'panoptic_labels_list',
+                        'unique_labels_list', 'indices_list'
+                    ])
+            ]),
+        target=dict(
+            type='CityscapesDataset',
+            data_root='data/cityscapes/',
+            img_dir='leftImg8bit/train',
+            depth_dir='',
+            ann_dir='gtFine_panoptic/cityscapes_panoptic_train_trainId',
+            pipeline=[
+                dict(type='LoadImageFromFile'),
+                dict(type='Resize', img_scale=(1024, 512)),
+                dict(type='RandomCrop', crop_size=(256, 256)),
+                dict(type='RandomFlip', prob=0.5),
+                dict(
+                    type='Normalize',
+                    mean=[123.675, 116.28, 103.53],
+                    std=[58.395, 57.12, 57.375],
+                    to_rgb=True),
+                dict(type='DefaultFormatBundleMmdet'),
+                dict(type='Collect', keys=['img'])
+            ]),
+        rare_class_sampling=dict(
+            min_pixels=3000, class_temp=0.01, min_crop_ratio=0.5)),
+    val=dict(
+        type='CityscapesDataset',
+        data_root='data/cityscapes',
+        img_dir='leftImg8bit/val',
+        depth_dir='',
+        ann_dir='gtFine_panoptic/cityscapes_panoptic_val',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(2048, 1024),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]),
+    test=dict(
+        type='CityscapesDataset',
+        data_root='data/cityscapes/',
+        img_dir='leftImg8bit/val',
+        depth_dir='',
+        ann_dir='gtFine_panoptic/cityscapes_panoptic_val',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(2048, 1024),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]))
+uda = dict(
+    type='DACS',
+    alpha=0.999,
+    pseudo_threshold=0.968,
+    pseudo_weight_ignore_top=15,
+    pseudo_weight_ignore_bottom=120,
+    imnet_feature_dist_lambda=0.005,
+    imnet_feature_dist_classes=[6, 7, 11, 12, 13, 14, 15, 16, 17, 18],
+    imnet_feature_dist_scale_min_ratio=0.75,
+    mix='class',
+    blur=True,
+    color_jitter_strength=0.2,
+    color_jitter_probability=0.2,
+    debug_img_interval=5000,
+    print_grad_magnitude=False,
+    share_src_backward=True,
+    disable_mix_masks=False)
+use_ddp_wrapper = True
+optimizer = dict(
+    type='AdamW',
+    lr=6e-05,
+    betas=(0.9, 0.999),
+    weight_decay=0.01,
+    paramwise_cfg=dict(
+        custom_keys=dict(
+            neck=dict(lr_mult=10.0),
+            head=dict(lr_mult=10.0),
+            pos_block=dict(decay_mult=0.0),
+            norm=dict(decay_mult=0.0))))
+optimizer_config = None
+lr_config = dict(
+    policy='poly',
+    warmup='linear',
+    warmup_iters=1500,
+    warmup_ratio=1e-06,
+    power=1.0,
+    min_lr=0.0,
+    by_epoch=False)
+debug = False
+n_gpus = 1
+gpu_mtotal = 23000
+total_train_time = '24:00:00'
+n_cpus = 16
+mem_per_cpu = 16000
+machine = 'local'
+only_eval = False
+only_train = False
+activate_auto_scale_lr = False
+auto_scale_lr = dict(enable=False, base_batch_size=16)
+print_layer_wise_lr = False
+file_sys = 'Slurm'
+launcher = None
+generate_only_visuals_without_eval = False
+dump_predictions_to_disk = False
+evaluate_from_saved_png_predictions = False
+panop_eval_temp_folder_previous = None
+exp_sub = 'exp-00001'
+exp_root = 'edaps_experiments'
+seed = 0
+evaluation = dict(
+    interval=50,
+    metric=['mIoU', 'mPQ', 'mAP'],
+    eval_type='maskrcnn_panoptic',
+    dataset_name='cityscapes',
+    gt_dir='data/cityscapes/gtFine/val',
+    gt_dir_panop='data/cityscapes/gtFine_panoptic',
+    num_samples_debug=12,
+    post_proccess_params=dict(
+        num_classes=19,
+        ignore_label=255,
+        mapillary_dataloading_style='OURS',
+        label_divisor=1000,
+        train_id_to_eval_id=[
+            7, 8, 11, 12, 13, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 31,
+            32, 33, 0
+        ],
+        thing_list=[11, 12, 13, 14, 15, 16, 17, 18],
+        mask_score_threshold=0.95,
+        debug=False,
+        dump_semantic_pred_as_numpy_array=False,
+        load_semantic_pred_as_numpy_array=False,
+        semantic_pred_numpy_array_location=None,
+        use_semantic_decoder_for_instance_labeling=False,
+        use_semantic_decoder_for_panoptic_labeling=False,
+        nms_th=None,
+        intersec_th=None,
+        upsnet_mask_pruning=False,
+        generate_thing_cls_panoptic_from_instance_pred=False),
+    visuals_pan_eval=False,
+    evalScale=None,
+    evaluate_from_saved_numpy_predictions=False,
+    evaluate_from_saved_png_predictions=False,
+    panop_eval_folder=
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff/panoptic_eval',
+    panop_eval_temp_folder=
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff/panoptic_eval/panop_eval_15-11-2023_01-02-26-222895',
+    debug=False,
+    out_dir=
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff/panoptic_eval/panop_eval_15-11-2023_01-02-26-222895/visuals'
+)
+runner = dict(type='IterBasedRunner', max_iters=50)
+name = '231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff'
+exp = 1
+name_dataset = 'synthia2cityscapes'
+name_architecture = 'maskrcnn_mitb5'
+name_encoder = 'mitb5'
+name_decoder = 'maskrcnn'
+name_uda = 'dacs_rcs0.01_cpl'
+name_opt = 'adamw_6e-05_pmTrue_poly10warm_1x2_0k'
+work_dir = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff'
+git_rev = 'dcf90925210a3061f3ba0ef8c1c557a1ba7360a4'
+auto_resume = False
+gpu_ids = [0]
+
+2023-11-15 01:02:29,654 - mmdet - INFO - Set random seed to 0, deterministic: False
+2023-11-15 01:02:29,654 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - BEFORE MODEL BUILD
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/two_stage.py:29: UserWarning: DeprecationWarning: pretrained is deprecated, please use "init_cfg" instead
+  warnings.warn('DeprecationWarning: pretrained is deprecated, '
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/backbones/mix_transformer.py:215: UserWarning: DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead
+  warnings.warn('DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead')
+2023-11-15 01:02:33,910 - mmdet - INFO - Load mit checkpoint.
+2023-11-15 01:02:33,911 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-15 01:02:38,996 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-15 01:02:39,030 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-15 01:02:39,038 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-15 01:02:39,173 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-15 01:02:39,245 - mmdet - INFO - Load mit checkpoint.
+2023-11-15 01:02:39,245 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-15 01:02:39,620 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-15 01:02:39,641 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-15 01:02:39,649 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-15 01:02:39,789 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-15 01:02:39,861 - mmdet - INFO - Load mit checkpoint.
+2023-11-15 01:02:39,861 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-15 01:02:40,257 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-15 01:02:40,282 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-15 01:02:40,290 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-15 01:02:40,437 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-15 01:02:40,556 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - MODEL IS READY
+2023-11-15 01:02:40,557 - mmseg - INFO - Loaded annotations from : data/synthia/panoptic-labels-crowdth-0-for-daformer/synthia_panoptic.json
+2023-11-15 01:02:53,532 - mmseg - INFO - Loaded 9400 images from data/synthia/RGB
+2023-11-15 01:02:53,536 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_train_trainId.json
+2023-11-15 01:02:54,142 - mmseg - INFO - Loaded 2975 images from data/cityscapes/leftImg8bit/train
+2023-11-15 01:02:54,260 - mmseg - INFO - RCS Classes: [6, 7, 17, 18, 4, 3, 12, 5, 15, 13, 11, 10, 8, 0, 1, 2]
+2023-11-15 01:02:54,260 - mmseg - INFO - RCS ClassProb: [1.55649453e-01 1.45927146e-01 1.30805254e-01 1.29144296e-01
+ 1.22819245e-01 1.22646019e-01 9.97279957e-02 5.53424992e-02
+ 3.33626680e-02 2.43163528e-03 2.00466975e-03 1.35448776e-04
+ 3.78220921e-06 8.31826052e-10 3.41141226e-10 1.11511794e-14]
+2023-11-15 01:03:12,274 - mmdet - INFO - Automatic scaling of learning rate (LR) has been disabled.
+2023-11-15 01:03:23,657 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_val.json
+2023-11-15 01:03:23,777 - mmseg - INFO - Loaded 500 images from data/cityscapes/leftImg8bit/val
+2023-11-15 01:03:23,777 - mmdet - INFO - Start running, host: ppolydorou@biwirender13, work_dir: /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff
+2023-11-15 01:03:23,778 - mmdet - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) PolyLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) PolyLrUpdaterHook                  
+(NORMAL      ) NumClassCheckHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) PolyLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHookUDA                        
+ -------------------- 
+after_train_iter:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHookUDA                        
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) NumClassCheckHook                  
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2023-11-15 01:03:23,778 - mmdet - INFO - workflow: [('train', 1)], max: 50 iters
+2023-11-15 01:03:23,779 - mmdet - INFO - Checkpoints will be saved to /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff by HardDiskBackend.
+2023-11-15 01:03:23,779 - mmdet - INFO - The best checkpoint will be saved to edaps_experiments/exp-00001/work_dirs/local-exp00001/231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff/panoptic_eval/panop_eval_15-11-2023_01-02-26-222895/visuals/231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff by HardDiskBackend
+_base_/default_runtime_mmdet_mr.py
+_base_/models/maskrcnn_sepaspp_mitb5.py
+_base_/datasets/uda_synthia_to_cityscapes_maskrcnn_panoptic.py
+_base_/uda/dacs_a999_fdthings.py
+_base_/schedules/adamw.py
+_base_/schedules/poly10warm.py
+Run job 231115_0102_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9d5ff
+DEBUG - PETROS 20-08-2023 - data root is : data/synthia/
+DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:<class 'dict'>
+DEBUG - PETROS 20-08-2023 - data root is : data/cityscapes/
+DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:<class 'dict'>
+DEBUG - PETROS 20-08-2023 - data root is : data/cityscapes
+DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:<class 'dict'>
+DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Number of gpus for training is: 1
+DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Samples per gpu is: 2
+DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Workers per gpu is: 4
+DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Batch_size: 2
+2023-11-15 01:09:45,870 - mmdet - INFO - Saving checkpoint at 50 iterations
+2023-11-15 01:10:13,245 - mmdet - INFO - Iter [50/50]	lr: 3.920e-08, eta: 0:00:00, time: 8.139, data_time: 0.086, memory: 4590, decode.loss_seg: 2.7942, decode.acc_seg: 7.2175, contrastive_loss: 1.4539, rpn.loss_rpn_cls: 0.6759, rpn.loss_rpn_bbox: 0.1335, roi.loss_cls: 1.7977, roi.acc: 51.4715, roi.loss_bbox: 0.1241, roi.loss_mask: 2.1333, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.6029, mix.decode.acc_seg: 12.2378
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 73
+02_random selection has been called
+04_length 32
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 73
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 73
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 73
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 73
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 73
+02_random selection has been called
+04_length 34
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 73
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 73
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 73
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 73
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 11
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 11
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 11
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 11
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 11
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 11
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 11
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 11
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 11
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 11
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 31
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 31
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 31
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 31
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 31
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 31
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 31
+02_random selection has been called
+04_length 34
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 31
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 31
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 31
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 19
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 19
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 19
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 19
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 19
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 19
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 19
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 19
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 19
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 19
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 33
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 33
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 33
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 33
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 33
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 33
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 33
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 33
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 33
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 33
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 67
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 67
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 67
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 67
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 67
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 67
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 67
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 67
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 67
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 67
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 18
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 18
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 18
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 18
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 18
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 18
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 18
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 18
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 18
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 18
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 8
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 3
+04_length 12
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 12
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 12
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 12
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 12
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 12
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 12
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 12
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 12
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 12
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 23
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 33
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 34
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 33
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 33
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 41
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 41
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 41
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 41
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 41
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 41
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 41
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 41
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 41
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 41
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 15
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 28
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 8
+04_length 30
+05_len(labels.unique()) 8
+06_number of instances 8
+
+01_len(labels.unique()) 8
+04_length 30
+05_len(labels.unique()) 8
+06_number of instances 8
+
+01_len(labels.unique()) 8
+04_length 30
+05_len(labels.unique()) 8
+06_number of instances 8
+
+01_len(labels.unique()) 8
+04_length 30
+05_len(labels.unique()) 8
+06_number of instances 8
+
+01_len(labels.unique()) 8
+04_length 30
+05_len(labels.unique()) 8
+06_number of instances 8
+
+01_len(labels.unique()) 8
+04_length 30
+05_len(labels.unique()) 8
+06_number of instances 8
+
+01_len(labels.unique()) 8
+04_length 30
+05_len(labels.unique()) 8
+06_number of instances 8
+
+01_len(labels.unique()) 8
+04_length 30
+05_len(labels.unique()) 8
+06_number of instances 8
+
+01_len(labels.unique()) 8
+04_length 30
+05_len(labels.unique()) 8
+06_number of instances 8
+
+01_len(labels.unique()) 8
+04_length 30
+05_len(labels.unique()) 8
+06_number of instances 8
+
+01_len(labels.unique()) 66
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 66
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 66
+02_random selection has been called
+04_length 33
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 66
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 66
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 66
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 66
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 66
+02_random selection has been called
+04_length 34
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 66
+02_random selection has been called
+04_length 34
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 66
+02_random selection has been called
+04_length 33
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 19
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 17
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 9
+04_length 34
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 34
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 34
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 34
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 34
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 34
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 34
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 34
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 34
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 34
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 7
+04_length 28
+05_len(labels.unique()) 7
+06_number of instances 7
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 10
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 71
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 71
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 71
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 71
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 71
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 71
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 71
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 71
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 71
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 71
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 1
+04_length 3
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 3
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 3
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 3
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 3
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 3
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 3
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 3
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 3
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 3
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 32
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 9
+04_length 35
+05_len(labels.unique()) 9
+06_number of instances 9
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 2
+04_length 7
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 7
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 7
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 7
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 7
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 7
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 7
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 7
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 7
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 2
+04_length 7
+05_len(labels.unique()) 2
+06_number of instances 2
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 14
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 21
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 50
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 50
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 50
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 50
+02_random selection has been called
+04_length 33
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 50
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 50
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 50
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 50
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 50
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 50
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 34
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 30
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 27
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 37
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 3
+04_length 11
+05_len(labels.unique()) 3
+06_number of instances 3
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 16
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 53
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 6
+04_length 24
+05_len(labels.unique()) 6
+06_number of instances 6
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 15
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 35
+02_random selection has been called
+04_length 34
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 35
+02_random selection has been called
+04_length 34
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 35
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 35
+02_random selection has been called
+04_length 31
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 35
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 35
+02_random selection has been called
+04_length 33
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 35
+02_random selection has been called
+04_length 33
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 35
+02_random selection has been called
+04_length 33
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 35
+02_random selection has been called
+04_length 32
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 35
+02_random selection has been called
+04_length 35
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 25
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 39
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 23
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 5
+04_length 20
+05_len(labels.unique()) 5
+06_number of instances 5
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 20
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 36
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 38
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 37
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 12
+02_random selection has been called
+04_length 40
+05_len(labels.unique()) 10
+06_number of instances 10
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 4
+04_length 16
+05_len(labels.unique()) 4
+06_number of instances 4
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+01_len(labels.unique()) 1
+04_length 4
+05_len(labels.unique()) 1
+06_number of instances 1
+
+[                                                  ] 0/500, elapsed: 0s, ETA:dataloader sampler type
+filename frankfurt/frankfurt_000000_000294_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                                 ] 1/500, 0.4 task/s, elapsed: 3s, ETA:  1320sdataloader sampler type
+filename frankfurt/frankfurt_000000_000576_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                                 ] 2/500, 0.5 task/s, elapsed: 4s, ETA:  1015sdataloader sampler type
+filename frankfurt/frankfurt_000000_001016_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                                 ] 3/500, 0.5 task/s, elapsed: 5s, ETA:   909sdataloader sampler type
+filename frankfurt/frankfurt_000000_001236_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                                 ] 4/500, 0.6 task/s, elapsed: 7s, ETA:   858sdataloader sampler type
+filename frankfurt/frankfurt_000000_001751_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                                 ] 5/500, 0.6 task/s, elapsed: 8s, ETA:   826sdataloader sampler type
+filename frankfurt/frankfurt_000000_002196_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                                ] 6/500, 0.6 task/s, elapsed: 10s, ETA:   806sdataloader sampler type
+filename frankfurt/frankfurt_000000_002963_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                                ] 7/500, 0.6 task/s, elapsed: 11s, ETA:   790sdataloader sampler type
+filename frankfurt/frankfurt_000000_003025_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                                ] 8/500, 0.6 task/s, elapsed: 13s, ETA:   777sdataloader sampler type
+filename frankfurt/frankfurt_000000_003357_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                                ] 9/500, 0.6 task/s, elapsed: 14s, ETA:   767sdataloader sampler type
+filename frankfurt/frankfurt_000000_003920_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                               ] 10/500, 0.6 task/s, elapsed: 15s, ETA:   759sdataloader sampler type
+filename frankfurt/frankfurt_000000_004617_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                               ] 11/500, 0.7 task/s, elapsed: 17s, ETA:   752sdataloader sampler type
+filename frankfurt/frankfurt_000000_005543_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                               ] 12/500, 0.7 task/s, elapsed: 18s, ETA:   747sdataloader sampler type
+filename frankfurt/frankfurt_000000_005898_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                               ] 13/500, 0.7 task/s, elapsed: 20s, ETA:   741sdataloader sampler type
+filename frankfurt/frankfurt_000000_006589_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                               ] 14/500, 0.7 task/s, elapsed: 21s, ETA:   737sdataloader sampler type
+filename frankfurt/frankfurt_000000_007365_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                               ] 15/500, 0.7 task/s, elapsed: 23s, ETA:   732sdataloader sampler type
+filename frankfurt/frankfurt_000000_008206_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[                               ] 16/500, 0.7 task/s, elapsed: 24s, ETA:   728sdataloader sampler type
+filename frankfurt/frankfurt_000000_008451_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 17/500, 0.7 task/s, elapsed: 26s, ETA:   725sdataloader sampler type
+filename frankfurt/frankfurt_000000_009291_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 18/500, 0.7 task/s, elapsed: 27s, ETA:   721sdataloader sampler type
+filename frankfurt/frankfurt_000000_009561_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 19/500, 0.7 task/s, elapsed: 28s, ETA:   718sdataloader sampler type
+filename frankfurt/frankfurt_000000_009688_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 20/500, 0.7 task/s, elapsed: 30s, ETA:   715sdataloader sampler type
+filename frankfurt/frankfurt_000000_009969_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 21/500, 0.7 task/s, elapsed: 31s, ETA:   712sdataloader sampler type
+filename frankfurt/frankfurt_000000_010351_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 22/500, 0.7 task/s, elapsed: 33s, ETA:   709sdataloader sampler type
+filename frankfurt/frankfurt_000000_010763_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 23/500, 0.7 task/s, elapsed: 34s, ETA:   707sdataloader sampler type
+filename frankfurt/frankfurt_000000_011007_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 24/500, 0.7 task/s, elapsed: 36s, ETA:   704sdataloader sampler type
+filename frankfurt/frankfurt_000000_011074_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 25/500, 0.7 task/s, elapsed: 37s, ETA:   702sdataloader sampler type
+filename frankfurt/frankfurt_000000_011461_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 26/500, 0.7 task/s, elapsed: 38s, ETA:   699sdataloader sampler type
+filename frankfurt/frankfurt_000000_011810_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 27/500, 0.7 task/s, elapsed: 40s, ETA:   697sdataloader sampler type
+filename frankfurt/frankfurt_000000_012009_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 28/500, 0.7 task/s, elapsed: 41s, ETA:   695sdataloader sampler type
+filename frankfurt/frankfurt_000000_012121_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 29/500, 0.7 task/s, elapsed: 43s, ETA:   693sdataloader sampler type
+filename frankfurt/frankfurt_000000_012868_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 30/500, 0.7 task/s, elapsed: 44s, ETA:   691sdataloader sampler type
+filename frankfurt/frankfurt_000000_013067_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 31/500, 0.7 task/s, elapsed: 46s, ETA:   689sdataloader sampler type
+filename frankfurt/frankfurt_000000_013240_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>                              ] 32/500, 0.7 task/s, elapsed: 47s, ETA:   687sdataloader sampler type
+filename frankfurt/frankfurt_000000_013382_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 33/500, 0.7 task/s, elapsed: 48s, ETA:   685sdataloader sampler type
+filename frankfurt/frankfurt_000000_013942_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 34/500, 0.7 task/s, elapsed: 50s, ETA:   683sdataloader sampler type
+filename frankfurt/frankfurt_000000_014480_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 35/500, 0.7 task/s, elapsed: 51s, ETA:   681sdataloader sampler type
+filename frankfurt/frankfurt_000000_015389_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 36/500, 0.7 task/s, elapsed: 53s, ETA:   679sdataloader sampler type
+filename frankfurt/frankfurt_000000_015676_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 37/500, 0.7 task/s, elapsed: 54s, ETA:   677sdataloader sampler type
+filename frankfurt/frankfurt_000000_016005_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 38/500, 0.7 task/s, elapsed: 56s, ETA:   675sdataloader sampler type
+filename frankfurt/frankfurt_000000_016286_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 39/500, 0.7 task/s, elapsed: 57s, ETA:   673sdataloader sampler type
+filename frankfurt/frankfurt_000000_017228_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 40/500, 0.7 task/s, elapsed: 58s, ETA:   672sdataloader sampler type
+filename frankfurt/frankfurt_000000_017476_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 41/500, 0.7 task/s, elapsed: 60s, ETA:   670sdataloader sampler type
+filename frankfurt/frankfurt_000000_018797_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 42/500, 0.7 task/s, elapsed: 61s, ETA:   668sdataloader sampler type
+filename frankfurt/frankfurt_000000_019607_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 43/500, 0.7 task/s, elapsed: 63s, ETA:   667sdataloader sampler type
+filename frankfurt/frankfurt_000000_020215_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 44/500, 0.7 task/s, elapsed: 64s, ETA:   665sdataloader sampler type
+filename frankfurt/frankfurt_000000_020321_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 45/500, 0.7 task/s, elapsed: 66s, ETA:   663sdataloader sampler type
+filename frankfurt/frankfurt_000000_020880_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 46/500, 0.7 task/s, elapsed: 67s, ETA:   661sdataloader sampler type
+filename frankfurt/frankfurt_000000_021667_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 47/500, 0.7 task/s, elapsed: 68s, ETA:   660sdataloader sampler type
+filename frankfurt/frankfurt_000000_021879_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>                             ] 48/500, 0.7 task/s, elapsed: 70s, ETA:   658sdataloader sampler type
+filename frankfurt/frankfurt_000000_022254_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 49/500, 0.7 task/s, elapsed: 71s, ETA:   656sdataloader sampler type
+filename frankfurt/frankfurt_000000_022797_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 50/500, 0.7 task/s, elapsed: 73s, ETA:   655sdataloader sampler type
+filename frankfurt/frankfurt_000001_000538_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 51/500, 0.7 task/s, elapsed: 74s, ETA:   653sdataloader sampler type
+filename frankfurt/frankfurt_000001_001464_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 52/500, 0.7 task/s, elapsed: 76s, ETA:   651sdataloader sampler type
+filename frankfurt/frankfurt_000001_002512_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 53/500, 0.7 task/s, elapsed: 77s, ETA:   650sdataloader sampler type
+filename frankfurt/frankfurt_000001_002646_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 54/500, 0.7 task/s, elapsed: 78s, ETA:   648sdataloader sampler type
+filename frankfurt/frankfurt_000001_002759_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 55/500, 0.7 task/s, elapsed: 80s, ETA:   647sdataloader sampler type
+filename frankfurt/frankfurt_000001_003056_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 56/500, 0.7 task/s, elapsed: 81s, ETA:   645sdataloader sampler type
+filename frankfurt/frankfurt_000001_003588_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 57/500, 0.7 task/s, elapsed: 83s, ETA:   643sdataloader sampler type
+filename frankfurt/frankfurt_000001_004327_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 58/500, 0.7 task/s, elapsed: 84s, ETA:   642sdataloader sampler type
+filename frankfurt/frankfurt_000001_004736_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 59/500, 0.7 task/s, elapsed: 86s, ETA:   640sdataloader sampler type
+filename frankfurt/frankfurt_000001_004859_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 60/500, 0.7 task/s, elapsed: 87s, ETA:   639sdataloader sampler type
+filename frankfurt/frankfurt_000001_005184_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 61/500, 0.7 task/s, elapsed: 89s, ETA:   637sdataloader sampler type
+filename frankfurt/frankfurt_000001_005410_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 62/500, 0.7 task/s, elapsed: 90s, ETA:   635sdataloader sampler type
+filename frankfurt/frankfurt_000001_005703_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 63/500, 0.7 task/s, elapsed: 91s, ETA:   634sdataloader sampler type
+filename frankfurt/frankfurt_000001_005898_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>                            ] 64/500, 0.7 task/s, elapsed: 93s, ETA:   632sdataloader sampler type
+filename frankfurt/frankfurt_000001_007285_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                           ] 65/500, 0.7 task/s, elapsed: 94s, ETA:   631sdataloader sampler type
+filename frankfurt/frankfurt_000001_007407_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                           ] 66/500, 0.7 task/s, elapsed: 96s, ETA:   629sdataloader sampler type
+filename frankfurt/frankfurt_000001_007622_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                           ] 67/500, 0.7 task/s, elapsed: 97s, ETA:   628sdataloader sampler type
+filename frankfurt/frankfurt_000001_007857_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                           ] 68/500, 0.7 task/s, elapsed: 99s, ETA:   626sdataloader sampler type
+filename frankfurt/frankfurt_000001_007973_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 69/500, 0.7 task/s, elapsed: 100s, ETA:   625sdataloader sampler type
+filename frankfurt/frankfurt_000001_008200_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 70/500, 0.7 task/s, elapsed: 101s, ETA:   623sdataloader sampler type
+filename frankfurt/frankfurt_000001_008688_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 71/500, 0.7 task/s, elapsed: 103s, ETA:   621sdataloader sampler type
+filename frankfurt/frankfurt_000001_009058_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 72/500, 0.7 task/s, elapsed: 104s, ETA:   620sdataloader sampler type
+filename frankfurt/frankfurt_000001_009504_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 73/500, 0.7 task/s, elapsed: 106s, ETA:   618sdataloader sampler type
+filename frankfurt/frankfurt_000001_009854_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 74/500, 0.7 task/s, elapsed: 107s, ETA:   617sdataloader sampler type
+filename frankfurt/frankfurt_000001_010156_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 75/500, 0.7 task/s, elapsed: 109s, ETA:   615sdataloader sampler type
+filename frankfurt/frankfurt_000001_010444_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 76/500, 0.7 task/s, elapsed: 110s, ETA:   614sdataloader sampler type
+filename frankfurt/frankfurt_000001_010600_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 77/500, 0.7 task/s, elapsed: 111s, ETA:   612sdataloader sampler type
+filename frankfurt/frankfurt_000001_010830_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 78/500, 0.7 task/s, elapsed: 113s, ETA:   611sdataloader sampler type
+filename frankfurt/frankfurt_000001_011162_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 79/500, 0.7 task/s, elapsed: 114s, ETA:   609sdataloader sampler type
+filename frankfurt/frankfurt_000001_011715_leftImg8bit.png
+image shape (1024, 2048, 3)
+input shape (1024, 2048)
+[>>>>                          ] 80/500, 0.7 task/s, elapsed: 116s, ETA:   608sTraceback (most recent call last):
+  File "run_experiments.py", line 146, in <module>
+    train_mmdet.main([config_files[i]])
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/tools/train_mmdet.py", line 127, in main
+    train_detector(model, datasets, cfg, distributed=distributed, validate=(not cfg.only_train), timestamp=timestamp,  meta=meta,)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/apis/train.py", line 214, in train_detector
+    runner.run(data_loaders, cfg.workflow)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 176, in run
+    iter_runner(iter_loaders[i], **kwargs)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 95, in train
+    self.call_hook('after_train_iter')
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/base_runner.py", line 317, in call_hook
+    getattr(hook, fn_name)(self)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/runner/hooks/evaluation.py", line 266, in after_train_iter
+    self._do_evaluate(runner)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/core/evaluation/eval_hooks.py", line 63, in _do_evaluate
+    results = single_gpu_test_uda(runner.model, self.dataloader, show=False, out_dir=self.out_dir, debug=self.debug, dataset_name=self.dataset_name)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/apis/test.py", line 173, in single_gpu_test_uda
+    for i, data in enumerate(data_loader):
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 435, in __next__
+    data = self._next_data()
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1085, in _next_data
+    return self._process_data(data)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1111, in _process_data
+    data.reraise()
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/_utils.py", line 428, in reraise
+    raise self.exc_type(msg)
+FileNotFoundError: Caught FileNotFoundError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/_utils/worker.py", line 198, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 44, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 44, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/custom.py", line 196, in __getitem__
+    return self.prepare_test_img(idx)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/custom.py", line 231, in prepare_test_img
+    return self.pipeline(results)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/pipelines/compose.py", line 42, in __call__
+    data = t(data)
+  File "/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmseg/datasets/pipelines/loading.py", line 62, in __call__
+    img_bytes = self.file_client.get(filename)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/fileio/file_client.py", line 1014, in get
+    return self.client.get(filepath)
+  File "/scratch_net/biwidl202/ppolydorou/conda_envs/edaps/lib/python3.8/site-packages/mmcv/fileio/file_client.py", line 535, in get
+    with open(filepath, 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'data/cityscapes/leftImg8bit/val/frankfurt/frankfurt_000001_011835_leftImg8bit.png'
+

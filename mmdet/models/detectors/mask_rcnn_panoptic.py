@@ -214,8 +214,8 @@ class MaskRCNNPanoptic(TwoStageDetector):
             losses.update(loss_decode)
        
         # # added by Petros for contrastive loss on 12 October 2023  # #  
-        if not True:  # added to avoid the constrastive loss calculation 
-        # if panoptic_labels_list:
+        #if True:  # added to avoid the constrastive loss calculation 
+        if panoptic_labels_list:
             for panoptic_labels, unique_labels, indices in zip(panoptic_labels_list, unique_labels_list, indices_list):
                 if panoptic_labels.numel() != 0:  # check if tensor is not empty contrastive loss will be computed
                     contrastive_loss = 0
@@ -227,18 +227,18 @@ class MaskRCNNPanoptic(TwoStageDetector):
                                 # print("panoptic_labels", panoptic_labels)
                                 labels, features = self.pool_features(x_, panoptic_labels, unique_labels, indices)  
                                   # check if number of instances more than 80 select only 100 and minimum number of positive pairs should be 2
-                                print('01_len(labels.unique())', len(labels.unique()))
+                                # print('01_len(labels.unique())', len(labels.unique()))
                                 if len(labels.unique()) > 10:
-                                    print('02_random selection has been called')
+                                    # print('02_random selection has been called')
                                     labels, features = self.random_selected_instances(labels, features)
                                # print('03_labels', labels)
-                                print('04_length', len(labels))
-                                print('05_len(labels.unique())', len(labels.unique()))
-                                print('06_number of instances', torch.unique(labels, sorted = True , return_inverse = True)[1].max().item()+1)     # +1 because indices start from zero                       
-                                print('')
+                                # print('04_length', len(labels))
+                                # print('05_len(labels.unique())', len(labels.unique()))
+                                # print('06_number of instances', torch.unique(labels, sorted = True , return_inverse = True)[1].max().item()+1)     # +1 because indices start from zero                       
+                                # print('')
                                 contrastive_loss += self.loss_constrastive(features, labels) / tensor.shape[0]
                     contrastive_loss = contrastive_loss / len(x_n)
-                    losses.update({'contrastive loss': contrastive_loss})
+                    losses.update({'contrastive_loss': contrastive_loss})
                 # else:
                     # print("No contrastive loss computation for this cropped image")
                     # print("panoptic_labels", panoptic_labels)

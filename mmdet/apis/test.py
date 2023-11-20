@@ -205,7 +205,11 @@ def single_gpu_test_uda(model,
                     out_file=out_file,
                     score_thr=show_score_thr)
         results.extend(result)
+        print('dataloader sampler type', )
         for _ in range(batch_size):
+            print('filename', data['img_metas'][0].data[0][0]['ori_filename'])
+            print('image shape', data['img_metas'][0].data[0][0]['img_shape'])
+            print('input shape', data['img_metas'][0].data[0][0]['batch_input_shape'])
             prog_bar.update()
     return results
 

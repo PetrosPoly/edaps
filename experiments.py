@@ -308,7 +308,7 @@ def generate_experiment_cfgs(id, machine_name):
     # -------------------------------------------------------------------------
     debug = False # true change some values and check which values will 
     machine = machine_name
-    iters = 100 # 40000  # Petros:: changed to 500
+    iters = 500 # 40000  # Petros:: changed to 500
     interval = iters
     interval_debug =  3 # I can change that to 40 debug true, debug to false 
     uda = 'dacs'
@@ -320,7 +320,7 @@ def generate_experiment_cfgs(id, machine_name):
     batch_size = 1 if debug else 2  # samples_per_gpu # # Petros change batch_size = 1 (batch_size = 1 if debug else 2)
     workers_per_gpu = 0 if debug else 4 # if 'dacs' in uda else 2
     eval_interval = interval_debug if debug else interval
-    checkpoint_interval = interval_debug if debug else interval
+    checkpoint_interval = interval_debug if debug else 5000 # interval  Petros::change here
     ann_dir = 'gtFine_panoptic_debug/cityscapes_panoptic_val' if debug else 'gtFine_panoptic/cityscapes_panoptic_val'
     log_interval = 1 if debug else 50
     debug_img_interval = 1 if debug else 5000
@@ -355,7 +355,7 @@ def generate_experiment_cfgs(id, machine_name):
     num_samples_debug = 12
     gt_dir_instance = 'data/cityscapes/gtFine/val'
     gt_dir_panoptic = 'data/cityscapes/gtFine_panoptic'
-    eval_metric_list = ['mIoU', 'mPQ', 'mAP']
+    eval_metric_list = ['mIoU'] # ['mIoU', 'mPQ', 'mAP']    # just take mIoU at 20.000 iterations, visualizations of segmantic segmentations. one step for 
     mapillary_dataloading_style = 'OURS'
     set_diff_pmult_for_sem_and_inst_heads = False
     semantic_decoder = 'sepaspp'
