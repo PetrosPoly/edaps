@@ -25,20 +25,20 @@ echo "SLURM_JOB_ID: ${SLURM_JOB_ID}"
 echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
 
 # Start GPU monitoring in a background process
-nvidia-smi --query-gpu=timestamp,name,utilization.gpu,utilization.memory,memory.total,memory.free,memory.used --format=csv -l 5 > gpu_usage_${SLURM_JOB_ID}.csv &
+# nvidia-smi --query-gpu=timestamp,name,utilization.gpu,utilization.memory,memory.total,memory.free,memory.used --format=csv -l 5 > gpu_usage_${SLURM_JOB_ID}.csv &
 
 # Capture CPU usage information
-top -b -n 1 -o +%CPU | grep "Cpu(s)" >> cpu_usage_${SLURM_JOB_ID}.csv &
+# top -b -n 1 -o +%CPU | grep "Cpu(s)" >> cpu_usage_${SLURM_JOB_ID}.csv &
 
 # Store the background job's PIDs
-GPU_MONITOR_PID=$!
-CPU_MONITOR_PID=$!
+# GPU_MONITOR_PID=$!
+# CPU_MONITOR_PID=$!
 
-export OMP_NUM_THREADS=$(nproc) # Use all available CPU cores
+# export OMP_NUM_THREADS=$(nproc) # Use all available CPU cores
 
 # Run the main Python script
 python run_experiments.py --exp 1
 
 # Kill the GPU monitoring process after the main script is done
-kill $GPU_MONITOR_PID
-kill $CPU_MONITOR_PID
+# kill $GPU_MONITOR_PID
+# kill $CPU_MONITOR_PID

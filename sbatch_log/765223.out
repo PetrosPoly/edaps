@@ -1,12 +1,14 @@
 Running on node: biwirender08
 In directory: /scratch_net/biwidl202/ppolydorou/project_edaps/edaps
-Starting on: Mon Nov 20 21:26:47 CET 2023
+Starting on: Tue Nov 21 12:44:37 CET 2023
 Number of CPUs available: 6
-SLURM_JOB_ID: 765001
+SLURM_JOB_ID: 765223
 CUDA_VISIBLE_DEVICES: 0
+/scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:38: UserWarning: Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
+  warnings.warn(
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/utils/setup_env.py:48: UserWarning: Setting MKL_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed.
   warnings.warn(
-2023-11-20 21:27:12,207 - mmdet - INFO - Environment info:
+2023-11-21 12:44:43,310 - mmdet - INFO - Environment info:
 ------------------------------------------------------------
 sys.platform: linux
 Python: 3.8.5 (default, Sep  4 2020, 07:30:14) [GCC 7.3.0]
@@ -35,11 +37,11 @@ OpenCV: 4.8.0
 MMCV: 1.6.1
 MMCV Compiler: GCC 7.3
 MMCV CUDA Compiler: 11.0
-MMDetection: 2.25.1+dcf9092
+MMDetection: 2.25.1+47cb809
 ------------------------------------------------------------
 
-2023-11-20 21:27:13,829 - mmdet - INFO - Distributed training: False
-2023-11-20 21:27:15,437 - mmdet - INFO - Config:
+2023-11-21 12:44:44,834 - mmdet - INFO - Distributed training: False
+2023-11-21 12:44:46,328 - mmdet - INFO - Config:
 checkpoint_config = dict(interval=5000, by_epoch=False, max_keep_ckpts=1)
 log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 custom_hooks = [dict(type='NumClassCheckHook')]
@@ -177,7 +179,7 @@ model = dict(
             pos_weight=-1,
             debug=False),
         work_dir=
-        'edaps_experiments/exp-00001/work_dirs/local-exp00001/231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2'
+        'edaps_experiments/exp-00001/work_dirs/local-exp00001/231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8'
     ),
     test_cfg=dict(
         mode='whole',
@@ -457,15 +459,15 @@ evaluation = dict(
     evaluate_from_saved_numpy_predictions=False,
     evaluate_from_saved_png_predictions=False,
     panop_eval_folder=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2/panoptic_eval',
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8/panoptic_eval',
     panop_eval_temp_folder=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2/panoptic_eval/panop_eval_20-11-2023_21-27-12-095071',
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8/panoptic_eval/panop_eval_21-11-2023_12-44-43-214929',
     debug=False,
     out_dir=
-    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2/panoptic_eval/panop_eval_20-11-2023_21-27-12-095071/visuals'
+    'edaps_experiments/exp-00001/work_dirs/local-exp00001/231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8/panoptic_eval/panop_eval_21-11-2023_12-44-43-214929/visuals'
 )
 runner = dict(type='IterBasedRunner', max_iters=500)
-name = '231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2'
+name = '231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8'
 exp = 1
 name_dataset = 'synthia2cityscapes'
 name_architecture = 'maskrcnn_mitb5'
@@ -473,50 +475,50 @@ name_encoder = 'mitb5'
 name_decoder = 'maskrcnn'
 name_uda = 'dacs_rcs0.01_cpl'
 name_opt = 'adamw_6e-05_pmTrue_poly10warm_1x2_0k'
-work_dir = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2'
-git_rev = 'dcf90925210a3061f3ba0ef8c1c557a1ba7360a4'
+work_dir = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8'
+git_rev = '47cb809616868b8f4a6d86982352ecdfe3667aa1'
 auto_resume = False
 gpu_ids = [0]
 
-2023-11-20 21:27:15,437 - mmdet - INFO - Set random seed to 0, deterministic: False
-2023-11-20 21:27:15,437 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - BEFORE MODEL BUILD
+2023-11-21 12:44:46,328 - mmdet - INFO - Set random seed to 0, deterministic: False
+2023-11-21 12:44:46,328 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - BEFORE MODEL BUILD
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/detectors/two_stage.py:29: UserWarning: DeprecationWarning: pretrained is deprecated, please use "init_cfg" instead
   warnings.warn('DeprecationWarning: pretrained is deprecated, '
 /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/mmdet/models/backbones/mix_transformer.py:215: UserWarning: DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead
   warnings.warn('DeprecationWarning: pretrained is a deprecated, please use "init_cfg" instead')
-2023-11-20 21:27:19,567 - mmdet - INFO - Load mit checkpoint.
-2023-11-20 21:27:19,568 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
-2023-11-20 21:27:22,868 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
-2023-11-20 21:27:22,899 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
-2023-11-20 21:27:22,907 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
-2023-11-20 21:27:23,048 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
-2023-11-20 21:27:23,145 - mmdet - INFO - Load mit checkpoint.
-2023-11-20 21:27:23,145 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
-2023-11-20 21:27:23,691 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
-2023-11-20 21:27:23,716 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
-2023-11-20 21:27:23,725 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
-2023-11-20 21:27:23,869 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
-2023-11-20 21:27:23,966 - mmdet - INFO - Load mit checkpoint.
-2023-11-20 21:27:23,966 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
-2023-11-20 21:27:24,624 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
-2023-11-20 21:27:24,650 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
-2023-11-20 21:27:24,659 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
-2023-11-20 21:27:24,803 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
-2023-11-20 21:27:24,944 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - MODEL IS READY
-2023-11-20 21:27:24,945 - mmseg - INFO - Loaded annotations from : data/synthia/panoptic-labels-crowdth-0-for-daformer/synthia_panoptic.json
-2023-11-20 21:27:34,754 - mmseg - INFO - Loaded 9400 images from data/synthia/RGB
-2023-11-20 21:27:34,758 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_train_trainId.json
-2023-11-20 21:27:35,216 - mmseg - INFO - Loaded 2975 images from data/cityscapes/leftImg8bit/train
-2023-11-20 21:27:35,321 - mmseg - INFO - RCS Classes: [6, 7, 17, 18, 4, 3, 12, 5, 15, 13, 11, 10, 8, 0, 1, 2]
-2023-11-20 21:27:35,321 - mmseg - INFO - RCS ClassProb: [1.55649453e-01 1.45927146e-01 1.30805254e-01 1.29144296e-01
+2023-11-21 12:44:50,183 - mmdet - INFO - Load mit checkpoint.
+2023-11-21 12:44:50,186 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-21 12:44:50,798 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-21 12:44:50,825 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-21 12:44:50,833 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-21 12:44:50,969 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-21 12:44:51,081 - mmdet - INFO - Load mit checkpoint.
+2023-11-21 12:44:51,082 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-21 12:44:51,637 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-21 12:44:51,661 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-21 12:44:51,669 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-21 12:44:51,805 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-21 12:44:51,917 - mmdet - INFO - Load mit checkpoint.
+2023-11-21 12:44:51,917 - mmdet - INFO - load checkpoint from local path: pretrained/mit_b5.pth
+2023-11-21 12:44:52,578 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2023-11-21 12:44:52,600 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2023-11-21 12:44:52,608 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2023-11-21 12:44:52,741 - mmdet - INFO - initialize DAFormerHead with init_cfg {'type': 'Normal', 'std': 0.01, 'override': {'name': 'conv_seg'}}
+2023-11-21 12:44:52,895 - mmdet - INFO - DEBUG - PETROS 14-08-2023 - MODEL IS READY
+2023-11-21 12:44:52,896 - mmseg - INFO - Loaded annotations from : data/synthia/panoptic-labels-crowdth-0-for-daformer/synthia_panoptic.json
+2023-11-21 12:44:58,270 - mmseg - INFO - Loaded 9400 images from data/synthia/RGB
+2023-11-21 12:44:58,274 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_train_trainId.json
+2023-11-21 12:44:58,718 - mmseg - INFO - Loaded 2975 images from data/cityscapes/leftImg8bit/train
+2023-11-21 12:44:58,809 - mmseg - INFO - RCS Classes: [6, 7, 17, 18, 4, 3, 12, 5, 15, 13, 11, 10, 8, 0, 1, 2]
+2023-11-21 12:44:58,809 - mmseg - INFO - RCS ClassProb: [1.55649453e-01 1.45927146e-01 1.30805254e-01 1.29144296e-01
  1.22819245e-01 1.22646019e-01 9.97279957e-02 5.53424992e-02
  3.33626680e-02 2.43163528e-03 2.00466975e-03 1.35448776e-04
  3.78220921e-06 8.31826052e-10 3.41141226e-10 1.11511794e-14]
-2023-11-20 21:27:46,725 - mmdet - INFO - Automatic scaling of learning rate (LR) has been disabled.
-2023-11-20 21:27:57,730 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_val.json
-2023-11-20 21:27:57,763 - mmseg - INFO - Loaded 150 images from data/cityscapes/leftImg8bit/val
-2023-11-20 21:27:57,764 - mmdet - INFO - Start running, host: ppolydorou@biwirender08, work_dir: /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2
-2023-11-20 21:27:57,764 - mmdet - INFO - Hooks will be executed in the following order:
+2023-11-21 12:45:09,565 - mmdet - INFO - Automatic scaling of learning rate (LR) has been disabled.
+2023-11-21 12:45:19,672 - mmseg - INFO - Loaded annotations from : data/cityscapes/gtFine_panoptic/cityscapes_panoptic_val.json
+2023-11-21 12:45:19,758 - mmseg - INFO - Loaded 500 images from data/cityscapes/leftImg8bit/val
+2023-11-21 12:45:19,759 - mmdet - INFO - Start running, host: ppolydorou@biwirender08, work_dir: /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8
+2023-11-21 12:45:19,759 - mmdet - INFO - Hooks will be executed in the following order:
 before_run:
 (VERY_HIGH   ) PolyLrUpdaterHook                  
 (NORMAL      ) CheckpointHook                     
@@ -563,16 +565,16 @@ after_val_epoch:
 after_run:
 (VERY_LOW    ) TextLoggerHook                     
  -------------------- 
-2023-11-20 21:27:57,764 - mmdet - INFO - workflow: [('train', 1)], max: 500 iters
-2023-11-20 21:27:57,765 - mmdet - INFO - Checkpoints will be saved to /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2 by HardDiskBackend.
-2023-11-20 21:27:57,765 - mmdet - INFO - The best checkpoint will be saved to edaps_experiments/exp-00001/work_dirs/local-exp00001/231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2/panoptic_eval/panop_eval_20-11-2023_21-27-12-095071/visuals/231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2 by HardDiskBackend
+2023-11-21 12:45:19,759 - mmdet - INFO - workflow: [('train', 1)], max: 500 iters
+2023-11-21 12:45:19,760 - mmdet - INFO - Checkpoints will be saved to /scratch_net/biwidl202/ppolydorou/project_edaps/edaps/edaps_experiments/exp-00001/work_dirs/local-exp00001/231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8 by HardDiskBackend.
+2023-11-21 12:45:19,760 - mmdet - INFO - The best checkpoint will be saved to edaps_experiments/exp-00001/work_dirs/local-exp00001/231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8/panoptic_eval/panop_eval_21-11-2023_12-44-43-214929/visuals/231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8 by HardDiskBackend
 _base_/default_runtime_mmdet_mr.py
 _base_/models/maskrcnn_sepaspp_mitb5.py
 _base_/datasets/uda_synthia_to_cityscapes_maskrcnn_panoptic.py
 _base_/uda/dacs_a999_fdthings.py
 _base_/schedules/adamw.py
 _base_/schedules/poly10warm.py
-Run job 231120_2127_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_f7cb2
+Run job 231121_1244_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_091c8
 DEBUG - PETROS 20-08-2023 - data root is : data/synthia/
 DEBUG - PETROS 19-08-2023 - MMSEG/CUSTOMDATASET - LOAD ANNOTATIONS PANOPTIC - DATASET TYPE:<class 'dict'>
 DEBUG - PETROS 20-08-2023 - data root is : data/cityscapes/
@@ -583,14 +585,14 @@ DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Number of gpus for training is: 
 DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Samples per gpu is: 2
 DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Workers per gpu is: 4
 DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Batch_size: 2
-2023-11-20 21:35:52,795 - mmdet - INFO - Iter [50/500]	lr: 1.768e-06, eta: 1:10:54, time: 9.454, data_time: 0.080, memory: 4655, decode.loss_seg: 2.7854, decode.acc_seg: 8.5988, contrastive_loss: 1.4433, rpn.loss_rpn_cls: 0.6722, rpn.loss_rpn_bbox: 0.1324, roi.loss_cls: 1.5581, roi.acc: 58.5360, roi.loss_bbox: 0.1265, roi.loss_mask: 1.9752, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.5975, mix.decode.acc_seg: 12.9885
-2023-11-20 21:43:37,223 - mmdet - INFO - Iter [100/500]	lr: 3.176e-06, eta: 1:02:28, time: 9.289, data_time: 0.016, memory: 4660, decode.loss_seg: 2.6864, decode.acc_seg: 22.5858, contrastive_loss: 1.5324, rpn.loss_rpn_cls: 0.6264, rpn.loss_rpn_bbox: 0.1235, roi.loss_cls: 0.5149, roi.acc: 93.4785, roi.loss_bbox: 0.1408, roi.loss_mask: 1.1994, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.3254, mix.decode.acc_seg: 23.6830
-2023-11-20 21:51:47,061 - mmdet - INFO - Iter [150/500]	lr: 4.184e-06, eta: 0:55:29, time: 9.797, data_time: 0.016, memory: 4667, decode.loss_seg: 2.4941, decode.acc_seg: 41.0101, contrastive_loss: 1.3230, rpn.loss_rpn_cls: 0.5224, rpn.loss_rpn_bbox: 0.1316, roi.loss_cls: 0.3541, roi.acc: 92.0273, roi.loss_bbox: 0.1723, roi.loss_mask: 0.8927, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.2250, mix.decode.acc_seg: 39.3054
-2023-11-20 21:59:32,423 - mmdet - INFO - Iter [200/500]	lr: 4.792e-06, eta: 0:47:18, time: 9.307, data_time: 0.015, memory: 4667, decode.loss_seg: 2.2930, decode.acc_seg: 44.7791, contrastive_loss: 1.3133, rpn.loss_rpn_cls: 0.3759, rpn.loss_rpn_bbox: 0.1032, roi.loss_cls: 0.3402, roi.acc: 91.9492, roi.loss_bbox: 0.2094, roi.loss_mask: 0.7640, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.1864, mix.decode.acc_seg: 48.3578
-2023-11-20 22:08:07,437 - mmdet - INFO - Iter [250/500]	lr: 5.000e-06, eta: 0:40:07, time: 10.300, data_time: 0.016, memory: 4888, decode.loss_seg: 1.9913, decode.acc_seg: 50.5488, contrastive_loss: 1.4211, rpn.loss_rpn_cls: 0.2927, rpn.loss_rpn_bbox: 0.1097, roi.loss_cls: 0.3868, roi.acc: 89.2832, roi.loss_bbox: 0.2855, roi.loss_mask: 0.7084, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.0511, mix.decode.acc_seg: 51.4111
-2023-11-20 22:16:22,332 - mmdet - INFO - Iter [300/500]	lr: 4.808e-06, eta: 0:32:14, time: 9.898, data_time: 0.016, memory: 4888, decode.loss_seg: 1.8745, decode.acc_seg: 51.0090, contrastive_loss: 1.5530, rpn.loss_rpn_cls: 0.2540, rpn.loss_rpn_bbox: 0.1059, roi.loss_cls: 0.4140, roi.acc: 88.5645, roi.loss_bbox: 0.3482, roi.loss_mask: 0.6761, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.9309, mix.decode.acc_seg: 53.2454
-2023-11-20 22:24:26,461 - mmdet - INFO - Iter [350/500]	lr: 4.216e-06, eta: 0:24:11, time: 9.683, data_time: 0.016, memory: 4888, decode.loss_seg: 1.7766, decode.acc_seg: 53.2654, contrastive_loss: 1.7077, rpn.loss_rpn_cls: 0.2466, rpn.loss_rpn_bbox: 0.0999, roi.loss_cls: 0.4099, roi.acc: 88.0586, roi.loss_bbox: 0.3677, roi.loss_mask: 0.6646, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.9553, mix.decode.acc_seg: 53.0465
-2023-11-20 22:32:50,439 - mmdet - INFO - Iter [400/500]	lr: 3.224e-06, eta: 0:16:12, time: 10.080, data_time: 0.016, memory: 4888, decode.loss_seg: 1.6675, decode.acc_seg: 55.9762, contrastive_loss: 1.5130, rpn.loss_rpn_cls: 0.2534, rpn.loss_rpn_bbox: 0.1204, roi.loss_cls: 0.4774, roi.acc: 85.6250, roi.loss_bbox: 0.4543, roi.loss_mask: 0.6485, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.8519, mix.decode.acc_seg: 56.4631
+2023-11-21 12:52:44,600 - mmdet - INFO - Iter [50/500]	lr: 1.768e-06, eta: 1:06:23, time: 8.853, data_time: 0.064, memory: 4655, decode.loss_seg: 2.7854, decode.acc_seg: 8.5972, contrastive_loss: 1.4395, rpn.loss_rpn_cls: 0.6722, rpn.loss_rpn_bbox: 0.1324, roi.loss_cls: 1.5584, roi.acc: 58.5338, roi.loss_bbox: 0.1264, roi.loss_mask: 1.9755, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.5979, mix.decode.acc_seg: 13.0335
+2023-11-21 13:00:16,133 - mmdet - INFO - Iter [100/500]	lr: 3.176e-06, eta: 0:59:36, time: 9.031, data_time: 0.014, memory: 4660, decode.loss_seg: 2.6864, decode.acc_seg: 22.5874, contrastive_loss: 1.5214, rpn.loss_rpn_cls: 0.6259, rpn.loss_rpn_bbox: 0.1235, roi.loss_cls: 0.5150, roi.acc: 93.4531, roi.loss_bbox: 0.1417, roi.loss_mask: 1.2009, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.3250, mix.decode.acc_seg: 23.5299
+2023-11-21 13:07:53,021 - mmdet - INFO - Iter [150/500]	lr: 4.184e-06, eta: 0:52:32, time: 9.138, data_time: 0.015, memory: 4667, decode.loss_seg: 2.4936, decode.acc_seg: 40.9963, contrastive_loss: 1.3425, rpn.loss_rpn_cls: 0.5223, rpn.loss_rpn_bbox: 0.1317, roi.loss_cls: 0.3552, roi.acc: 91.9824, roi.loss_bbox: 0.1748, roi.loss_mask: 0.8924, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.2262, mix.decode.acc_seg: 39.1274
+2023-11-21 13:15:09,484 - mmdet - INFO - Iter [200/500]	lr: 4.792e-06, eta: 0:44:41, time: 8.729, data_time: 0.014, memory: 4667, decode.loss_seg: 2.2906, decode.acc_seg: 45.0114, contrastive_loss: 1.3250, rpn.loss_rpn_cls: 0.3767, rpn.loss_rpn_bbox: 0.1033, roi.loss_cls: 0.3419, roi.acc: 91.8809, roi.loss_bbox: 0.2102, roi.loss_mask: 0.7625, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.1914, mix.decode.acc_seg: 48.2292
+2023-11-21 13:23:21,071 - mmdet - INFO - Iter [250/500]	lr: 5.000e-06, eta: 0:37:59, time: 9.832, data_time: 0.015, memory: 4901, decode.loss_seg: 1.9914, decode.acc_seg: 50.5111, contrastive_loss: 1.4110, rpn.loss_rpn_cls: 0.2955, rpn.loss_rpn_bbox: 0.1097, roi.loss_cls: 0.3873, roi.acc: 89.3945, roi.loss_bbox: 0.2865, roi.loss_mask: 0.7100, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 1.0537, mix.decode.acc_seg: 51.1559
+2023-11-21 13:31:03,576 - mmdet - INFO - Iter [300/500]	lr: 4.808e-06, eta: 0:30:27, time: 9.250, data_time: 0.014, memory: 4901, decode.loss_seg: 1.8749, decode.acc_seg: 51.0029, contrastive_loss: 1.5835, rpn.loss_rpn_cls: 0.2536, rpn.loss_rpn_bbox: 0.1067, roi.loss_cls: 0.4161, roi.acc: 88.4688, roi.loss_bbox: 0.3506, roi.loss_mask: 0.6744, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.9297, mix.decode.acc_seg: 53.5073
+2023-11-21 13:38:45,507 - mmdet - INFO - Iter [350/500]	lr: 4.216e-06, eta: 0:22:52, time: 9.239, data_time: 0.014, memory: 4901, decode.loss_seg: 1.7760, decode.acc_seg: 53.4732, contrastive_loss: 1.7131, rpn.loss_rpn_cls: 0.2435, rpn.loss_rpn_bbox: 0.0994, roi.loss_cls: 0.4126, roi.acc: 87.9648, roi.loss_bbox: 0.3713, roi.loss_mask: 0.6632, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.9549, mix.decode.acc_seg: 53.4232
+2023-11-21 13:46:39,883 - mmdet - INFO - Iter [400/500]	lr: 3.224e-06, eta: 0:15:19, time: 9.488, data_time: 0.014, memory: 4901, decode.loss_seg: 1.6665, decode.acc_seg: 55.9028, contrastive_loss: 1.5071, rpn.loss_rpn_cls: 0.2523, rpn.loss_rpn_bbox: 0.1208, roi.loss_cls: 0.4744, roi.acc: 85.7363, roi.loss_bbox: 0.4537, roi.loss_mask: 0.6498, src.loss_imnet_feat_dist: nan, mix.decode.loss_seg: 0.8580, mix.decode.acc_seg: 56.6522
 libpng error: bad adaptive filter value
 Traceback (most recent call last):
   File "run_experiments.py", line 146, in <module>
@@ -635,5 +637,3 @@ Original Traceback (most recent call last):
     results['img_shape'] = img.shape
 AttributeError: 'NoneType' object has no attribute 'shape'
 
-/scratch/slurm/spool/job765001/slurm_script: line 43: kill: (10858) - No such process
-/scratch/slurm/spool/job765001/slurm_script: line 44: kill: (10858) - No such process
