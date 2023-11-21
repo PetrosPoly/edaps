@@ -1,6 +1,0 @@
-timestamp, name, utilization.gpu [%], utilization.memory [%], memory.total [MiB], memory.free [MiB], memory.used [MiB]
-2023/11/20 17:50:22.797, NVIDIA GeForce GTX TITAN X, 0 %, 0 %, 12212 MiB, 12211 MiB, 1 MiB
-2023/11/20 17:50:27.798, NVIDIA GeForce GTX TITAN X, 0 %, 0 %, 12212 MiB, 12211 MiB, 1 MiB
-2023/11/20 17:50:32.799, NVIDIA GeForce GTX TITAN X, 0 %, 0 %, 12212 MiB, 12211 MiB, 1 MiB
-2023/11/20 17:50:37.800, NVIDIA GeForce GTX TITAN X, 0 %, 0 %, 12212 MiB, 12211 MiB, 1 MiB
-2023/11/20 17:50:42.801, NVIDIA GeForce GTX TITAN X, 0 %, 0 %, 12212 MiB, 12208 MiB, 4 MiB
