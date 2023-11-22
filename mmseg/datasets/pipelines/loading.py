@@ -7,6 +7,8 @@ from ..builder import PIPELINES
 import cv2
 from PIL import Image
 
+import logging # added by Petros
+
 @PIPELINES.register_module()
 class LoadImageFromFile(object):
     """Load an image from file.
@@ -67,14 +69,12 @@ class LoadImageFromFile(object):
             img = img.astype(np.float32)
 
         results['filename'] = filename
-        print('20.11.2023 - PETROS DEBUG - RESULTS["FILENAME"]', results['filename'])    # Petros prints added for debugging 
+        logging.info(f'loading file - 20.11.2023 - PETROS DEBUG - RESULTS["FILENAME"] {results["filename"]}')
         results['ori_filename'] = results['img_info']['filename']
         results['img'] = img
         results['img_shape'] = img.shape
-        print('20.11.2023 - PETROS DEBUG - RESULTS["IMG_SHAPE"]', results['filename'])
+        logging.info(f'Loading file - 20.11.2023 - PETROS DEBUG - RESULTS["IMG_SHAPE"], {img.shape}') # added by Petros
         results['ori_shape'] = img.shape
-
-
         # Set initial values for default meta_keys
         results['pad_shape'] = img.shape
         results['scale_factor'] = 1.0

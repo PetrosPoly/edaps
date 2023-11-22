@@ -308,7 +308,7 @@ def generate_experiment_cfgs(id, machine_name):
     # -------------------------------------------------------------------------
     debug = False # true change some values and check which values will 
     machine = machine_name
-    iters = 500 # 40000  # Petros:: changed to 500
+    iters = 20000 # 40000  # Petros:: changed to 500
     interval = iters
     interval_debug =  3 # I can change that to 40 debug true, debug to false 
     uda = 'dacs'
@@ -317,7 +317,7 @@ def generate_experiment_cfgs(id, machine_name):
     # --- Set the debug time configs ---
     # ----------------------------------------
     n_gpus = 1 if debug else 1
-    batch_size = 1 if debug else 2  # samples_per_gpu # # Petros change batch_size = 1 (batch_size = 1 if debug else 2)
+    batch_size = 1 if debug else 1  # samples_per_gpu # # Petros change batch_size = 1 (batch_size = 1 if debug else 2)
     workers_per_gpu = 0 if debug else 4 # if 'dacs' in uda else 2
     eval_interval = interval_debug if debug else interval
     checkpoint_interval = interval_debug if debug else 5000 # interval  Petros::change here
