@@ -8,6 +8,8 @@ import cv2
 from PIL import Image
 
 import logging # added by Petros
+# from mmdet.utils import get_root_logger # added by Petros
+from mmcv.utils import get_logger # added by Petros
 
 @PIPELINES.register_module()
 class LoadImageFromFile(object):
@@ -42,6 +44,7 @@ class LoadImageFromFile(object):
         self.file_client = None
         self.imdecode_backend = imdecode_backend
         # self.diffusion_check_cnt = 0
+        self.logger_Petros = get_logger(name='petros', log_file='loading_info.log', log_level=logging.INFO) # added by Petros
 
     def __call__(self, results):
         """Call functions to load image and get image meta information.
@@ -61,6 +64,7 @@ class LoadImageFromFile(object):
         else:
             filename = results['img_info']['filename']
 
+        self.logger_Petros.info(f'loading file - 20.11.2023 - PETROS DEBUG - RESULTS["FILENAME"] {filename}') # added by Petros
         img_bytes = self.file_client.get(filename)
 
         img = mmcv.imfrombytes(img_bytes, flag=self.color_type, backend=self.imdecode_backend)
@@ -69,11 +73,11 @@ class LoadImageFromFile(object):
             img = img.astype(np.float32)
 
         results['filename'] = filename
-        logging.info(f'loading file - 20.11.2023 - PETROS DEBUG - RESULTS["FILENAME"] {results["filename"]}')
+        
         results['ori_filename'] = results['img_info']['filename']
         results['img'] = img
         results['img_shape'] = img.shape
-        logging.info(f'Loading file - 20.11.2023 - PETROS DEBUG - RESULTS["IMG_SHAPE"], {img.shape}') # added by Petros
+        self.logger_Petros.info(f'Loading file - 20.11.2023 - PETROS DEBUG - RESULTS["IMG_SHAPE"], {img.shape}') # added by Petros
         results['ori_shape'] = img.shape
         # Set initial values for default meta_keys
         results['pad_shape'] = img.shape

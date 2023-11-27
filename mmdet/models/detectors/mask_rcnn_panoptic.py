@@ -48,6 +48,7 @@ class MaskRCNNPanoptic(TwoStageDetector):
         self.test_cfg = test_cfg
         self.use_neck_feat_for_decode_head = use_neck_feat_for_decode_head
         self.loss_constrastive_ntx = NTXentLoss() # added by Petros 
+        self.lamda = 10 # added by Petros is a weight for the constrastive loss
 
     # init daformer decode head
     def _init_decode_head(self, decode_head):
@@ -215,7 +216,7 @@ class MaskRCNNPanoptic(TwoStageDetector):
        
         # # added by Petros for contrastive loss on 12 October 2023  # #  
         #if True:  # added to avoid the constrastive loss calculation 
-        if panoptic_labels_list:
+        if self.lamda > 0 and panoptic_labels_list:
             for panoptic_labels, unique_labels, indices in zip(panoptic_labels_list, unique_labels_list, indices_list):
                 if panoptic_labels.numel() != 0:  # check if tensor is not empty contrastive loss will be computed
                     contrastive_loss = 0
@@ -238,7 +239,7 @@ class MaskRCNNPanoptic(TwoStageDetector):
                                 # print('')
                                 contrastive_loss += self.loss_constrastive(features, labels) / tensor.shape[0]
                     contrastive_loss = contrastive_loss / len(x_n)
-                    losses.update({'contrastive_loss': contrastive_loss})
+                    losses.update({'contrastive_loss': contrastive_loss * self.lamda}) 
                 # else:
                     # print("No contrastive loss computation for this cropped image")
                     # print("panoptic_labels", panoptic_labels)

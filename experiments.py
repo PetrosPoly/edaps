@@ -320,7 +320,7 @@ def generate_experiment_cfgs(id, machine_name):
     batch_size = 1 if debug else 1  # samples_per_gpu # # Petros change batch_size = 1 (batch_size = 1 if debug else 2)
     workers_per_gpu = 0 if debug else 4 # if 'dacs' in uda else 2
     eval_interval = interval_debug if debug else interval
-    checkpoint_interval = interval_debug if debug else 5000 # interval  Petros::change here
+    checkpoint_interval = interval_debug if debug else 2000 # interval  Petros::change here
     ann_dir = 'gtFine_panoptic_debug/cityscapes_panoptic_val' if debug else 'gtFine_panoptic/cityscapes_panoptic_val'
     log_interval = 1 if debug else 50
     debug_img_interval = 1 if debug else 5000
