@@ -308,7 +308,7 @@ def generate_experiment_cfgs(id, machine_name):
     # -------------------------------------------------------------------------
     debug = False
     machine = machine_name
-    iters = 20000 # 40000
+    iters = 1000 # 40000
     interval = iters
     interval_debug = 3
     uda = 'dacs'
@@ -565,7 +565,7 @@ def generate_experiment_cfgs(id, machine_name):
         seed = 0
         batch_size = 1
         workers_per_gpu = 0
-        checkpoint_path = 'path/to/the/latest/checkpoint'
+        checkpoint_path = 'pretrained'
         cfg = config_from_vars()
         cfg['checkpoint_path'] = checkpoint_path
         cfgs.append(cfg)
@@ -583,7 +583,7 @@ def generate_experiment_cfgs(id, machine_name):
         workers_per_gpu = 0
         generate_only_visuals_without_eval = True
         dump_visuals_during_eval = True
-        checkpoint_path = 'path/to/the/latest/checkpoint'
+        checkpoint_path = 'pretrained'
         cfg = config_from_vars()
         cfg['checkpoint_path'] = checkpoint_path
         cfgs.append(cfg)

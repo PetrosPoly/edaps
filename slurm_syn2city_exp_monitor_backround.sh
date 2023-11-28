@@ -9,7 +9,7 @@
 #SBATCH --time=24:00:00 # Set a time limit if required
 
 # Load necessary modules and activate conda environment
-cd /scratch_net/biwidl212/ppolydorou/project_edaps/edaps
+cd /scratch_net/biwidl212/ppolydorou/project/edaps
 source /scratch_net/biwidl212/ppolydorou/conda/etc/profile.d/conda.sh
 conda activate edaps
 

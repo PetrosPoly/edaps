@@ -14,14 +14,14 @@ def check_images(root_folder):
                     with Image.open(file_path) as img:
                         img.verify()  # Verify the integrity of the file
                 except (IOError, SyntaxError) as e:
-                    print(f'Error occurred: {e}')
-                    print(f'Corrupted image: {file_path}')
+                    print('Error occurred:', e)
+                    print('Corrupted image:', file_path)
                     corrupted_images.append(file_path)
     return corrupted_images
 
 # Usage
 root_folder = 'data'  # or data_150_old
 corrupted_images = check_images(root_folder)
-print(f"Found {len(corrupted_images)} potentially corrupted images.")
+print("The number of potentially corrupted images is:", len(corrupted_images))
 
 
