@@ -308,7 +308,7 @@ def generate_experiment_cfgs(id, machine_name):
     # -------------------------------------------------------------------------
     debug = False
     machine = machine_name
-    iters = 40000
+    iters = 20000 # 40000
     interval = iters
     interval_debug = 3
     uda = 'dacs'
@@ -317,7 +317,7 @@ def generate_experiment_cfgs(id, machine_name):
     # --- Set the debug time configs ---
     # ----------------------------------------
     n_gpus = 1 if debug else 1
-    batch_size = 1 if debug else 2  # samples_per_gpu
+    batch_size = 1 if debug else 1 # 2  # samples_per_gpu
     workers_per_gpu = 0 if debug else 4 # if 'dacs' in uda else 2
     eval_interval = interval_debug if debug else interval
     checkpoint_interval = interval_debug if debug else interval
