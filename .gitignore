@@ -54,8 +54,10 @@ mmdet/models/roi_heads/__pycache__
 mmdet/models/seg_heads/__pycache__
 mmdet/models/utils/__pycache__
 mmdet/utils/__pycache__
-data
-logs
+data/
+logs/
+pretrained/
+sbatch_log
 
 panop_eval_25-04-2022_20-45-50-049418/*
 panoptic/*
