@@ -10,6 +10,7 @@ from cityscapesscripts.helpers.labels import id2label, labels
 from tools.panoptic_deeplab.utils import rgb2id
 from mmdet.core import BitmapMasks
 
+import torch # Petros for scatter mean
 
 def isValidBox(box):
     isValid = False
@@ -34,6 +35,19 @@ def get_bbox_coord(mask):
     y2 = y1 + int(height) - 1
     bbox = [x1, y1, x2, y2]
     return bbox
+
+# added by Petros
+def divide_box(box):
+    x1, y1, x2, y2 = box
+    width = x2 - x1 + 1
+    height = y2 - y1 + 1
+    # No overlapping of sub - boxes
+    roi1 = (x1, y1, x1 + width // 2 - 1, y1 + height // 2 - 1)
+    roi2 = (x1 + width // 2, y1, x2, y1 + height // 2 - 1)
+    roi3 = (x1, y1 + height // 2 , x1 + width // 2 - 1, y2)
+    roi4 = (x1 + width // 2, y1 + height // 2, x2, y2)
+    return roi1, roi2, roi3, roi4
+# added by Petros for contrastive
 
 @PIPELINES.register_module()
 class GenPanopLabelsForMaskFormer(object):
@@ -73,6 +87,13 @@ class GenPanopLabelsForMaskFormer(object):
         panoptic_only_thing_classes = np.zeros(panoptic.shape)
         max_inst_per_class = np.zeros(len(self.thing_list))
         class_id_tracker = {}
+        
+        # for contrastive loss added by Petros 
+        panoptic_labels_list = []
+        unique_labels_list = []
+        indices_list = []
+        # for contrastive loss added by Petros
+        
         for cid in self.thing_list:
             class_id_tracker[cid] = 1
         gt_masks = []
@@ -96,7 +117,26 @@ class GenPanopLabelsForMaskFormer(object):
                         # gt_masks_all.append(mask.astype(np.uint8))
                         if cat_id in self.thing_list:
                             box = get_bbox_coord(mask)
+                            
+                            # for contrastive loss added by Petros 17 Oct. 2023
+                            subregion_labels = np.full_like(panoptic, fill_value=-100, dtype=np.int8)
+                            contrast_label = np.zeros_like(panoptic, dtype=np.uint8)
+                            subboxes = [None, None, None, None]
                             if isValidBox(box):
+                                # build the subregion label
+                                subboxes[0], subboxes[1], subboxes[2], subboxes[3] = divide_box(box)
+                                for i, subbox in enumerate(subboxes):
+                                    x1, y1, x2, y2 = subbox
+                                    subregion_labels[y1:y2+1, x1:x2+1] = i
+                                # build the contrastive labels and extract the uniques and index
+                                contrast_label = panoptic * 10 + subregion_labels
+                                contrast_label_flatten_tensor = torch.from_numpy(contrast_label.flatten())
+                                unique_labels, indicies = torch.unique(contrast_label_flatten_tensor,sorted = True, return_inverse=True)
+                                panoptic_labels_list.append(seg["id"])
+                                unique_labels_list.append(unique_labels.numpy().astype('long'))
+                                indices_list.append(indicies.numpy().astype('long'))
+                            # for contrastive loss added by Petros 17 Oct. 2023
+
                                 gt_masks.append(mask.astype(np.uint8))
                                 gt_labels.append(self._map_instance_class_ids(cat_id))
                                 gt_bboxes.append(box)
@@ -106,6 +146,26 @@ class GenPanopLabelsForMaskFormer(object):
                     if cat_id in self.thing_list:
                         box = get_bbox_coord(mask)
                         if isValidBox(box):
+                            
+                            # for contrastive loss added by Petros 17 Oct. 2023
+                            subregion_labels = np.full_like(panoptic, fill_value=-100, dtype=np.int8)
+                            contrast_label = np.zeros_like(panoptic, dtype=np.uint8)
+                            subboxes = [None, None, None, None]
+                            if isValidBox(box):
+                                # build the subregion label
+                                subboxes[0], subboxes[1], subboxes[2], subboxes[3] = divide_box(box)
+                                for i, subbox in enumerate(subboxes):
+                                    x1, y1, x2, y2 = subbox
+                                    subregion_labels[y1:y2+1, x1:x2+1] = i
+                                # build the contrastive labels and extract the uniques and index
+                                contrast_label = panoptic * 10 + subregion_labels
+                                contrast_label_flatten_tensor = torch.from_numpy(contrast_label.flatten())
+                                unique_labels, indicies = torch.unique(contrast_label_flatten_tensor,sorted = True, return_inverse=True)
+                                panoptic_labels_list.append(seg["id"])
+                                unique_labels_list.append(unique_labels.numpy().astype('long'))
+                                indices_list.append(indicies.numpy().astype('long'))
+                            # for contrastive loss added by Petros 17 Oct. 2023
+                            
                             gt_masks.append(mask.astype(np.uint8))
                             gt_labels.append(self._map_instance_class_ids(cat_id))
                             gt_bboxes.append(box)
@@ -113,6 +173,17 @@ class GenPanopLabelsForMaskFormer(object):
                             class_id_tracker[cat_id] += 1
         for cid in list(class_id_tracker.keys()):
             max_inst_per_class[self._map_instance_class_ids(cid)] = class_id_tracker[cid]
+            
+        # for contrastive loss added by Petros
+        if unique_labels_list:
+            largest_shape = max(unique_labels_list, key=lambda x:len(x)).shape[0]
+            unique_labels_list = [np.pad(arr, (0, largest_shape - arr.shape[0]), mode = 'constant') for arr in unique_labels_list]                   
+        
+        results['panoptic_labels_list'] = np.asarray(panoptic_labels_list) 
+        results['unique_labels_list'] = np.asarray(unique_labels_list)
+        results['indices_list'] = np.asarray(indices_list)
+        # for contrastive loss added by Petros   
+            
         gt_masks = BitmapMasks(gt_masks, height, width)
         results['gt_masks'] = gt_masks
         results['gt_semantic_seg'] = semantic.astype('long')

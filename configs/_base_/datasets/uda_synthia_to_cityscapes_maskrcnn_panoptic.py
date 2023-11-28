@@ -6,7 +6,7 @@
 dataset_type = 'CityscapesDataset'
 data_root = 'data/cityscapes/'
 img_norm_cfg = dict(mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-crop_size = (512, 512)
+crop_size = (256,256) # (512, 512)
 num_classes = 19
 synthia_train_pipeline = [
                             dict(type='LoadImageFromFile'),
@@ -22,7 +22,7 @@ synthia_train_pipeline = [
                                  ),
                             dict(type='Normalize', **img_norm_cfg),
                             dict(type='DefaultFormatBundleMmdet'),
-                            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg', 'gt_panoptic_only_thing_classes', 'max_inst_per_class']),
+                            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks', 'gt_semantic_seg', 'gt_panoptic_only_thing_classes', 'max_inst_per_class','panoptic_labels_list','unique_labels_list','indices_list']),
                         ]
 
 cityscapes_train_pipeline = [

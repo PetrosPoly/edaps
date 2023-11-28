@@ -11,6 +11,12 @@ from mmseg.core import add_prefix
 import torch
 import torch.nn.functional as F
 
+# # added by Petros for the contrastive loss 
+from pytorch_metric_learning.losses import NTXentLoss
+from mmcv.runner import force_fp32
+from mmseg.utils.scatter_mean import scatter_mean
+# # added by Petros for the contrastive loss
+
 @DETECTORS.register_module()
 class MaskRCNNPanoptic(TwoStageDetector):
 
@@ -41,6 +47,8 @@ class MaskRCNNPanoptic(TwoStageDetector):
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
         self.use_neck_feat_for_decode_head = use_neck_feat_for_decode_head
+        self.loss_constrastive_ntx = NTXentLoss() # added by Petros 
+        self.lamda = 10 # added by Petros is a weight for the constrastive loss
 
     # init daformer decode head
     def _init_decode_head(self, decode_head):
@@ -87,8 +95,70 @@ class MaskRCNNPanoptic(TwoStageDetector):
     def _decode_head_forward_test(self, x, img_metas):
         seg_logits = self.decode_head.forward_test(x, img_metas, self.test_cfg)
         return seg_logits
+    
+    # # added by Petros for contrastive loss
+    
+    def random_selected_instances(self, selected_labels, selected_features, max_instances = 10):
+        # Retrieve the unique values 
+        unique_labels = torch.unique(selected_labels, sorted = True)
+        num_instances = len(unique_labels)
+        
+        # Random permutation of the indices
+        random_indices = torch.randperm(num_instances)[:max_instances]
+        
+        # Random selection of panoptic labels that I will keep
+        random_labels = unique_labels[random_indices]
+        
+        # Keep from the initial tensor only the labels that selected above
+        indices = torch.hstack([torch.nonzero(selected_labels == label).flatten() for label in random_labels])
+        selected_labels = selected_labels[indices]
+        selected_features = selected_features[indices]
+        
+        return selected_labels, selected_features
+    
+    def constrastive_features(self, tensor, img):
+      x = resize(input=tensor, size=img.shape[2:], mode='bilinear', align_corners=self.align_corners)
+      x_flat = x.view(x.shape[0], x.shape[1], -1).permute(0,2,1).contiguous()
+      return x_flat
+    
+    def pool_features(self, extracted_features, pan_labels, unique_labels, indices):
+        selected_labels = [] 
+        selected_features = []
+        for i, pan_label in enumerate(pan_labels):
+            if pan_label == 0:
+                continue  # Skip label 0
+            
+            # remove the padding of zeros in the unique values arrays
+            non_zero_indices = unique_labels[i].nonzero(as_tuple=True)[0]
+            end_index_before_zero = non_zero_indices[-1].item()
+            unique_labels_ = unique_labels[i][0:end_index_before_zero+1]
+            
+            # extract the mean values based on the indicies 
+            mean_features = scatter_mean(extracted_features, indices[i], dim=0)
+            
+            # find the indices from the unique_labels which divided // 10 is equal to panoptic 
+            mask_ = (unique_labels_ // 10 == pan_label.item())
+            mask_indices = mask_.nonzero(as_tuple=True)[0]
 
-
+            # Loop according to these indices 
+            for idx in mask_indices:
+                selected_labels.append(unique_labels_[idx].item() // 10)
+                selected_features.append(mean_features[idx])
+ 
+        # Convert list to torch.tensors to be used as input for the loss 
+        selected_labels  = torch.tensor(selected_labels)
+        selected_features = torch.stack(selected_features)
+        
+        return  selected_labels, selected_features
+    
+   
+    @force_fp32(apply_to=('features', 'labels'))
+    def loss_constrastive(self, features, labels):
+        loss = self.loss_constrastive_ntx(features, labels)
+        return loss
+    
+    # # added by Petros for contrastive loss
+    
     def forward_dummy(self, img):
         """Dummy forward function."""
         # seg_logit = self.encode_decode(img, None)
@@ -122,6 +192,9 @@ class MaskRCNNPanoptic(TwoStageDetector):
                       gt_labels=None,
                       gt_bboxes_ignore=None,
                       gt_masks=None,
+                      panoptic_labels_list = None,           # added by Petros for contrastive 
+                      unique_labels_list = None,             # added by Petros for contrastive 
+                      indices_list = None,                   # added by Petros for contrastive
                       proposals=None,
                       box_domain_indicator=None,
                       pseudo_wght_val=None,
@@ -140,6 +213,24 @@ class MaskRCNNPanoptic(TwoStageDetector):
         if gt_semantic_seg is not None:
             loss_decode = self._decode_head_forward_train(x, img_metas, gt_semantic_seg, seg_weight)
             losses.update(loss_decode)
+        # added by Petros for contrastive loss # #  
+
+        if self.lamda > 0 and panoptic_labels_list:
+            for panoptic_labels, unique_labels, indices in zip(panoptic_labels_list, unique_labels_list, indices_list):
+                if panoptic_labels.numel() != 0:  # check if tensor is not empty contrastive loss will be computed
+                    contrastive_loss = 0
+                    for tensor in x_n:
+                        x_flat = self.constrastive_features(tensor, img)
+                        for i, x_ in enumerate(x_flat):        # x_flat a
+                                labels, features = self.pool_features(x_, panoptic_labels, unique_labels, indices)  
+                                # check if number of instances more than 10 and minimum number of positive pairs should be 2
+                                if len(labels.unique()) > 10:
+                                    labels, features = self.random_selected_instances(labels, features)
+                                contrastive_loss += self.loss_constrastive(features, labels) / tensor.shape[0]
+                    contrastive_loss = contrastive_loss / len(x_n)
+                    losses.update({'contrastive_loss': contrastive_loss * self.lamda}) 
+
+        # # added by Petros for contrastive loss # # 
         if gt_bboxes:
             batch_size = len(gt_labels)
             set_loss_to_zero = False

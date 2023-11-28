@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     config_file = None
     expId = None
-    machine_name = None
+    machine_name = 'local' # None
     JOB_DIR = 'jobs'
     WORKDIR = 'work_dirs'
     GEN_CONFIG_DIR = 'configs/generated'
