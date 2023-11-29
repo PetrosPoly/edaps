@@ -308,7 +308,7 @@ def generate_experiment_cfgs(id, machine_name):
     # -------------------------------------------------------------------------
     debug = False
     machine = machine_name
-    iters = 10000 # 40000
+    iters = 40000
     interval = iters
     interval_debug = 3
     uda = 'dacs'
