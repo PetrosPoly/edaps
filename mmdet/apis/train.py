@@ -207,5 +207,8 @@ def train_detector(model, dataset, cfg, distributed=False, validate=False, times
 
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
-
+    print('DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Number of gpus for training is:', cfg._cfg_dict['n_gpus'])
+    print('DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Samples per gpu is:', cfg._cfg_dict['data']['train_dataloader']['samples_per_gpu'])
+    print('DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Workers per gpu is:', cfg._cfg_dict['data']['train_dataloader']['workers_per_gpu'])
+    print('DEBUG_PETROS 31/10/2023 - MMDET/APIS/TRAIN.PY - Batch_size:', cfg._cfg_dict['data']['train_dataloader']['samples_per_gpu']*cfg._cfg_dict['n_gpus'])
     runner.run(data_loaders, cfg.workflow)
