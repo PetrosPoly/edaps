@@ -36,7 +36,7 @@ CPU_MONITOR_PID=$!
 export OMP_NUM_THREADS=$(nproc) # Use all available CPU cores
 
 # Run the main Python script
-python run_experiments.py --exp 6
+python run_experiments.py --exp 1
 
 # Kill the GPU monitoring process after the main script is done
 kill $GPU_MONITOR_PID
