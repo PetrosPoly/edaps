@@ -6,7 +6,6 @@
 #SBATCH --constraint='geforce_gtx_titan_x|titan_xp'
 #SBATCH --cpus-per-task=5 # Utilize all available CPU cores
 #SBATCH --mem=50G
-#SBATCH --time=24:00:00 # Set a time limit if required
 
 # Load necessary modules and activate conda environment
 cd /scratch_net/biwidl212/ppolydorou/project/edaps

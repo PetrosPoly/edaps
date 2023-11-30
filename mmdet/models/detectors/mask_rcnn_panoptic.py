@@ -48,7 +48,7 @@ class MaskRCNNPanoptic(TwoStageDetector):
         self.test_cfg = test_cfg
         self.use_neck_feat_for_decode_head = use_neck_feat_for_decode_head
         self.loss_constrastive_ntx = NTXentLoss() # added by Petros 
-        self.lamda = 10 # added by Petros is a weight for the constrastive loss
+        self.lamda = 10  # added by Petros is a weight for the constrastive loss
 
     # init daformer decode head
     def _init_decode_head(self, decode_head):
