@@ -1,0 +1,43 @@
+train log analysis:
+python tools/analysis_tools/analyze_logs.py plot_curve mmgeneration_experiments/euler-exp00001/pix2pix_facades_231010_1515_pix2pix_facades_b9c0f/20231010_151755.log.json \
+    --keys loss_gan_d_fake loss_gan_d_real \
+    --legend loss_gan_d_fake loss_gan_d_real \
+    --out plot_train_losses/pix2pix_facades_discriminator_losses.pdf
+
+python tools/analysis_tools/analyze_logs.py plot_curve mmgeneration_experiments/euler-exp00001/pix2pix_facades_231010_1515_pix2pix_facades_b9c0f/20231010_151755.log.json \
+    --keys loss_gan_g \
+    --legend loss_gan_g \
+    --out plot_train_losses/pix2pix_facades_train_generator_loss.pdf
+
+python tools/analysis_tools/analyze_logs.py plot_curve mmgeneration_experiments/euler-exp00001/pix2pix_facades_231010_1515_pix2pix_facades_b9c0f/20231010_151755.log.json \
+    --keys pixel_loss \
+    --legend pixel_loss \
+    --out plot_train_losses/pix2pix_facades_pixel_loss_plot.pdf
+
+python tools/analysis_tools/analyze_logs.py plot_curve mmgeneration_experiments/euler-exp00001/pix2pix_facades_231010_1515_pix2pix_facades_b9c0f/20231010_151755.log.json \
+    --keys loss \
+    --legend loss \
+    --out plot_train_losses/pix2pix_facades_total_loss_plot.pdf
+
+--------------
+mmgeneration_experiments/local-exp00001/pix2pix_facades_231014_1926_pix2pix_facades_23593/20231014_192641.log.json
+
+python tools/analysis_tools/analyze_logs.py plot_curve mmgeneration_experiments/local-exp00001/pix2pix_facades_231014_1926_pix2pix_facades_23593/20231014_192641.log.json \
+    --keys loss_gan_d_fake loss_gan_d_real \
+    --legend loss_gan_d_fake loss_gan_d_real \
+    --out plot_train_losses/pix2pix_lamp_discriminator_losses.pdf
+
+python tools/analysis_tools/analyze_logs.py plot_curve mmgeneration_experiments/local-exp00001/pix2pix_facades_231014_1926_pix2pix_facades_23593/20231014_192641.log.json \
+    --keys loss_gan_g \
+    --legend loss_gan_g \
+    --out plot_train_losses/pix2pix_lamp_train_generator_loss.pdf
+
+python tools/analysis_tools/analyze_logs.py plot_curve mmgeneration_experiments/local-exp00001/pix2pix_facades_231014_1926_pix2pix_facades_23593/20231014_192641.log.json \
+    --keys pixel_loss \
+    --legend pixel_loss \
+    --out plot_train_losses/pix2pix_lamp_pixel_loss_plot.pdf
+
+python tools/analysis_tools/analyze_logs.py plot_curve mmgeneration_experiments/local-exp00001/pix2pix_facades_231014_1926_pix2pix_facades_23593/20231014_192641.log.json \
+    --keys loss \
+    --legend loss \
+    --out plot_train_losses/pix2pix_lamp_total_loss_plot.pdf

@@ -355,7 +355,7 @@ def generate_experiment_cfgs(id, machine_name):
     num_samples_debug = 12
     gt_dir_instance = 'data/cityscapes/gtFine/val'
     gt_dir_panoptic = 'data/cityscapes/gtFine_panoptic'
-    eval_metric_list = ['mIoU'] # ['mIoU', 'mPQ', 'mAP']
+    eval_metric_list = ['mIoU', 'mAP'] # ['mIoU', 'mPQ', 'mAP']
     mapillary_dataloading_style = 'OURS'
     set_diff_pmult_for_sem_and_inst_heads = False
     semantic_decoder = 'sepaspp'
@@ -565,7 +565,8 @@ def generate_experiment_cfgs(id, machine_name):
         seed = 0
         batch_size = 1
         workers_per_gpu = 0
-        checkpoint_path = 'path/to/the/latest/checkpoint'
+        checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0215_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_6e53a'   # experiment edaps batch 2 iterations 1 
+       # checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0218_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9eb4c'    # experiment loss batch 2 iterations 1 
         cfg = config_from_vars()
         cfg['checkpoint_path'] = checkpoint_path
         cfgs.append(cfg)
@@ -583,7 +584,9 @@ def generate_experiment_cfgs(id, machine_name):
         workers_per_gpu = 0
         generate_only_visuals_without_eval = True
         dump_visuals_during_eval = True
-        checkpoint_path = 'path/to/the/latest/checkpoint'
+        # checkpoint_path = 'path/to/the/latest/checkpoint'
+        checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0215_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_6e53a'   # experiment edaps batch 2 iterations 1 
+        # checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0218_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9eb4c'    # experiment loss batch 2 iterations 
         cfg = config_from_vars()
         cfg['checkpoint_path'] = checkpoint_path
         cfgs.append(cfg)
