@@ -565,8 +565,13 @@ def generate_experiment_cfgs(id, machine_name):
         seed = 0
         batch_size = 1
         workers_per_gpu = 0
-        checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0215_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_6e53a'   # experiment edaps batch 2 iterations 1 
-       # checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0218_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9eb4c'    # experiment loss batch 2 iterations 1 
+        # checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0215_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_6e53a'   # experiment edaps batch 2 iterations 1 
+        # checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0218_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9eb4c'    # experiment loss batch 2 iterations 1 
+        # checkpoint_path = 'checkpoints/loss_10_batch_2_iter_40000'  # experiment loss 10 batch 2 iterations 15000/400000
+        # checkpoint_path = 'checkpoints/loss_5_batch_2_iter_40000'  # experiment loss 5 batch 2 iterations 15000/400000
+        # checkpoint_path = 'checkpoints/loss_1_batch_2_iter_40000'  # experiment loss 1 batch 2 iterations 15000/400000
+        checkpoint_path = 'checkpoints/loss_01_batch_2_iter_40000'  # experiment loss 0.1 batch 2 iterations 15000/400000
+        # =checkpoint_path = 'checkpoints/edaps_batch_2_iter_40000'  # experiment edaps 1 batch 2 iterations 15000/400000
         cfg = config_from_vars()
         cfg['checkpoint_path'] = checkpoint_path
         cfgs.append(cfg)
@@ -584,9 +589,13 @@ def generate_experiment_cfgs(id, machine_name):
         workers_per_gpu = 0
         generate_only_visuals_without_eval = True
         dump_visuals_during_eval = True
-        # checkpoint_path = 'path/to/the/latest/checkpoint'
-        checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0215_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_6e53a'   # experiment edaps batch 2 iterations 1 
+        # checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0215_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_6e53a'    # experiment edaps batch 2 iterations 1 
         # checkpoint_path = 'edaps_experiments/exp-00001/work_dirs/local-exp00001/231129_0218_syn2cs_dacs_rcs001_cpl_maskrcnn_mitb5_poly10warm_s0_9eb4c'    # experiment loss batch 2 iterations 
+        # checkpoint_path = 'checkpoints/loss_10_batch_2_iter_40000'  # experiment loss 10 batch 2 iterations 15000/400000
+        # checkpoint_path = 'checkpoints/loss_5_batch_2_iter_40000'  # experiment loss 5 batch 2 iterations 15000/400000
+        # checkpoint_path = 'checkpoints/loss_1_batch_2_iter_40000'  # experiment loss 1 batch 2 iterations 15000/400000
+        checkpoint_path = 'checkpoints/loss_01_batch_2_iter_40000'  # experiment loss 0.1 batch 2 iterations 15000/400000
+        # checkpoint_path = 'checkpoints/edaps_batch_2_iter_40000'  # experiment edaps 1 batch 2 iterations 15000/400000
         cfg = config_from_vars()
         cfg['checkpoint_path'] = checkpoint_path
         cfgs.append(cfg)

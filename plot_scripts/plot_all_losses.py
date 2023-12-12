@@ -6,7 +6,7 @@ import glob
 # Use glob to find all JSON files in the folder
 
 # /media/suman/CVLHDD/apps/experiments/mmgeneration_experiments_on_euler_backup/euler-exp00004/231016_2316_lamp_pix2pix_dnc_3_dbc_32_glr_0.0002_dlr_2e-06_9cc2a/
-src_root ='/losses/losses_experiments_3/exp-00001/work_dirs'
+src_root ='losses/losses_experiments_8_loss_01/exp-00001/work_dirs'
 plot_template_file_name = 'plot_train_losses/plot_template.sh'
 # src_root = '/media/suman/CVLHDD/apps/experiments/mmgeneration_experiments_on_euler_backup'
 # plot_template_file_name = 'plot_train_losses/plot_template.sh'

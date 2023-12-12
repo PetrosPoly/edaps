@@ -60,6 +60,7 @@ pretrained/
 sbatch_log
 losses/
 checkpoints/
+w_Petros/
 
 panop_eval_25-04-2022_20-45-50-049418/*
 panoptic/*
