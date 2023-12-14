@@ -268,7 +268,8 @@ def prep_gt_pan_for_vis(pan_map, dataset_name='cityscapes', debug=False, blend_r
         if lab < 1000:
             classId = lab
         else:
-            classId = lab // label_divisor
+            classId = lab // 10000
+            # classId = lab // label_divisor
 
         labelInfo = id2label[classId]
         classTrainId = labelInfo.trainId
@@ -279,7 +280,7 @@ def prep_gt_pan_for_vis(pan_map, dataset_name='cityscapes', debug=False, blend_r
             color = base_color
         else:
             while True:
-                color = _random_color(base_color, max_dist=5)
+                color = _random_color(base_color, max_dist=300)
                 if color not in taken_colors:
                     taken_colors.add(color)
                     break
